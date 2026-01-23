@@ -13,7 +13,7 @@ ANDROID_EMULATOR_SERVICE = "android-emulator-min"
 [profile]
 
 [services]
-android-emulator-min.command = """
+android-emulator-min.command = '''
 bash -lc '
 set -euo pipefail
 
@@ -49,7 +49,7 @@ if [ -z "$abi" ]; then
 fi
 
 device="${ANDROID_DEVICE:-pixel}"
-avd_name="${DETOX_AVD:-${ANDROID_AVD_NAME:-${device}_API${api}_${abi//-/_}}}"
+avd_name="${ANDROID_AVD_NAME:-${device}_API${api}_${abi//-/_}}"
 system_image="${ANDROID_SYSTEM_IMAGE:-system-images;android-${api};${tag};${abi}}"
 
 android_setup() {
@@ -57,7 +57,7 @@ android_setup() {
     return 0
   fi
   img_path="${ANDROID_SDK_ROOT}/${system_image/system-images;/system-images/}"
-  img_path="${img_path//;/\/}"
+  img_path="$(printf "%s" "$img_path" | tr ";" "/")"
   if [ ! -d "$img_path" ]; then
     echo "Missing system image ${system_image} under ${ANDROID_SDK_ROOT}." >&2
     exit 1
@@ -72,7 +72,12 @@ port="${EMU_PORT:-5554}"
 serial="emulator-${port}"
 headless="${EMU_HEADLESS:-}"
 
-emulator -avd "$avd_name" -port "$port" ${headless:+-no-window} ${ANDROID_EMULATOR_FLAGS:-} ${ANDROID_EMULATOR_HEADLESS_FLAGS:-} &
+extra_flags="${ANDROID_EMULATOR_FLAGS:-}"
+if [ -n "${EMU_HEADLESS:-}" ]; then
+  extra_flags="${extra_flags} ${ANDROID_EMULATOR_HEADLESS_FLAGS:-}"
+fi
+
+emulator -avd "$avd_name" -port "$port" $extra_flags &
 
 adb -s "$serial" wait-for-device
 boot_completed=""
@@ -85,7 +90,7 @@ adb -s "$serial" shell settings put global window_animation_scale 0
 adb -s "$serial" shell settings put global transition_animation_scale 0
 adb -s "$serial" shell settings put global animator_duration_scale 0
 '
-"""
+'''
 
 [include]
 environments = [
