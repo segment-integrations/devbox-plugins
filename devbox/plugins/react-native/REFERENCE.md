@@ -6,8 +6,8 @@ This plugin composes the Android and iOS plugins.
 
 ## Commands
 
-- Android: `devbox run --pure start-emu`, `devbox run --pure start-app`, `devbox run --pure stop-emu`
-- iOS: `devbox run --pure start-sim`, `devbox run --pure stop-sim`
+- Android: `devbox run --pure start-emu`, `devbox run --pure start-android`, `devbox run --pure stop-emu`
+- iOS: `devbox run --pure start-sim`, `devbox run --pure start-ios`, `devbox run --pure stop-sim`
 
 ## Files
 

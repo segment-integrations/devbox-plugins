@@ -40,7 +40,7 @@ Each device file is JSON with:
 
 ### Build + run
 
-- `ANDROID_APP_ID=<id> devbox run --pure start-app [device]`
+- `ANDROID_APP_ID=<id> devbox run --pure start-android [device]`
 - Optional: `ANDROID_APP_ACTIVITY=<activity>`
 
 ### Device management

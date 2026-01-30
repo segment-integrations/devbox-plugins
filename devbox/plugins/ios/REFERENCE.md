@@ -17,6 +17,10 @@ Each device file is JSON with:
 - `EVALUATE_DEVICES`
 - `IOS_DEFAULT_DEVICE`
 - `IOS_DEFAULT_RUNTIME`
+- `IOS_APP_PROJECT`
+- `IOS_APP_SCHEME`
+- `IOS_APP_BUNDLE_ID`
+- `IOS_APP_DERIVED_DATA`
 - `IOS_DEVELOPER_DIR`
 - `IOS_DOWNLOAD_RUNTIME`
 - `IOS_XCODE_ENV_PATH`
@@ -27,6 +31,7 @@ Each device file is JSON with:
 
 - `devbox run --pure start-sim [device]`
 - `devbox run --pure stop-sim`
+- `devbox run --pure start-ios [device]`
 - `devbox run --pure ios.sh devices <command>`
 - `devbox run --pure ios.sh config <command>`
 

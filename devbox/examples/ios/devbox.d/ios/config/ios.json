@@ -2,6 +2,10 @@
   "EVALUATE_DEVICES": [],
   "IOS_DEFAULT_DEVICE": "max",
   "IOS_DEFAULT_RUNTIME": "",
+  "IOS_APP_PROJECT": "DevboxIOS.xcodeproj",
+  "IOS_APP_SCHEME": "DevboxIOS",
+  "IOS_APP_BUNDLE_ID": "com.example.devbox",
+  "IOS_APP_DERIVED_DATA": "",
   "IOS_DEVELOPER_DIR": "",
   "IOS_DOWNLOAD_RUNTIME": "1",
   "IOS_XCODE_ENV_PATH": ""

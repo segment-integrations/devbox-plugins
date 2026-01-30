@@ -497,6 +497,114 @@ ios_start() {
   echo "iOS simulator booted: ${display_name} (${udid}, headless=${headless:-0})"
 }
 
+ios_resolve_app_project() {
+  if [ -n "${IOS_APP_PROJECT:-}" ]; then
+    printf '%s\n' "$IOS_APP_PROJECT"
+    return 0
+  fi
+  for proj in *.xcodeproj; do
+    [ -d "$proj" ] || continue
+    printf '%s\n' "$proj"
+    return 0
+  done
+  return 1
+}
+
+ios_resolve_app_scheme() {
+  if [ -n "${IOS_APP_SCHEME:-}" ]; then
+    printf '%s\n' "$IOS_APP_SCHEME"
+    return 0
+  fi
+  project="$(ios_resolve_app_project 2>/dev/null || true)"
+  if [ -n "$project" ]; then
+    printf '%s\n' "$(basename "$project" .xcodeproj)"
+    return 0
+  fi
+  return 1
+}
+
+ios_resolve_app_bundle_id() {
+  if [ -n "${IOS_APP_BUNDLE_ID:-}" ]; then
+    printf '%s\n' "$IOS_APP_BUNDLE_ID"
+    return 0
+  fi
+  return 1
+}
+
+ios_resolve_derived_data() {
+  if [ -n "${IOS_APP_DERIVED_DATA:-}" ]; then
+    printf '%s\n' "$IOS_APP_DERIVED_DATA"
+    return 0
+  fi
+  if [ -n "${IOS_CONFIG_DIR:-}" ]; then
+    printf '%s\n' "${IOS_CONFIG_DIR%/}/.devbox/virtenv/ios/DerivedData"
+    return 0
+  fi
+  if [ -n "${DEVBOX_PROJECT_ROOT:-}" ]; then
+    printf '%s\n' "${DEVBOX_PROJECT_ROOT%/}/.devbox/virtenv/ios/DerivedData"
+    return 0
+  fi
+  if [ -n "${DEVBOX_PROJECT_DIR:-}" ]; then
+    printf '%s\n' "${DEVBOX_PROJECT_DIR%/}/.devbox/virtenv/ios/DerivedData"
+    return 0
+  fi
+  if [ -n "${DEVBOX_WD:-}" ]; then
+    printf '%s\n' "${DEVBOX_WD%/}/.devbox/virtenv/ios/DerivedData"
+    return 0
+  fi
+  printf '%s\n' "./.devbox/virtenv/ios/DerivedData"
+}
+
+ios_build_app() {
+  ios_require_tool xcodebuild
+  project="$(ios_resolve_app_project || true)"
+  scheme="$(ios_resolve_app_scheme || true)"
+  if [ -z "$project" ] || [ -z "$scheme" ]; then
+    echo "Unable to resolve iOS project/scheme. Set IOS_APP_PROJECT and IOS_APP_SCHEME." >&2
+    return 1
+  fi
+  derived_data="$(ios_resolve_derived_data)"
+  mkdir -p "$derived_data"
+  xcodebuild -project "$project" -scheme "$scheme" -configuration Debug \
+    -destination 'generic/platform=iOS Simulator' \
+    -derivedDataPath "$derived_data" build
+}
+
+ios_app_path() {
+  scheme="$(ios_resolve_app_scheme || true)"
+  derived_data="$(ios_resolve_derived_data)"
+  if [ -z "$scheme" ]; then
+    return 1
+  fi
+  printf '%s\n' "${derived_data%/}/Build/Products/Debug-iphonesimulator/${scheme}.app"
+}
+
+ios_run_app() {
+  device_name="${1-}"
+  ios_start "$device_name"
+
+  ios_build_app
+
+  app_path="$(ios_app_path || true)"
+  bundle_id="$(ios_resolve_app_bundle_id || true)"
+  if [ -z "$app_path" ] || [ ! -d "$app_path" ]; then
+    echo "Built app not found at ${app_path}." >&2
+    return 1
+  fi
+  if [ -z "$bundle_id" ]; then
+    echo "IOS_APP_BUNDLE_ID is required to launch the app." >&2
+    return 1
+  fi
+  udid="${IOS_SIM_UDID:-}"
+  if [ -z "$udid" ]; then
+    echo "iOS simulator UDID not available; ensure the simulator is booted." >&2
+    return 1
+  fi
+
+  xcrun simctl install "$udid" "$app_path"
+  xcrun simctl launch "$udid" "$bundle_id"
+}
+
 ios_stop() {
   udid="${IOS_SIM_UDID:-}"
   if [ -z "$udid" ] && [ -n "${IOS_SIM_NAME:-}" ]; then

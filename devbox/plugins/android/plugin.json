@@ -51,7 +51,7 @@
         "  devbox services up -b --env ANDROID_DEVICE_NAME=\"$device_name\" android-emulator",
         "fi"
       ],
-      "start-app": [
+      "start-android": [
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_run_app \"${1-}\""
       ],

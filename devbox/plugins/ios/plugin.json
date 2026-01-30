@@ -66,6 +66,10 @@
         "fi",
         "export PATH",
         "devbox services stop ios-simulator"
+      ],
+      "start-ios": [
+        ". {{ .Virtenv }}/scripts/simctl.sh",
+        "ios_run_app \"${1-}\""
       ]
     }
   }
