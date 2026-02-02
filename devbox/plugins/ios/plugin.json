@@ -26,9 +26,11 @@
     "{{ .Virtenv }}/scripts/ios.sh": "scripts/ios.sh",
     "{{ .Virtenv }}/scripts/devices.sh": "scripts/devices.sh",
     "{{ .Virtenv }}/scripts/select-device.sh": "scripts/select-device.sh",
+    "{{ .Virtenv }}/scripts/validate.sh": "scripts/validate.sh",
     "{{ .Virtenv }}/config/ios.json": "config/ios.json",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
     "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json",
+    "{{ .DevboxDir }}/devices.lock.json": "config/devices.lock.json",
     "{{ .DevboxDir }}/ios.json": "config/ios.json"
   },
   "shell": {

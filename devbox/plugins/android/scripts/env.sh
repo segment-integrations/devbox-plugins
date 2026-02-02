@@ -110,6 +110,13 @@ EOF
 
 load_android_config
 
+# Source and run validation (non-blocking)
+if [ -f "${ANDROID_SCRIPTS_DIR}/validate.sh" ]; then
+  . "${ANDROID_SCRIPTS_DIR}/validate.sh"
+  android_validate_lock_file || true
+  android_validate_sdk || true
+fi
+
 resolve_flake_sdk_root() {
   output="$1"
   if ! command -v nix >/dev/null 2>&1; then
@@ -134,11 +141,46 @@ resolve_flake_sdk_root() {
   if android_debug_enabled; then
     android_debug_log "Android SDK flake path: ${ANDROID_SDK_FLAKE_PATH:-$root}"
   fi
+
+  # Check cache (invalidate if lock file changes)
+  cache_file="${root}/.nix_sdk_eval.cache"
+  lock_file="${root}/devices.lock.json"
+  cache_ttl=3600  # 1 hour
+
+  if [ -f "$cache_file" ] && [ -f "$lock_file" ]; then
+    # Get modification times (works on both macOS and Linux)
+    if command -v stat >/dev/null 2>&1; then
+      cache_mtime=$(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null || echo 0)
+      lock_mtime=$(stat -f %m "$lock_file" 2>/dev/null || stat -c %Y "$lock_file" 2>/dev/null || echo 0)
+      cache_age=$(( $(date +%s) - cache_mtime ))
+
+      # Use cache if fresh and newer than lock file
+      if [ "$cache_age" -lt "$cache_ttl" ] && [ "$cache_mtime" -gt "$lock_mtime" ]; then
+        cached_sdk=$(cat "$cache_file" 2>/dev/null || true)
+        if [ -n "$cached_sdk" ] && [ -d "$cached_sdk/libexec/android-sdk" ]; then
+          if android_debug_enabled; then
+            android_debug_log "Using cached Nix SDK evaluation result"
+          fi
+          printf '%s\n' "$cached_sdk/libexec/android-sdk"
+          return 0
+        fi
+      fi
+    fi
+  fi
+
+  # Perform expensive nix eval
+  if android_debug_enabled; then
+    android_debug_log "Performing Nix SDK evaluation (not cached)"
+  fi
+
   sdk_out=$(
     nix --extra-experimental-features 'nix-command flakes' \
       eval --raw "path:${root}#${output}.outPath" 2>/dev/null || true
   )
+
   if [ -n "${sdk_out:-}" ] && [ -d "$sdk_out/libexec/android-sdk" ]; then
+    # Cache the result
+    echo "$sdk_out" > "$cache_file" 2>/dev/null || true
     printf '%s\n' "$sdk_out/libexec/android-sdk"
     return 0
   fi
@@ -312,10 +354,7 @@ fi
 
 android_debug_log_script "devbox.d/android/scripts/env.sh"
 
-if [ -n "${INIT_ANDROID:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && [ -z "${ANDROID_SDK_SUMMARY_PRINTED:-}" ]; then
-  ANDROID_SDK_SUMMARY_PRINTED=1
-  export ANDROID_SDK_SUMMARY_PRINTED
-
+android_show_summary() {
   android_sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
   android_sdk_version="${ANDROID_BUILD_TOOLS_VERSION:-${ANDROID_CMDLINE_TOOLS_VERSION:-30.0.3}}"
   devices_dir="${ANDROID_DEVICES_DIR:-${ANDROID_CONFIG_DIR:-}/devices}"
@@ -342,4 +381,11 @@ if [ -n "${INIT_ANDROID:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" 
     echo "  ANDROID_DEFAULT_DEVICE: ${default_device}"
   fi
   echo "  Tip: use a local SDK with ANDROID_LOCAL_SDK=1 ANDROID_SDK_ROOT=/path/to/sdk (or ANDROID_HOME)."
+}
+
+# Optionally print summary on init if INIT_ANDROID is set
+if [ -n "${INIT_ANDROID:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && [ -z "${ANDROID_SDK_SUMMARY_PRINTED:-}" ]; then
+  ANDROID_SDK_SUMMARY_PRINTED=1
+  export ANDROID_SDK_SUMMARY_PRINTED
+  android_show_summary
 fi

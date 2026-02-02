@@ -10,6 +10,7 @@ Commands:
   config show
   config set key=value [key=value...]
   config reset
+  info
 
 Examples:
   ios.sh devices list
@@ -87,6 +88,16 @@ case "$command_name" in
         usage
         ;;
     esac
+    ;;
+  info)
+    # Source env.sh to get the ios_show_summary function
+    if [ -f "${IOS_SCRIPTS_DIR}/env.sh" ]; then
+      . "${IOS_SCRIPTS_DIR}/env.sh"
+      ios_show_summary
+    else
+      echo "Error: env.sh not found" >&2
+      exit 1
+    fi
     ;;
   *)
     usage

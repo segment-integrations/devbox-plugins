@@ -153,7 +153,34 @@ case "$command_name" in
     echo "Selected iOS devices: all"
     ;;
   eval)
-    jq -r '.EVALUATE_DEVICES | if . == [] then "all" else join(",") end' "$config_path"
+    # Get selected devices
+    selected=$(jq -r '.EVALUATE_DEVICES // []' "$config_path")
+
+    # Generate lock file
+    lock_path="${config_dir%/}/devices.lock.json"
+
+    # Compute checksum of device files
+    checksum=""
+    if command -v sha256sum >/dev/null 2>&1; then
+      checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | sha256sum | cut -d' ' -f1)
+    elif command -v shasum >/dev/null 2>&1; then
+      checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | shasum -a 256 | cut -d' ' -f1)
+    fi
+
+    # Determine device names for output
+    if [ "$selected" = "[]" ]; then
+      device_names="all"
+    else
+      device_names=$(echo "$selected" | jq -r 'join(",")')
+    fi
+
+    # Write lock file with devices array, checksum, and timestamp
+    temp_lock="${lock_path}.tmp"
+    echo "$selected" | jq --arg cs "$checksum" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date +%Y-%m-%dT%H:%M:%SZ)" \
+      '{devices: ., checksum: $cs, generated_at: $ts}' > "$temp_lock"
+    mv "$temp_lock" "$lock_path"
+
+    echo "$device_names"
     ;;
   *)
     usage

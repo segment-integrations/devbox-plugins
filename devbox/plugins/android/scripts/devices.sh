@@ -272,8 +272,20 @@ EOF
       echo "No device APIs found in ${devices_dir}." >&2
       exit 1
     fi
+
+    # Compute checksum of device files
+    local checksum
+    if command -v sha256sum >/dev/null 2>&1; then
+      checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | sha256sum | cut -d' ' -f1)
+    elif command -v shasum >/dev/null 2>&1; then
+      checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | shasum -a 256 | cut -d' ' -f1)
+    else
+      checksum=""
+    fi
+
     temp_lock="${lock_path}.tmp"
-    printf '%s\n' "$api_values" | awk 'NF' | sort -u | jq -R -s '{api_versions: (split("\n") | map(select(length>0)) | map(tonumber))}' >"$temp_lock"
+    printf '%s\n' "$api_values" | awk 'NF' | sort -u | \
+      jq -R -s --arg cs "$checksum" '{api_versions: (split("\n") | map(select(length>0)) | map(tonumber)), checksum: $cs}' >"$temp_lock"
     mv "$temp_lock" "$lock_path"
     jq -r '.api_versions | join(",")' "$lock_path"
     ;;

@@ -117,6 +117,13 @@ CONFIG_EOF
 
 load_ios_config
 
+# Source and run validation (non-blocking)
+if [ -f "${IOS_SCRIPTS_DIR}/validate.sh" ]; then
+  . "${IOS_SCRIPTS_DIR}/validate.sh"
+  ios_validate_xcode || true
+  ios_validate_lock_file || true
+fi
+
 if [ -z "${IOS_NODE_BINARY:-}" ] && command -v node >/dev/null 2>&1; then
   IOS_NODE_BINARY="$(command -v node)"
   export IOS_NODE_BINARY
@@ -168,33 +175,100 @@ ios_latest_xcode_dev_dir() {
 }
 
 ios_resolve_developer_dir() {
+  # Check cache first (1 hour TTL)
+  cache_dir="${DEVBOX_VIRTENV:-${DEVBOX_PROJECT_ROOT:-.}/.devbox/virtenv}/ios"
+  cache_file="${cache_dir}/.xcode_dev_dir.cache"
+  cache_ttl=3600  # 1 hour
+
+  # Ensure cache directory exists
+  if [ ! -d "$cache_dir" ]; then
+    mkdir -p "$cache_dir" 2>/dev/null || true
+  fi
+
+  if [ -f "$cache_file" ]; then
+    # Get cache age (works on both macOS and Linux)
+    if command -v stat >/dev/null 2>&1; then
+      cache_mtime=$(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null || echo 0)
+      cache_age=$(( $(date +%s) - cache_mtime ))
+
+      if [ "$cache_age" -lt "$cache_ttl" ]; then
+        cached_dir=$(cat "$cache_file" 2>/dev/null || true)
+        if [ -n "$cached_dir" ] && [ -d "$cached_dir" ]; then
+          printf '%s\n' "$cached_dir"
+          return 0
+        fi
+      fi
+    fi
+  fi
+
+  # Original resolution logic
   desired="${IOS_DEVELOPER_DIR:-}"
   if [ -n "$desired" ] && [ -d "$desired" ]; then
+    printf '%s\n' "$desired" | tee "$cache_file" >/dev/null
     printf '%s\n' "$desired"
     return 0
   fi
+
   desired="$(ios_latest_xcode_dev_dir 2>/dev/null || true)"
   if [ -n "$desired" ] && [ -d "$desired" ]; then
+    printf '%s\n' "$desired" | tee "$cache_file" >/dev/null
     printf '%s\n' "$desired"
     return 0
   fi
+
   if command -v xcode-select >/dev/null 2>&1; then
     desired="$(xcode-select -p 2>/dev/null || true)"
     if [ -n "$desired" ] && [ -d "$desired" ]; then
+      printf '%s\n' "$desired" | tee "$cache_file" >/dev/null
       printf '%s\n' "$desired"
       return 0
     fi
   fi
+
   if [ -d /Applications/Xcode.app/Contents/Developer ]; then
+    printf '%s\n' "/Applications/Xcode.app/Contents/Developer" | tee "$cache_file" >/dev/null
     printf '%s\n' "/Applications/Xcode.app/Contents/Developer"
     return 0
   fi
+
   return 1
 }
 
 devbox_omit_nix_env() {
   if [ "${DEVBOX_OMIT_NIX_ENV_APPLIED:-}" = "1" ]; then
     return 0
+  fi
+
+  # Check cache for devbox shellenv result
+  cache_dir="${DEVBOX_VIRTENV:-${DEVBOX_PROJECT_ROOT:-.}/.devbox/virtenv}/ios"
+  cache_file="${cache_dir}/.shellenv.cache"
+  cache_ttl=3600  # 1 hour
+
+  # Ensure cache directory exists
+  if [ ! -d "$cache_dir" ]; then
+    mkdir -p "$cache_dir" 2>/dev/null || true
+  fi
+
+  if [ -f "$cache_file" ]; then
+    # Get cache age
+    if command -v stat >/dev/null 2>&1; then
+      cache_mtime=$(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null || echo 0)
+      cache_age=$(( $(date +%s) - cache_mtime ))
+
+      if [ "$cache_age" -lt "$cache_ttl" ]; then
+        # Source cached environment
+        if ios_debug_enabled; then
+          ios_debug_log "Using cached devbox shellenv result"
+        fi
+        . "$cache_file"
+        export DEVBOX_OMIT_NIX_ENV_APPLIED=1
+        return 0
+      fi
+    fi
+  fi
+
+  if ios_debug_enabled; then
+    ios_debug_log "Performing devbox shellenv (not cached)"
   fi
 
   export DEVBOX_OMIT_NIX_ENV_APPLIED=1
@@ -278,6 +352,16 @@ devbox_omit_nix_env() {
   export PATH
 
   dump_env "after"
+
+  # Cache the environment variables we set
+  {
+    echo "# Cached devbox shellenv result"
+    echo "export CC='${CC:-}'"
+    echo "export CXX='${CXX:-}'"
+    echo "export PATH='${PATH}'"
+    echo "export DEVELOPER_DIR='${DEVELOPER_DIR:-}'"
+    echo "export DEVBOX_OMIT_NIX_ENV_APPLIED=1"
+  } > "$cache_file" 2>/dev/null || true
 }
 
 devbox_omit_nix_env
@@ -321,10 +405,7 @@ if ios_debug_enabled; then
     CXX
 fi
 
-if [ -n "${INIT_IOS:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && [ -z "${IOS_SDK_SUMMARY_PRINTED:-}" ]; then
-  IOS_SDK_SUMMARY_PRINTED=1
-  export IOS_SDK_SUMMARY_PRINTED
-
+ios_show_summary() {
   ios_runtime="${IOS_DEFAULT_RUNTIME:-}"
   if [ -z "$ios_runtime" ] && command -v xcrun >/dev/null 2>&1; then
     ios_runtime="$(xcrun --sdk iphonesimulator --show-sdk-version 2>/dev/null || true)"
@@ -348,4 +429,11 @@ if [ -n "${INIT_IOS:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] &&
   echo "  XCODE_VERSION: ${xcode_version:-unknown}"
   echo "  IOS_RUNTIME: ${ios_runtime:-not set}"
   echo "  IOS_SIM_TARGET: device=${ios_target_device:-unknown} runtime=${ios_target_runtime:-not set}"
+}
+
+# Optionally print summary on init if INIT_IOS is set
+if [ -n "${INIT_IOS:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && [ -z "${IOS_SDK_SUMMARY_PRINTED:-}" ]; then
+  IOS_SDK_SUMMARY_PRINTED=1
+  export IOS_SDK_SUMMARY_PRINTED
+  ios_show_summary
 fi
