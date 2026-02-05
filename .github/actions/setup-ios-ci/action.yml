@@ -1,0 +1,23 @@
+name: Setup iOS CI
+description: Setup iOS environment with CocoaPods and Xcode caches
+runs:
+  using: composite
+  steps:
+    - name: Setup CocoaPods cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cocoapods/repos
+          ~/Library/Caches/CocoaPods
+        key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Setup Xcode build cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-xcode-${{ hashFiles('**/*.xcodeproj/**', '**/*.xcworkspace/**') }}
+        restore-keys: |
+          ${{ runner.os }}-xcode-

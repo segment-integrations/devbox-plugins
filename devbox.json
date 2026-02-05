@@ -26,6 +26,19 @@
       "lint-all": [
         "echo 'Running shellcheck on all plugins...'",
         "shellcheck -S warning devbox/plugins/*/scripts/*.sh"
+      ],
+      "check-workflows": [
+        "echo 'Checking GitHub workflow syntax...'",
+        "for workflow in .github/workflows/*.yml; do",
+        "  echo \"  Validating $(basename $workflow)...\"",
+        "  act -W \"$workflow\" -l > /dev/null 2>&1 || {",
+        "    echo \"    ✗ Syntax error in $workflow\"",
+        "    act -W \"$workflow\" -l 2>&1 | head -20",
+        "    exit 1",
+        "  }",
+        "  echo \"    ✓ $(basename $workflow)\"",
+        "done",
+        "echo 'All workflows valid!'"
       ]
     }
   }

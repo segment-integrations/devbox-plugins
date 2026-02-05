@@ -1,0 +1,37 @@
+name: Setup Android CI
+description: Setup Android environment with KVM, Gradle cache, and device selection
+inputs:
+  device:
+    description: Device to select for SDK evaluation
+    required: true
+  working-directory:
+    description: Working directory relative to workspace
+    required: false
+    default: '.'
+runs:
+  using: composite
+  steps:
+    - name: Enable KVM
+      shell: bash
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Setup Gradle cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Select device for SDK evaluation
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        # Select specific device to minimize SDK download
+        # (devices.sh uses nix-shell for jq if not installed)
+        bash ../../plugins/android/scripts/devices.sh select ${{ inputs.device }}
