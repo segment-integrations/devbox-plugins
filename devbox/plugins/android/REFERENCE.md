@@ -19,23 +19,19 @@ Each device file is JSON with:
 
 ## Config keys (`android.json`)
 
-- `ANDROID_SDK_FLAKE_OUTPUT`
-- `ANDROID_SDK_FLAKE_PATH`
-- `ANDROID_LOCAL_SDK`
-- `ANDROID_SDK_ROOT`
-- `ANDROID_HOME`
-- `ANDROID_COMPILE_SDK`
-- `ANDROID_TARGET_SDK`
-- `ANDROID_PLATFORM_VERSIONS` (array; extra SDK platforms to include)
-- `EVALUATE_DEVICES` (array; empty means all)
-- `ANDROID_DEFAULT_DEVICE`
-- `ANDROID_SYSTEM_IMAGE_TAG`
-- `ANDROID_APP_APK` (path or glob relative to project root)
-- `ANDROID_BUILD_TOOLS_VERSION`
-- `ANDROID_NDK_VERSION`
-- `ANDROID_CMAKE_VERSION` (string; preferred CMake version)
-- `ANDROID_CMAKE_VERSIONS` (array; empty to skip CMake)
-- `ANDROID_CMDLINE_TOOLS_VERSION`
+- `ANDROID_LOCAL_SDK` — Use local SDK instead of Nix-managed SDK (0=false, 1=true)
+- `ANDROID_COMPILE_SDK` — Compile SDK version (e.g., "36")
+- `ANDROID_TARGET_SDK` — Target SDK version (e.g., "36")
+- `EVALUATE_DEVICES` — Array of device names to evaluate in flake (empty = all devices)
+- `ANDROID_DEFAULT_DEVICE` — Default device name when none specified
+- `ANDROID_SYSTEM_IMAGE_TAG` — System image tag (e.g., "google_apis", "google_apis_playstore")
+- `ANDROID_APP_APK` — Path or glob pattern for APK (relative to project root)
+- `ANDROID_BUILD_TOOLS_VERSION` — Build tools version (e.g., "36.1.0")
+- `ANDROID_INCLUDE_NDK` — Include Android NDK in SDK (true/false, default: false)
+- `ANDROID_NDK_VERSION` — NDK version when enabled (e.g., "27.0.12077973")
+- `ANDROID_INCLUDE_CMAKE` — Include CMake in SDK (true/false, default: false)
+- `ANDROID_CMAKE_VERSION` — CMake version when enabled (e.g., "3.22.1")
+- `ANDROID_CMDLINE_TOOLS_VERSION` — Command-line tools version (e.g., "19.0")
 
 ## Commands
 

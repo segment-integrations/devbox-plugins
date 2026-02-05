@@ -16,17 +16,19 @@ The Android SDK flake lives under `devbox.d/android/` and exposes `android-sdk*`
 
 ```sh
 # List devices
-devbox run --pure android.sh devices list
+devbox run android.sh devices list
 
-# Boot emulator (device name is the file name or the "name" field)
-devbox run --pure start-emu max
+# Build + install + launch app on emulator
+devbox run start-android
 
-# Build + install + launch on the resolved emulator
-devbox run --pure start-android max
+# Stop all emulators
+devbox run stop-emu
+
+# Reset emulator state (useful after Nix package updates)
+devbox run reset-emu
 ```
 
-`start-android` runs `devbox run --pure build-android` in the project and installs the APK matched by
-`ANDROID_APP_APK`.
+`start-android` starts the emulator, builds the app (via `build-android`), and installs/launches the APK matched by `ANDROID_APP_APK`.
 
 ## Reference
 
@@ -49,25 +51,44 @@ The flake evaluates all device APIs by default. To restrict it, set:
 ```json
 {"EVALUATE_DEVICES": ["max"]}
 ```
-Use `devbox run --pure android.sh devices select max` to update this value.
+Use `devbox run android.sh devices select max` to update this value.
+
+**Note:** The Android flake lock is automatically updated when device definitions change, ensuring system images stay in sync.
 
 ## Commands
 
-Device commands:
+Emulator commands:
 ```sh
-devbox run --pure android.sh devices list
-devbox run --pure android.sh devices create pixel_api28 --api 28 --device pixel --tag google_apis
-devbox run --pure android.sh devices update pixel_api28 --api 29
-devbox run --pure android.sh devices delete pixel_api28
-devbox run --pure android.sh devices reset
-devbox run --pure android.sh devices eval
+devbox run start-android        # Build, install, and launch app on emulator
+devbox run stop-emu             # Stop all running emulators
+devbox run reset-emu            # Stop and reset all emulators (cleans AVD state)
+devbox run reset-emu-device max # Reset a specific device
+```
+
+Device management:
+```sh
+devbox run android.sh devices list
+devbox run android.sh devices create pixel_api28 --api 28 --device pixel --tag google_apis
+devbox run android.sh devices update pixel_api28 --api 29
+devbox run android.sh devices delete pixel_api28
+devbox run android.sh devices select max min  # Select specific devices
+devbox run android.sh devices reset           # Reset to all devices
+devbox run android.sh devices eval            # Generate devices.lock.json
+```
+
+Build commands:
+```sh
+devbox run build-android        # Build with info logging
+devbox run build-android-debug  # Build with full debug output
+devbox run gradle-clean         # Clean build artifacts
 ```
 
 Config commands:
 ```sh
-devbox run --pure android.sh config show
-devbox run --pure android.sh config set ANDROID_DEFAULT_DEVICE=max
-devbox run --pure android.sh config reset
+devbox run android.sh config show
+devbox run android.sh config set ANDROID_DEFAULT_DEVICE=max
+devbox run android.sh config reset
+devbox run android.sh info      # Show resolved SDK info
 ```
 
 ## Environment variables

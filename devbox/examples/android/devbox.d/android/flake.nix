@@ -37,7 +37,12 @@
         buildToolsVersion = getVar "ANDROID_BUILD_TOOLS_VERSION";
         cmdLineToolsVersion = getVar "ANDROID_CMDLINE_TOOLS_VERSION";
         systemImageTypes = [ (getVar "ANDROID_SYSTEM_IMAGE_TAG") ];
+        includeNDK =
+          if builtins.hasAttr "ANDROID_INCLUDE_NDK" defaultsData then defaultsData.ANDROID_INCLUDE_NDK else false;
         ndkVersion = getVar "ANDROID_NDK_VERSION";
+        includeCMake =
+          if builtins.hasAttr "ANDROID_INCLUDE_CMAKE" defaultsData then defaultsData.ANDROID_INCLUDE_CMAKE else false;
+        cmakeVersion = getVar "ANDROID_CMAKE_VERSION";
       };
 
       forAllSystems =
@@ -71,8 +76,10 @@
               cmdLineToolsVersion = config.cmdLineToolsVersion;
               includeEmulator = true;
               includeSystemImages = true;
-              includeNDK = config.ndkVersion != "";
-              ndkVersions = if config.ndkVersion != "" then [ config.ndkVersion ] else [ ];
+              includeNDK = config.includeNDK;
+              ndkVersions = if config.includeNDK && config.ndkVersion != "" then [ config.ndkVersion ] else [ ];
+              includeCmake = config.includeCMake;
+              cmakeVersions = if config.includeCMake && config.cmakeVersion != "" then [ config.cmakeVersion ] else [ ];
               abiVersions = abiVersions;
               systemImageTypes = config.systemImageTypes;
             };

@@ -47,18 +47,40 @@
     ],
     "scripts": {
       "build-android": [
-        "gradle assembleDebug"
+        "echo 'Building Android app...'",
+        "gradle assembleDebug --info"
+      ],
+      "build-android-debug": [
+        "echo 'Building Android app with debug output...'",
+        "gradle assembleDebug --debug --stacktrace"
       ],
       "test-android": [
         "gradle test"
       ],
       "test-android-e2e": [
-        "devbox services start android-emulator || devbox services up -b android-emulator",
-        "gradle connectedAndroidTest"
+        "echo 'Starting Android E2E tests...'",
+        ". {{ .Virtenv }}/scripts/avd.sh",
+        "android_start_emulator \"${1:-}\"",
+        "gradle connectedAndroidTest",
+        "android_stop_emulator"
+      ],
+      "start-emu": [
+        ". {{ .Virtenv }}/scripts/avd.sh",
+        "android_start_emulator \"${1:-}\""
       ],
       "start-android": [
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_run_app \"${1-}\""
+      ],
+      "stop-emu": [
+        ". {{ .Virtenv }}/scripts/avd.sh",
+        "android_stop_emulator"
+      ],
+      "reset-emu": [
+        "echo 'Resetting Android emulators...'",
+        ". {{ .Virtenv }}/scripts/avd.sh",
+        "android_stop_emulator",
+        "android_reset_avds"
       ]
     }
   }

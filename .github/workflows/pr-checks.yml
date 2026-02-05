@@ -135,27 +135,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Select device for SDK evaluation
+        working-directory: devbox/examples/android
+        run: |
+          # Select only 'min' device to minimize SDK download in CI
+          # (devices.sh uses nix-shell for jq if not installed)
+          bash ../../plugins/android/scripts/devices.sh select min
+
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
         with:
           enable-cache: true
 
-      - name: Test Android emulator lifecycle (default device)
+      - name: Test Android emulator lifecycle (min device)
         working-directory: devbox/examples/android
+        env:
+          EMU_HEADLESS: 1
         run: |
-          # Start emulator in headless mode with KVM acceleration
-          EMU_HEADLESS=1 devbox run --pure start-emu &
-          EMU_PID=$!
-
-          # Wait for emulator to boot
-          sleep 60
+          # Start emulator and wait for boot
+          devbox run --pure start-emu min
 
           # Verify emulator is running
           devbox run --pure android.sh info
 
           # Clean stop
-          kill $EMU_PID 2>/dev/null || true
-          wait $EMU_PID 2>/dev/null || true
+          devbox run --pure stop-emu
 
   ios-quick-smoke:
     name: iOS Quick Smoke Test
@@ -190,21 +194,17 @@ jobs:
 
       - name: Test iOS simulator lifecycle (default device)
         working-directory: devbox/examples/ios
+        env:
+          SIM_HEADLESS: 1
         run: |
-          # Start simulator in headless mode
-          SIM_HEADLESS=1 devbox run --pure start-sim &
-          SIM_PID=$!
-
-          # Wait for simulator to boot
-          sleep 40
+          # Start simulator and wait for boot
+          devbox run --pure start-sim
 
           # Verify simulator is running
           devbox run --pure ios.sh info
 
-          # Stop simulator
+          # Clean stop
           devbox run --pure stop-sim
-
-          wait $SIM_PID 2>/dev/null || true
 
   android-unit-tests:
     name: Android Unit Tests

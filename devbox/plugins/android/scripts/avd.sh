@@ -19,7 +19,7 @@ ANDROID_AVD_LOADED_PID="$$"
 # Device Hardware Profile Resolution
 # ============================================================================
 
-# Resolve device hardware profile with fuzzy matching
+# Resolve device hardware profile (exact match only)
 android_resolve_device_hardware() {
   desired_device="$1"
 
@@ -27,55 +27,13 @@ android_resolve_device_hardware() {
     return 1
   fi
 
-  # Get list of available devices from avdmanager
-  available_devices="$(avdmanager list device | awk -F': ' '
-    /^id: /{
-      id=$2
-      # Handle quoted IDs
-      if (index(id, "\"") > 0) {
-        q=index(id, "\"")
-        rest=substr(id, q + 1)
-        q2=index(rest, "\"")
-        if (q2 > 0) { id=substr(rest, 1, q2 - 1) }
-      } else {
-        # Handle space-separated IDs
-        split(id, parts, " ")
-        id=parts[1]
-      }
-      next
-    }
-    /^[[:space:]]*Name: /{
-      name=$2
-      if (id != "") { print id "\t" name; id="" }
-    }
-  ')"
-
-  if [ -z "$available_devices" ]; then
-    return 1
+  # Check if device exists in avdmanager list (exact match)
+  if avdmanager list device 2>/dev/null | grep -q "^id: .* or \"$desired_device\"$"; then
+    printf '%s\n' "$desired_device"
+    return 0
   fi
 
-  # Normalize desired device name for fuzzy matching
-  desired_normalized="$(android_normalize_name "$desired_device")"
-  desired_alt_normalized="$(android_normalize_name "$(printf '%s' "$desired_device" | tr '_-' '  ')")"
-
-  # Try to find matching device
-  # shellcheck disable=SC3003
-  while IFS=$'\t' read -r device_id device_name; do
-    id_normalized="$(android_normalize_name "$device_id")"
-    name_normalized="$(android_normalize_name "$device_name")"
-
-    # Match on ID or name, trying both normalized forms
-    if [ "$id_normalized" = "$desired_normalized" ] || \
-       [ "$id_normalized" = "$desired_alt_normalized" ] || \
-       [ "$name_normalized" = "$desired_normalized" ] || \
-       [ "$name_normalized" = "$desired_alt_normalized" ]; then
-      printf '%s\n' "$device_id"
-      return 0
-    fi
-  done <<EOF
-$available_devices
-EOF
-
+  # Device not found
   return 1
 }
 
@@ -393,11 +351,12 @@ android_setup_avds() {
     echo "  Tag: $image_tag"
     [ -n "$preferred_abi" ] && echo "  Preferred ABI: $preferred_abi"
 
-    # Resolve device hardware profile
-    resolved_hardware="$(android_resolve_device_hardware "$device_hardware" 2>/dev/null || true)"
-    if [ -n "$resolved_hardware" ]; then
-      device_hardware="$resolved_hardware"
-      echo "  Resolved hardware: $device_hardware"
+    # Validate device hardware profile exists
+    if ! android_resolve_device_hardware "$device_hardware" >/dev/null 2>&1; then
+      echo "ERROR: Device '$device_hardware' not found in avdmanager" >&2
+      echo "       Run: avdmanager list device" >&2
+      echo "       Use exact device ID from the list" >&2
+      continue
     fi
 
     # Find compatible system image

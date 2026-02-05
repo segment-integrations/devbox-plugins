@@ -192,9 +192,24 @@ validate_abi() {
 # Initialize
 # ============================================================================
 
-# Load shared utilities and ensure jq is available
+# Load shared utilities (but don't require jq yet)
 ensure_lib_loaded
-android_require_jq
+
+# Setup jq wrapper - use system jq if available, otherwise use nix-shell
+if command -v jq >/dev/null 2>&1; then
+  # System jq available - use it directly
+  jq() { command jq "$@"; }
+elif command -v nix >/dev/null 2>&1; then
+  # No system jq, but nix is available - use ephemeral shell
+  jq() {
+    nix-shell -p jq --run "jq $(printf '%q ' "$@")" 2>/dev/null
+  }
+else
+  # Neither jq nor nix available
+  echo "ERROR: jq is required but not found" >&2
+  echo "       Install jq or ensure nix is available" >&2
+  exit 1
+fi
 
 # ============================================================================
 # Command Handlers
@@ -533,6 +548,16 @@ EOF
     # Compute checksum using shared utility function
     checksum="$(android_compute_devices_checksum "$devices_dir" || echo "")"
 
+    # Check if checksum changed (to determine if we need to update flake)
+    old_checksum=""
+    if [ -f "$lock_file_path" ]; then
+      old_checksum="$(jq -r '.checksum // ""' "$lock_file_path" 2>/dev/null || echo "")"
+    fi
+    checksum_changed=false
+    if [ "$old_checksum" != "$checksum" ]; then
+      checksum_changed=true
+    fi
+
     # Generate lock file
     temp_lock_file="${lock_file_path}.tmp"
     printf '%s\n' "$api_versions" | \
@@ -543,6 +568,16 @@ EOF
         > "$temp_lock_file"
 
     mv "$temp_lock_file" "$lock_file_path"
+
+    # Update Android flake lock automatically if devices changed
+    if [ "$checksum_changed" = true ]; then
+      flake_dir="${config_dir}"
+      if [ -f "${flake_dir}/flake.nix" ] && [ -f "${flake_dir}/flake.lock" ]; then
+        if command -v nix >/dev/null 2>&1; then
+          (cd "${flake_dir}" && nix flake update 2>&1 | grep -v "^warning:" || true) >/dev/null
+        fi
+      fi
+    fi
 
     # Print selected API versions
     jq -r '.api_versions | join(",")' "$lock_file_path"

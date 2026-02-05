@@ -2,17 +2,51 @@
 
 This document provides a detailed reference for all scripts in the Android plugin, their purposes, dependencies, and how they interact with each other.
 
+## Available Commands
+
+### Build & Test Commands
+- `devbox run build-android` - Build Android app with info logging
+- `devbox run build-android-debug` - Build with full debug output
+- `devbox run test-android` - Run unit tests
+- `devbox run test-android-e2e` - Run end-to-end tests on emulator
+
+### Emulator Commands
+- `devbox run start-android [device]` - Start emulator and deploy app
+- `devbox run stop-emu` - Stop all running emulators
+- `devbox run reset-emu` - Stop and reset all emulators (cleans AVD state)
+- `devbox run reset-emu-device <name>` - Stop and reset specific device
+
+### Device Management
+- `devbox run android.sh devices list` - List all device definitions
+- `devbox run android.sh devices show <name>` - Show device details
+- `devbox run android.sh devices create <name> --api <n> --device <id>` - Create device
+- `devbox run android.sh devices update <name> [options]` - Update device
+- `devbox run android.sh devices delete <name>` - Delete device
+- `devbox run android.sh devices select <names...>` - Select devices for evaluation
+- `devbox run android.sh devices reset` - Reset device selection (all devices)
+- `devbox run android.sh devices eval` - Generate devices.lock.json
+
+### Gradle Utilities
+- `devbox run gradle-clean` - Clean Gradle build artifacts
+- `devbox run gradle-stop` - Stop Gradle daemon
+
+### Configuration
+- `devbox run android.sh config show` - Display android.json configuration
+- `devbox run android.sh config set KEY=VALUE` - Update configuration
+- `devbox run android.sh info` - Display resolved SDK information
+
 ## Scripts Directory Structure
 
 ```
 devbox/plugins/android/scripts/
-├── env.sh           # Environment setup and SDK resolution (sourced)
-├── lib.sh           # Utility functions library (sourced)
-├── validate.sh      # Validation functions (sourced)
-├── android.sh       # Main CLI entry point (executable)
-├── devices.sh       # Device management CLI (executable)
-├── select-device.sh # Device selection helper (executable)
-└── avd.sh           # AVD/emulator functions (sourced)
+├── env.sh       # Environment setup and SDK resolution (sourced)
+├── lib.sh       # Utility functions library (sourced)
+├── validate.sh  # Validation functions (sourced)
+├── avd.sh       # AVD management, device resolution, reset (sourced)
+├── emulator.sh  # Emulator lifecycle (start, stop, service) (sourced)
+├── deploy.sh    # App deployment (build, install, launch) (sourced)
+├── android.sh   # Main CLI entry point (executable)
+└── devices.sh   # Device management CLI (executable)
 ```
 
 ## Script Categories
@@ -22,13 +56,14 @@ These scripts must be sourced (not executed) and provide functions/environment f
 - `env.sh` - Core environment setup
 - `lib.sh` - Utility functions
 - `validate.sh` - Validation functions
-- `avd.sh` - AVD management functions
+- `avd.sh` - AVD management (includes device resolution, AVD creation, reset)
+- `emulator.sh` - Emulator lifecycle management
+- `deploy.sh` - Application deployment pipeline
 
 ### 2. Executable CLI Scripts
 These scripts are executed directly by users or other scripts:
 - `android.sh` - Main CLI router
-- `devices.sh` - Device management commands
-- `select-device.sh` - Device selection utility
+- `devices.sh` - Device management commands (includes device selection)
 
 ## Detailed Script Documentation
 
@@ -67,8 +102,6 @@ These scripts are executed directly by users or other scripts:
 - `ANDROID_USER_HOME` - User state directory (project-local)
 - `ANDROID_AVD_HOME` - AVD definitions directory
 - `ANDROID_EMULATOR_HOME` - Emulator configuration directory
-- `ANDROID_SDK_FLAKE_PATH` - Path to Nix flake for SDK
-- `ANDROID_SDK_FLAKE_OUTPUT` - Nix flake output name
 - `PATH` - Updated with SDK tools and scripts
 
 **SDK Resolution Strategy:**
