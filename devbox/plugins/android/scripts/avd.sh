@@ -301,44 +301,57 @@ android_setup_avds() {
     export ANDROID_JAVA_HOME
   fi
 
-  # ---- Find Device Definitions ----
+  # ---- Find Lock File ----
 
-  devices_dir="$(android_get_devices_dir 2>/dev/null || true)"
-  if [ -z "$devices_dir" ]; then
-    echo "ERROR: Android devices directory not found" >&2
-    echo "       Expected devbox.d/android/devices or ANDROID_DEVICES_DIR" >&2
+  config_dir="$(android_resolve_config_dir 2>/dev/null || true)"
+  if [ -z "$config_dir" ]; then
+    echo "ERROR: Android config directory not found" >&2
+    echo "       Expected devbox.d/android or ANDROID_CONFIG_DIR" >&2
     exit 1
   fi
 
-  device_files="$(android_select_device_files "$devices_dir")"
-  if [ -z "$device_files" ]; then
-    echo "ERROR: No Android device definitions found in ${devices_dir}" >&2
+  lock_file="${config_dir}/devices.lock.json"
+  if [ ! -f "$lock_file" ]; then
+    echo "ERROR: devices.lock.json not found at ${lock_file}" >&2
+    echo "       Run 'devbox run android.sh devices eval' to generate it" >&2
     exit 1
   fi
 
-  # ---- Process Each Device ----
+  # Read devices from lock file
+  devices_json="$(jq -c '.devices[]' "$lock_file" 2>/dev/null || echo "")"
+  if [ -z "$devices_json" ]; then
+    echo "ERROR: No devices found in ${lock_file}" >&2
+    echo "       Run 'devbox run android.sh devices eval' to regenerate" >&2
+    exit 1
+  fi
 
-  # Track first AVD name for convenience
-  first_avd_name=""
+  # Get lock file checksum for AVD validation
+  lock_checksum="$(jq -r '.checksum // ""' "$lock_file" 2>/dev/null || echo "")"
+
+  # ---- Process Each Device from Lock File ----
+
+  # Track first AVD name for convenience (export to file since loop is in subshell)
+  first_avd_file="${ANDROID_AVD_HOME}/.first_avd"
+  rm -f "$first_avd_file"
 
   # Get default system image tag
   default_image_tag="${ANDROID_SYSTEM_IMAGE_TAG:-google_apis}"
 
-  for device_file in $device_files; do
+  echo "$devices_json" | while IFS= read -r device_json; do
     echo ""
-    echo "Processing device definition: $(basename "$device_file")"
+    echo "Processing device from lock file..."
 
-    # Parse device definition
-    device_name="$(jq -r '.name // empty' "$device_file")"
-    api_level="$(jq -r '.api // empty' "$device_file")"
-    device_hardware="$(jq -r '.device // empty' "$device_file")"
-    image_tag="$(jq -r '.tag // empty' "$device_file")"
-    preferred_abi="$(jq -r '.preferred_abi // empty' "$device_file")"
+    # Parse device definition from lock file
+    device_name="$(echo "$device_json" | jq -r '.name // empty')"
+    api_level="$(echo "$device_json" | jq -r '.api // empty')"
+    device_hardware="$(echo "$device_json" | jq -r '.device // empty')"
+    image_tag="$(echo "$device_json" | jq -r '.tag // empty')"
+    preferred_abi="$(echo "$device_json" | jq -r '.preferred_abi // empty')"
 
     # Validate required fields
     if [ -z "$api_level" ] || [ -z "$device_hardware" ]; then
-      echo "ERROR: Device definition missing required fields (api, device) in ${device_file}" >&2
-      exit 1
+      echo "ERROR: Device definition missing required fields (api, device)" >&2
+      continue
     fi
 
     # Use default tag if not specified
@@ -382,26 +395,66 @@ android_setup_avds() {
 
     echo "  AVD name: $avd_name"
 
-    # Create the AVD
-    android_create_avd "$avd_name" "$device_hardware" "$system_image"
-
-    # Track first AVD
-    if [ -z "$first_avd_name" ]; then
-      first_avd_name="$avd_name"
+    # Check if AVD exists and is consistent with lock file
+    avd_needs_recreation=false
+    if android_avd_exists "$avd_name"; then
+      # Read checksum from AVD config
+      avd_config="${ANDROID_AVD_HOME}/${avd_name}.avd/config.ini"
+      if [ -f "$avd_config" ]; then
+        avd_checksum="$(grep '^devbox.lock.checksum=' "$avd_config" 2>/dev/null | cut -d'=' -f2 || echo "")"
+        if [ "$avd_checksum" != "$lock_checksum" ]; then
+          echo "  ⚠ AVD checksum mismatch (lock file changed)"
+          echo "  ⚠ Recreating AVD to match lock file..."
+          avd_needs_recreation=true
+        else
+          echo "  ✓ AVD exists and matches lock file"
+        fi
+      else
+        # Old AVD without checksum - recreate
+        echo "  ⚠ AVD missing checksum metadata (old format)"
+        echo "  ⚠ Recreating AVD..."
+        avd_needs_recreation=true
+      fi
+    else
+      avd_needs_recreation=true
     fi
 
-    # Confirm AVD is ready
-    if android_avd_exists "$avd_name"; then
-      echo "  ✓ AVD ready: ${avd_name}"
+    # Create or recreate the AVD if needed
+    if [ "$avd_needs_recreation" = true ]; then
+      # Delete old AVD if it exists
+      if android_avd_exists "$avd_name"; then
+        echo "  Deleting old AVD..."
+        android_run_avdmanager delete avd --name "$avd_name" >/dev/null 2>&1 || true
+      fi
+
+      # Create the AVD
+      android_create_avd "$avd_name" "$device_hardware" "$system_image"
+
+      # Store lock file checksum in AVD config for consistency checking
+      avd_config="${ANDROID_AVD_HOME}/${avd_name}.avd/config.ini"
+      if [ -f "$avd_config" ] && [ -n "$lock_checksum" ]; then
+        echo "devbox.lock.checksum=${lock_checksum}" >> "$avd_config"
+      fi
+
+      echo "  ✓ AVD created: ${avd_name}"
+    fi
+
+    # Track first AVD (write to file since we're in a subshell)
+    if [ ! -f "$first_avd_file" ]; then
+      echo "$avd_name" > "$first_avd_file"
     fi
   done
 
   # Export first AVD name for convenience
-  if [ -n "$first_avd_name" ]; then
-    ANDROID_RESOLVED_AVD="$first_avd_name"
-    export ANDROID_RESOLVED_AVD
-    echo ""
-    echo "Default AVD: $first_avd_name"
+  if [ -f "$first_avd_file" ]; then
+    first_avd_name="$(cat "$first_avd_file")"
+    rm -f "$first_avd_file"
+    if [ -n "$first_avd_name" ]; then
+      ANDROID_RESOLVED_AVD="$first_avd_name"
+      export ANDROID_RESOLVED_AVD
+      echo ""
+      echo "Default AVD: $first_avd_name"
+    fi
   fi
 
   echo ""

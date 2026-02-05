@@ -1,0 +1,149 @@
+#!/usr/bin/env sh
+# iOS Plugin - Core Utilities
+# See REFERENCE.md for detailed documentation
+
+set -eu
+
+if ! (return 0 2>/dev/null); then
+  echo "ERROR: lib.sh must be sourced" >&2
+  exit 1
+fi
+
+if [ "${IOS_LIB_LOADED:-}" = "1" ] && [ "${IOS_LIB_LOADED_PID:-}" = "$$" ]; then
+  return 0 2>/dev/null || exit 0
+fi
+IOS_LIB_LOADED=1
+IOS_LIB_LOADED_PID="$$"
+
+# Debug logging helper
+ios_debug_log() {
+  if [ "${IOS_DEBUG:-}" = "1" ] || [ "${DEBUG:-}" = "1" ]; then
+    printf 'DEBUG: %s\n' "$*"
+  fi
+}
+
+# Sanitize device name for iOS simulator (allows ._- and spaces)
+ios_sanitize_device_name() {
+  raw_name="$1"
+  if [ -z "$raw_name" ]; then
+    return 1
+  fi
+  # iOS simulator names can contain spaces, alphanumeric, dots, dashes, underscores
+  cleaned_name="$(printf '%s' "$raw_name" | tr -cd 'A-Za-z0-9 ._-')"
+  if [ -z "$cleaned_name" ]; then
+    return 1
+  fi
+  printf '%s\n' "$cleaned_name"
+}
+
+# Compute SHA-256 checksum of device definition files
+ios_compute_devices_checksum() {
+  devices_dir="$1"
+  if [ -z "$devices_dir" ] || [ ! -d "$devices_dir" ]; then
+    return 1
+  fi
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | \
+      sha256sum | cut -d' ' -f1
+  elif command -v shasum >/dev/null 2>&1; then
+    find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | \
+      shasum -a 256 | cut -d' ' -f1
+  else
+    return 1
+  fi
+}
+
+# Path resolution with fallback priority:
+# IOS_CONFIG_DIR > DEVBOX_PROJECT_ROOT > DEVBOX_PROJECT_DIR > DEVBOX_WD > ./
+ios_config_path() {
+  if [ -n "${IOS_CONFIG_DIR:-}" ] && [ -f "${IOS_CONFIG_DIR%/}/ios.json" ]; then
+    printf '%s\n' "${IOS_CONFIG_DIR%/}/ios.json"
+    return 0
+  fi
+  if [ -n "${DEVBOX_PROJECT_ROOT:-}" ] && [ -f "${DEVBOX_PROJECT_ROOT}/devbox.d/ios/ios.json" ]; then
+    printf '%s\n' "${DEVBOX_PROJECT_ROOT}/devbox.d/ios/ios.json"
+    return 0
+  fi
+  if [ -n "${DEVBOX_PROJECT_DIR:-}" ] && [ -f "${DEVBOX_PROJECT_DIR}/devbox.d/ios/ios.json" ]; then
+    printf '%s\n' "${DEVBOX_PROJECT_DIR}/devbox.d/ios/ios.json"
+    return 0
+  fi
+  if [ -n "${DEVBOX_WD:-}" ] && [ -f "${DEVBOX_WD}/devbox.d/ios/ios.json" ]; then
+    printf '%s\n' "${DEVBOX_WD}/devbox.d/ios/ios.json"
+    return 0
+  fi
+  if [ -f "./devbox.d/ios/ios.json" ]; then
+    printf '%s\n' "./devbox.d/ios/ios.json"
+    return 0
+  fi
+  return 1
+}
+
+# Device directory resolution with fallback priority
+ios_devices_dir() {
+  if [ -n "${IOS_DEVICES_DIR:-}" ] && [ -d "$IOS_DEVICES_DIR" ]; then
+    printf '%s\n' "$IOS_DEVICES_DIR"
+    return 0
+  fi
+  if [ -n "${IOS_CONFIG_DIR:-}" ] && [ -d "${IOS_CONFIG_DIR}/devices" ]; then
+    printf '%s\n' "${IOS_CONFIG_DIR}/devices"
+    return 0
+  fi
+  if [ -n "${DEVBOX_PROJECT_ROOT:-}" ] && [ -d "${DEVBOX_PROJECT_ROOT}/devbox.d/ios/devices" ]; then
+    printf '%s\n' "${DEVBOX_PROJECT_ROOT}/devbox.d/ios/devices"
+    return 0
+  fi
+  if [ -n "${DEVBOX_PROJECT_DIR:-}" ] && [ -d "${DEVBOX_PROJECT_DIR}/devbox.d/ios/devices" ]; then
+    printf '%s\n' "${DEVBOX_PROJECT_DIR}/devbox.d/ios/devices"
+    return 0
+  fi
+  if [ -n "${DEVBOX_WD:-}" ] && [ -d "${DEVBOX_WD}/devbox.d/ios/devices" ]; then
+    printf '%s\n' "${DEVBOX_WD}/devbox.d/ios/devices"
+    return 0
+  fi
+  if [ -d "./devbox.d/ios/devices" ]; then
+    printf '%s\n' "./devbox.d/ios/devices"
+    return 0
+  fi
+  return 1
+}
+
+# Requirement checks
+ios_require_jq() {
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "ERROR: jq is required" >&2
+    exit 1
+  fi
+}
+
+ios_require_tool() {
+  tool_name="$1"
+  error_message="${2:-Missing required tool: $tool_name}"
+  if ! command -v "$tool_name" >/dev/null 2>&1; then
+    echo "ERROR: $error_message" >&2
+    exit 1
+  fi
+}
+
+ios_require_dir() {
+  path="$1"
+  error_message="${2:-Missing required directory: $path}"
+  if [ ! -d "$path" ]; then
+    echo "ERROR: $error_message" >&2
+    exit 1
+  fi
+}
+
+ios_require_dir_contains() {
+  base_dir="$1"
+  required_subpath="$2"
+  error_message="${3:-Missing required path: $base_dir/$required_subpath}"
+  full_path="${base_dir%/}/${required_subpath#/}"
+  if [ ! -e "$full_path" ]; then
+    echo "ERROR: $error_message" >&2
+    exit 1
+  fi
+}
+
+ios_debug_log "lib.sh loaded"

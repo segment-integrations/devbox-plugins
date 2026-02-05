@@ -44,6 +44,7 @@ load_react_native_config() {
     current="$(eval "printf '%s' \"\${$key-}\"")"
     if [ -z "$current" ] && [ -n "$value" ]; then
       eval "$key=\"\$value\""
+      # shellcheck disable=SC2163
       export "$key"
     fi
   done <<EOF

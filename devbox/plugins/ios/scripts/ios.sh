@@ -26,63 +26,29 @@ if [ -z "$command_name" ] || [ "$command_name" = "help" ]; then
 fi
 shift || true
 
-config_dir="${IOS_CONFIG_DIR:-./devbox.d/ios}"
-config_path="${config_dir%/}/ios.json"
-
-require_jq() {
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "jq is required." >&2
-    exit 1
-  fi
-}
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
+  script_dir="${IOS_SCRIPTS_DIR}"
+fi
 
 case "$command_name" in
   devices)
-    exec "${IOS_SCRIPTS_DIR:-${config_dir%/}/scripts}/devices.sh" "$@"
+    exec "${script_dir}/devices.sh" "$@"
     ;;
   config)
     sub="${1-}"
     shift || true
-    require_jq
+    # shellcheck disable=SC1090
+    . "${script_dir}/config.sh"
     case "$sub" in
       show)
-        cat "$config_path"
+        ios_config_show
         ;;
       set)
-        [ "${1-}" != "" ] || usage
-        tmp="${config_path}.tmp"
-        filter='.'
-        while [ "${1-}" != "" ]; do
-          pair="$1"
-          key="${pair%%=*}"
-          value="${pair#*=}"
-          if [ -z "$key" ] || [ "$key" = "$value" ]; then
-            echo "Invalid key=value: $pair" >&2
-            exit 1
-          fi
-          if ! jq -e --arg key "$key" 'has($key)' "$config_path" >/dev/null 2>&1; then
-            echo "Unknown config key: $key" >&2
-            exit 1
-          fi
-          filter="$filter | .${key} = \"${value}\""
-          shift
-        done
-        jq "$filter" "$config_path" >"$tmp"
-        mv "$tmp" "$config_path"
+        ios_config_set "$@"
         ;;
       reset)
-        default_config=""
-        if [ -n "${IOS_SCRIPTS_DIR:-}" ]; then
-          candidate="${IOS_SCRIPTS_DIR%/}/../config/ios.json"
-          if [ -f "$candidate" ]; then
-            default_config="$candidate"
-          fi
-        fi
-        if [ -z "$default_config" ]; then
-          echo "Default iOS config not found; reinstall the plugin to restore defaults." >&2
-          exit 1
-        fi
-        cp "$default_config" "$config_path"
+        ios_config_reset
         ;;
       *)
         usage
@@ -91,8 +57,9 @@ case "$command_name" in
     ;;
   info)
     # Source env.sh to get the ios_show_summary function
-    if [ -f "${IOS_SCRIPTS_DIR}/env.sh" ]; then
-      . "${IOS_SCRIPTS_DIR}/env.sh"
+    if [ -f "${script_dir}/env.sh" ]; then
+      # shellcheck disable=SC1090
+      . "${script_dir}/env.sh"
       ios_show_summary
     else
       echo "Error: env.sh not found" >&2

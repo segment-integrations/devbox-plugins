@@ -27,11 +27,16 @@
         ) [ ] list;
 
       lockData =
-        builtins.fromJSON (
-          builtins.readFile ./devices.lock.json
-        );
+        if builtins.pathExists ./devices.lock.json
+        then builtins.fromJSON (builtins.readFile ./devices.lock.json)
+        else { devices = [ ]; };
+
+      # Extract API versions from lock file devices array, default to latest if empty
       deviceApis =
-        if builtins.hasAttr "api_versions" lockData then lockData.api_versions else [ ];
+        if builtins.hasAttr "devices" lockData && (builtins.length lockData.devices) > 0
+        then map (device: device.api) lockData.devices
+        else [ 36 ]; # Default to latest stable API
+
       androidSdkConfig = {
         platformVersions = unique (map toString deviceApis);
         buildToolsVersion = getVar "ANDROID_BUILD_TOOLS_VERSION";

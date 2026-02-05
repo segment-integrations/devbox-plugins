@@ -1,7 +1,12 @@
 {
-  "api_versions": [
-    21,
-    36
+  "devices": [
+    {
+      "name": "medium_phone_api36",
+      "api": 36,
+      "device": "medium_phone",
+      "tag": "google_apis"
+    }
   ],
-  "checksum": "8df4d3393b61fbbb08e45cf8762f95c521316938e514527916e4fce88a849d57"
+  "checksum": "8df4d3393b61fbbb08e45cf8762f95c521316938e514527916e4fce88a849d57",
+  "generated_at": "2026-02-05T23:19:37Z"
 }

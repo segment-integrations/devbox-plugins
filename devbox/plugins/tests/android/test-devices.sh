@@ -69,7 +69,7 @@ assert_success "$devices_script show test_pixel | grep -q '\"api\": 34'" "Device
 echo ""
 echo "TEST: Select device"
 assert_success "$devices_script select test_pixel" "Select device"
-assert_success "grep -q '\"test_pixel\"' '$test_root/devbox.d/android/android.json'" "Device selection recorded"
+assert_success "jq -e '.devices[] | select(.name == \"test_pixel\")' '$test_root/devbox.d/android/devices.lock.json' >/dev/null" "Device recorded in lock file"
 
 # Test: Eval (generate lock file)
 echo ""

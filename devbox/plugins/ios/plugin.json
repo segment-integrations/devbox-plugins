@@ -21,12 +21,15 @@
   },
   "create_files": {
     "{{ .Virtenv }}/process-compose.yaml": "config/process-compose.yaml",
+    "{{ .Virtenv }}/scripts/lib.sh": "scripts/lib.sh",
     "{{ .Virtenv }}/scripts/env.sh": "scripts/env.sh",
-    "{{ .Virtenv }}/scripts/simctl.sh": "scripts/simctl.sh",
+    "{{ .Virtenv }}/scripts/validate.sh": "scripts/validate.sh",
+    "{{ .Virtenv }}/scripts/device.sh": "scripts/device.sh",
+    "{{ .Virtenv }}/scripts/simulator.sh": "scripts/simulator.sh",
+    "{{ .Virtenv }}/scripts/deploy.sh": "scripts/deploy.sh",
+    "{{ .Virtenv }}/scripts/config.sh": "scripts/config.sh",
     "{{ .Virtenv }}/scripts/ios.sh": "scripts/ios.sh",
     "{{ .Virtenv }}/scripts/devices.sh": "scripts/devices.sh",
-    "{{ .Virtenv }}/scripts/select-device.sh": "scripts/select-device.sh",
-    "{{ .Virtenv }}/scripts/validate.sh": "scripts/validate.sh",
     "{{ .Virtenv }}/config/ios.json": "config/ios.json",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
     "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json",
@@ -46,21 +49,21 @@
       ],
       "test-ios-e2e": [
         "echo 'Starting iOS E2E tests...'",
-        ". {{ .Virtenv }}/scripts/simctl.sh",
+        ". {{ .Virtenv }}/scripts/simulator.sh",
         "ios_start \"${1:-}\"",
         "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'platform=iOS Simulator,name=${IOS_SIM_NAME:-iPhone 15}' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} test",
         "ios_stop"
       ],
       "start-sim": [
-        ". {{ .Virtenv }}/scripts/simctl.sh",
+        ". {{ .Virtenv }}/scripts/simulator.sh",
         "ios_start \"${1:-}\""
       ],
       "stop-sim": [
-        ". {{ .Virtenv }}/scripts/simctl.sh",
+        ". {{ .Virtenv }}/scripts/simulator.sh",
         "ios_stop"
       ],
       "start-ios": [
-        ". {{ .Virtenv }}/scripts/simctl.sh",
+        ". {{ .Virtenv }}/scripts/deploy.sh",
         "ios_run_app \"${1-}\""
       ]
     }

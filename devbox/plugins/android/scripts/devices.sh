@@ -67,7 +67,6 @@ shift || true
 
 # Local variables (derived from user-overridable variables)
 config_dir="${ANDROID_CONFIG_DIR:-./devbox.d/android}"
-config_path="${config_dir%/}/android.json"
 devices_dir="${ANDROID_DEVICES_DIR:-${config_dir%/}/devices}"
 scripts_dir="${ANDROID_SCRIPTS_DIR:-${config_dir%/}/scripts}"
 lock_file_path="${config_dir%/}/devices.lock.json"
@@ -202,6 +201,7 @@ if command -v jq >/dev/null 2>&1; then
 elif command -v nix >/dev/null 2>&1; then
   # No system jq, but nix is available - use ephemeral shell
   jq() {
+    # shellcheck disable=SC3050
     nix-shell -p jq --run "jq $(printf '%q ' "$@")" 2>/dev/null
   }
 else
@@ -421,7 +421,7 @@ case "$command_name" in
     ;;
 
   # --------------------------------------------------------------------------
-  # select - Select specific devices for evaluation
+  # select - Select specific devices for evaluation (updates lock file directly)
   # --------------------------------------------------------------------------
   select)
     [ "${1-}" != "" ] || {
@@ -429,35 +429,101 @@ case "$command_name" in
       usage
     }
 
-    # Convert arguments to JSON array
-    device_selections_json="$(printf '%s\n' "$@" | jq -R . | jq -s .)"
+    # Get all device files as JSON
+    devices_json="$(
+      for device_file in $(find "$devices_dir" -name "*.json" -type f | sort); do
+        jq -c --arg file "$device_file" \
+          '. + {file: $file}' \
+          "$device_file"
+      done | jq -s '.'
+    )"
 
-    # Update EVALUATE_DEVICES in config
-    temp_file="${config_path}.tmp"
-    jq --argjson selections "$device_selections_json" \
-      '.EVALUATE_DEVICES = $selections' \
-      "$config_path" > "$temp_file"
+    # Extract APIs from selected devices
+    api_versions=""
+    for selected_name in "$@"; do
+      # Find matching device file
+      matching_file="$(printf '%s\n' "$devices_json" | jq -r \
+        --arg sel "$selected_name" \
+        '.[] | select((.file | sub("^.*/"; "") | sub("\\.json$"; "")) == $sel or .name == $sel) | .file' \
+        | head -n1)"
 
-    mv "$temp_file" "$config_path"
+      if [ -z "$matching_file" ]; then
+        echo "ERROR: Device '$selected_name' not found in ${devices_dir}" >&2
+        exit 1
+      fi
 
+      # Extract API version
+      api_version="$(printf '%s\n' "$devices_json" | jq -r \
+        --arg file "$matching_file" \
+        '.[] | select(.file == $file) | .api' \
+        | head -n1)"
+
+      if [ -n "$api_version" ] && [ "$api_version" != "null" ]; then
+        api_versions="${api_versions}${api_versions:+
+}${api_version}"
+      fi
+    done
+
+    if [ -z "$api_versions" ]; then
+      echo "ERROR: No API versions found for selected devices" >&2
+      exit 1
+    fi
+
+    # Build devices array for lock file
+    devices_array="["
+    first=true
+    for selected_name in "$@"; do
+      matching_file="$(printf '%s\n' "$devices_json" | jq -r \
+        --arg sel "$selected_name" \
+        '.[] | select((.file | sub("^.*/"; "") | sub("\\.json$"; "")) == $sel or .name == $sel) | .file' \
+        | head -n1)"
+
+      if [ -n "$matching_file" ]; then
+        device_config="$(cat "$matching_file")"
+        if [ "$first" = true ]; then
+          first=false
+        else
+          devices_array="${devices_array},"
+        fi
+        devices_array="${devices_array}${device_config}"
+      fi
+    done
+    devices_array="${devices_array}]"
+
+    # Compute checksum
+    checksum="$(android_compute_devices_checksum "$devices_dir" || echo "")"
+
+    # Generate lock file with full device configs
+    lock_file_path="${config_dir}/devices.lock.json"
+    temp_lock_file="${lock_file_path}.tmp"
+    echo "$devices_array" | jq \
+      --arg cs "$checksum" \
+      --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date +%Y-%m-%dT%H:%M:%SZ)" \
+      '{devices: ., checksum: $cs, generated_at: $ts}' \
+      > "$temp_lock_file"
+
+    mv "$temp_lock_file" "$lock_file_path"
+
+    # Update Android flake lock
+    flake_dir="${config_dir}"
+    if [ -f "${flake_dir}/flake.nix" ] && [ -f "${flake_dir}/flake.lock" ]; then
+      if command -v nix >/dev/null 2>&1; then
+        (cd "${flake_dir}" && nix flake update 2>&1 | grep -v "^warning:" || true) >/dev/null
+      fi
+    fi
+
+    device_count="$(jq '.devices | length' "$lock_file_path")"
+    selected_apis="$(jq -r '.devices | map(.api) | join(",")' "$lock_file_path")"
     echo "Selected Android devices: $*"
-
-    # Automatically regenerate lock file after selection
-    "$0" eval >/dev/null
+    echo "Lock file updated: ${device_count} devices with APIs ${selected_apis}"
     ;;
 
   # --------------------------------------------------------------------------
-  # reset - Reset device selection to all devices
+  # reset - Reset device selection to all devices (regenerate from all files)
   # --------------------------------------------------------------------------
   reset)
-    temp_file="${config_path}.tmp"
-    jq '.EVALUATE_DEVICES = []' "$config_path" > "$temp_file"
-    mv "$temp_file" "$config_path"
-
-    echo "Selected Android devices: all"
-
-    # Automatically regenerate lock file
-    "$0" eval >/dev/null
+    echo "Regenerating lock file from all device files..."
+    exec "$0" eval
     ;;
 
   # --------------------------------------------------------------------------
@@ -476,72 +542,22 @@ case "$command_name" in
       exit 1
     fi
 
-    # Build JSON array of device information
+    # Build JSON array of device information (include all fields + file path)
     devices_json="$(
       for device_file in $device_files; do
         jq -c --arg path "$device_file" \
-          '{file:$path, name:(.name // ""), api:(.api // null)}' \
+          '. + {file: $path}' \
           "$device_file"
       done | jq -s '.'
     )"
 
-    # Get list of selected devices from config
-    selected_devices="$(jq -r '.EVALUATE_DEVICES[]?' "$config_path")"
+    # Eval scans ALL device files (no filtering) and generates full lock file
+    # Use 'select' command to choose specific devices
 
-    # Get any extra API versions from config
-    extra_api_versions="$(jq -r '.ANDROID_PLATFORM_VERSIONS[]?' "$config_path")"
-
-    # Build list of API versions to include
-    api_versions=""
-
-    if [ -n "$selected_devices" ]; then
-      # Process each selected device
-      while read -r selected_name; do
-        [ -n "$selected_name" ] || continue
-
-        # Find matching device file
-        matching_file="$(printf '%s\n' "$devices_json" | jq -r \
-          --arg sel "$selected_name" \
-          '.[] | select((.file | sub("^.*/"; "") | sub("\\.json$"; "")) == $sel or .name == $sel) | .file' \
-          | head -n1)"
-
-        if [ -z "$matching_file" ]; then
-          echo "ERROR: EVALUATE_DEVICES '$selected_name' not found in devbox.d/android/devices" >&2
-          exit 1
-        fi
-
-        # Extract API version
-        api_version="$(printf '%s\n' "$devices_json" | jq -r \
-          --arg file "$matching_file" \
-          '.[] | select(.file == $file) | .api' \
-          | head -n1)"
-
-        if [ -n "$api_version" ] && [ "$api_version" != "null" ]; then
-          api_versions="${api_versions}${api_versions:+
-}${api_version}"
-        fi
-      done <<EOF
-$selected_devices
-EOF
-    else
-      # No selection - include all devices
-      api_versions="$(printf '%s\n' "$devices_json" | jq -r '.[] | .api' | awk 'NF')"
-    fi
-
-    # Add extra API versions from config
-    if [ -n "$extra_api_versions" ]; then
-      while read -r extra_api; do
-        [ -n "$extra_api" ] || continue
-        api_versions="${api_versions}${api_versions:+
-}${extra_api}"
-      done <<EOF
-$extra_api_versions
-EOF
-    fi
-
-    # Check we have at least one API version
-    if [ -z "$api_versions" ]; then
-      echo "ERROR: No device APIs found in ${devices_dir}" >&2
+    # Check we have at least one device
+    device_count="$(printf '%s\n' "$devices_json" | jq '. | length')"
+    if [ "$device_count" -eq 0 ]; then
+      echo "ERROR: No device definitions found in ${devices_dir}" >&2
       exit 1
     fi
 
@@ -558,14 +574,13 @@ EOF
       checksum_changed=true
     fi
 
-    # Generate lock file
+    # Generate lock file with full device configs (strip the .file field we added)
     temp_lock_file="${lock_file_path}.tmp"
-    printf '%s\n' "$api_versions" | \
-      awk 'NF' | \
-      sort -u | \
-      jq -R -s --arg cs "$checksum" \
-        '{api_versions: (split("\n") | map(select(length>0)) | map(tonumber)), checksum: $cs}' \
-        > "$temp_lock_file"
+    printf '%s\n' "$devices_json" | jq \
+      --arg cs "$checksum" \
+      --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date +%Y-%m-%dT%H:%M:%SZ)" \
+      'map(del(.file)) | {devices: ., checksum: $cs, generated_at: $ts}' \
+      > "$temp_lock_file"
 
     mv "$temp_lock_file" "$lock_file_path"
 
@@ -579,8 +594,10 @@ EOF
       fi
     fi
 
-    # Print selected API versions
-    jq -r '.api_versions | join(",")' "$lock_file_path"
+    # Print summary
+    device_count="$(jq '.devices | length' "$lock_file_path")"
+    api_list="$(jq -r '.devices | map(.api) | join(",")' "$lock_file_path")"
+    echo "Lock file generated: ${device_count} devices with APIs ${api_list}"
     ;;
 
   # --------------------------------------------------------------------------

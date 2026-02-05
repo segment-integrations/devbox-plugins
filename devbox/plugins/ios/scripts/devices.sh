@@ -1,6 +1,16 @@
 #!/usr/bin/env sh
 set -eu
 
+# devices.sh is a CLI script and can be executed directly
+# Source dependencies
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
+  script_dir="${IOS_SCRIPTS_DIR}"
+fi
+
+# shellcheck disable=SC1090
+. "$script_dir/lib.sh"
+
 usage() {
   cat >&2 <<'USAGE'
 Usage: devices.sh <command> [args]
@@ -32,17 +42,12 @@ if [ -z "$command_name" ] || [ "$command_name" = "help" ]; then
 fi
 shift || true
 
-config_dir="${IOS_CONFIG_DIR:-./devbox.d/ios}"
-config_path="${config_dir%/}/ios.json"
-devices_dir="${IOS_DEVICES_DIR:-${config_dir%/}/devices}"
-scripts_dir="${IOS_SCRIPTS_DIR:-${config_dir%/}/scripts}"
+# Use lib.sh functions for path resolution
+config_path="$(ios_config_path 2>/dev/null || echo "./devbox.d/ios/ios.json")"
+devices_dir="$(ios_devices_dir 2>/dev/null || echo "./devbox.d/ios/devices")"
 
-require_jq() {
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "jq is required." >&2
-    exit 1
-  fi
-}
+# Ensure jq is available
+ios_require_jq
 
 resolve_device_file() {
   selection="$1"
@@ -64,12 +69,10 @@ resolve_device_file() {
   return 1
 }
 
-require_jq
-
 validate_runtime() {
   value="$1"
   case "$value" in
-    ''|*[^0-9.]*|.*.|*..*)
+    ''|*[!0-9.]*|.*.|*..*)
       echo "Invalid runtime: $value" >&2
       exit 1
       ;;
@@ -143,8 +146,16 @@ case "$command_name" in
     rm -f "$file"
     ;;
   select)
+    # Inline select-device.sh functionality
     [ "${1-}" != "" ] || usage
-    "${scripts_dir%/}/select-device.sh" "$@"
+    if [ ! -f "$config_path" ]; then
+      echo "iOS config not found: $config_path" >&2
+      exit 1
+    fi
+    tmp="${config_path}.tmp"
+    jq --argjson selections "$(printf '%s\n' "$@" | jq -R . | jq -s .)" '.EVALUATE_DEVICES = $selections' "$config_path" >"$tmp"
+    mv "$tmp" "$config_path"
+    echo "Selected iOS devices: $*"
     ;;
   reset)
     tmp="${config_path}.tmp"
@@ -157,15 +168,11 @@ case "$command_name" in
     selected=$(jq -r '.EVALUATE_DEVICES // []' "$config_path")
 
     # Generate lock file
+    config_dir="$(dirname "$config_path")"
     lock_path="${config_dir%/}/devices.lock.json"
 
-    # Compute checksum of device files
-    checksum=""
-    if command -v sha256sum >/dev/null 2>&1; then
-      checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | sha256sum | cut -d' ' -f1)
-    elif command -v shasum >/dev/null 2>&1; then
-      checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | shasum -a 256 | cut -d' ' -f1)
-    fi
+    # Compute checksum using lib.sh function
+    checksum="$(ios_compute_devices_checksum "$devices_dir" 2>/dev/null || echo "")"
 
     # Determine device names for output
     if [ "$selected" = "[]" ]; then

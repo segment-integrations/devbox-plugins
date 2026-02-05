@@ -11,6 +11,16 @@ fi
 IOS_ENV_LOADED=1
 IOS_ENV_LOADED_PID="$$"
 
+# Temporarily define script_dir for sourcing lib.sh
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
+  script_dir="${IOS_SCRIPTS_DIR}"
+fi
+
+# Source lib.sh first
+# shellcheck disable=SC1090
+. "$script_dir/lib.sh"
+
 ios_debug_enabled() {
   [ "${IOS_DEBUG:-}" = "1" ] || [ "${DEBUG:-}" = "1" ]
 }
@@ -71,22 +81,8 @@ ios_require_dir_contains() {
 
 load_ios_config() {
   config_path="${IOS_PLUGIN_CONFIG:-}"
-  script_dir="$(cd "$(dirname "$0")" && pwd)"
-  if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
-    script_dir="${IOS_SCRIPTS_DIR}"
-  fi
   if [ -z "$config_path" ]; then
-    if [ -n "${IOS_CONFIG_DIR:-}" ] && [ -f "${IOS_CONFIG_DIR}/ios.json" ]; then
-      config_path="${IOS_CONFIG_DIR}/ios.json"
-    elif [ -n "${DEVBOX_PROJECT_ROOT:-}" ] && [ -f "${DEVBOX_PROJECT_ROOT}/devbox.d/ios/ios.json" ]; then
-      config_path="${DEVBOX_PROJECT_ROOT}/devbox.d/ios/ios.json"
-    elif [ -n "${DEVBOX_PROJECT_DIR:-}" ] && [ -f "${DEVBOX_PROJECT_DIR}/devbox.d/ios/ios.json" ]; then
-      config_path="${DEVBOX_PROJECT_DIR}/devbox.d/ios/ios.json"
-    elif [ -n "${DEVBOX_WD:-}" ] && [ -f "${DEVBOX_WD}/devbox.d/ios/ios.json" ]; then
-      config_path="${DEVBOX_WD}/devbox.d/ios/ios.json"
-    else
-      config_path="./devbox.d/ios/ios.json"
-    fi
+    config_path="$(ios_config_path 2>/dev/null || echo "./devbox.d/ios/ios.json")"
   fi
 
   if [ ! -f "$config_path" ]; then
@@ -106,6 +102,7 @@ load_ios_config() {
     current="$(eval "printf '%s' \"\${$key-}\"")"
     if [ -z "$current" ] && [ -n "$value" ]; then
       eval "$key=\"$value\""
+      # shellcheck disable=SC2163
       export "$key"
     fi
   done <<CONFIG_EOF
@@ -286,7 +283,7 @@ if [ "$(uname -s)" = "Darwin" ]; then
 fi
 
 if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
-  for script in ios.sh devices.sh select-device.sh simctl.sh; do
+  for script in ios.sh devices.sh; do
     if [ -f "${IOS_SCRIPTS_DIR%/}/$script" ]; then
       chmod +x "${IOS_SCRIPTS_DIR%/}/$script" 2>/dev/null || true
     fi

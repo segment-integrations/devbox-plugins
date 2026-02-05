@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if ! (return 0 2>/dev/null); then
+  echo "ERROR: validate.sh must be sourced" >&2
+  exit 1
+fi
+
+if [ "${IOS_VALIDATE_LOADED:-}" = "1" ] && [ "${IOS_VALIDATE_LOADED_PID:-}" = "$$" ]; then
+  return 0 2>/dev/null || exit 0
+fi
+IOS_VALIDATE_LOADED=1
+IOS_VALIDATE_LOADED_PID="$$"
+
+# Source dependencies
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
+  script_dir="${IOS_SCRIPTS_DIR}"
+fi
+
+# shellcheck disable=SC1090
+. "$script_dir/lib.sh"
+
 ios_validate_xcode() {
   # Only validate on macOS
   if [ "$(uname -s)" != "Darwin" ]; then
@@ -30,13 +50,10 @@ ios_validate_lock_file() {
     return 0
   fi
 
-  # Compute checksum of device files
+  # Compute checksum of device files using lib.sh function
   local current_checksum
-  if command -v sha256sum >/dev/null 2>&1; then
-    current_checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | sha256sum | cut -d' ' -f1)
-  elif command -v shasum >/dev/null 2>&1; then
-    current_checksum=$(find "$devices_dir" -name "*.json" -type f -exec cat {} \; 2>/dev/null | shasum -a 256 | cut -d' ' -f1)
-  else
+  current_checksum=$(ios_compute_devices_checksum "$devices_dir" 2>/dev/null || echo "")
+  if [ -z "$current_checksum" ]; then
     # No checksum tool available, skip validation
     return 0
   fi
