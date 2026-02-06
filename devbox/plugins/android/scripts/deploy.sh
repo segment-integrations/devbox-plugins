@@ -15,6 +15,12 @@ fi
 ANDROID_DEPLOY_LOADED=1
 ANDROID_DEPLOY_LOADED_PID="$$"
 
+# Source dependencies
+if [ -n "${ANDROID_SCRIPTS_DIR:-}" ]; then
+  . "${ANDROID_SCRIPTS_DIR}/env.sh"
+  . "${ANDROID_SCRIPTS_DIR}/lib.sh"
+fi
+
 # Run Android project build via devbox
 android_run_build() {
   project_root="$1"

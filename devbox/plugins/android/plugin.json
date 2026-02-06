@@ -9,6 +9,7 @@
     "ANDROID_CONFIG_DIR": "{{ .DevboxDir }}",
     "ANDROID_DEVICES_DIR": "{{ .DevboxDir }}/devices",
     "ANDROID_SCRIPTS_DIR": "{{ .Virtenv }}/scripts",
+    "ANDROID_FLAKE_DIR": "{{ .Virtenv }}",
     "ANDROID_LOCAL_SDK": "0",
     "ANDROID_COMPILE_SDK": "36",
     "ANDROID_TARGET_SDK": "36",
@@ -30,8 +31,7 @@
     "gawk": "latest",
     "jq": "latest",
     "jdk17": "latest",
-    "gradle": "latest",
-    "path:{{ .Virtenv }}#android-sdk": ""
+    "gradle": "latest"
   },
   "create_files": {
     "{{ .Virtenv }}/android": "",
@@ -48,8 +48,7 @@
     "{{ .Virtenv }}/scripts/android-init.sh": "scripts/android-init.sh",
     "{{ .Virtenv }}/flake.nix": "config/flake.nix",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
-    "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json",
-    "{{ .DevboxDir }}/devices/devices.lock": "config/devices.lock.json"
+    "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json"
   },
   "shell": {
     "init_hook": [
@@ -57,37 +56,37 @@
       ". {{ .Virtenv }}/scripts/env.sh"
     ],
     "scripts": {
-      "build-android": [
+      "build:android": [
         "echo 'Building Android app...'",
         "gradle assembleDebug --info"
       ],
-      "build-android-debug": [
+      "build:android:debug": [
         "echo 'Building Android app with debug output...'",
         "gradle assembleDebug --debug --stacktrace"
       ],
-      "test-android": [
+      "test:android": [
         "gradle test"
       ],
-      "test-android-e2e": [
+      "test:android:e2e": [
         "echo 'Starting Android E2E tests...'",
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_start_emulator \"${1:-}\"",
         "gradle connectedAndroidTest",
         "android_stop_emulator"
       ],
-      "start-emu": [
+      "start:emu": [
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_start_emulator \"${1:-}\""
       ],
-      "start-android": [
+      "start:android": [
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_run_app \"${1-}\""
       ],
-      "stop-emu": [
+      "stop:emu": [
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_stop_emulator"
       ],
-      "reset-emu": [
+      "reset:emu": [
         "echo 'Resetting Android emulators...'",
         ". {{ .Virtenv }}/scripts/avd.sh",
         "android_stop_emulator",

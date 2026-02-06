@@ -11,6 +11,12 @@
 
 set -eu
 
+# Source dependencies
+if [ -n "${ANDROID_SCRIPTS_DIR:-}" ]; then
+  . "${ANDROID_SCRIPTS_DIR}/env.sh"
+  . "${ANDROID_SCRIPTS_DIR}/lib.sh"
+fi
+
 # ============================================================================
 # Usage and Help
 # ============================================================================

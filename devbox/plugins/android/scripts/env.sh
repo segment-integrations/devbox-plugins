@@ -87,16 +87,19 @@ resolve_flake_sdk_root() {
   fi
   root="${ANDROID_SDK_FLAKE_PATH:-}"
   if [ -z "$root" ]; then
-    if [ -n "${ANDROID_CONFIG_DIR:-}" ] && [ -d "${ANDROID_CONFIG_DIR}" ]; then
-      root="${ANDROID_CONFIG_DIR}"
-    elif [ -n "${DEVBOX_PROJECT_ROOT:-}" ] && [ -d "${DEVBOX_PROJECT_ROOT}/devbox.d/android" ]; then
-      root="${DEVBOX_PROJECT_ROOT}/devbox.d/android"
-    elif [ -n "${DEVBOX_PROJECT_DIR:-}" ] && [ -d "${DEVBOX_PROJECT_DIR}/devbox.d/android" ]; then
-      root="${DEVBOX_PROJECT_DIR}/devbox.d/android"
-    elif [ -n "${DEVBOX_WD:-}" ] && [ -d "${DEVBOX_WD}/devbox.d/android" ]; then
-      root="${DEVBOX_WD}/devbox.d/android"
+    if [ -n "${ANDROID_FLAKE_DIR:-}" ] && [ -d "${ANDROID_FLAKE_DIR}" ]; then
+      root="${ANDROID_FLAKE_DIR}"
+    elif [ -n "${ANDROID_SCRIPTS_DIR:-}" ] && [ -d "${ANDROID_SCRIPTS_DIR}" ]; then
+      # Flake is in same directory as scripts (virtenv)
+      root="$(dirname "${ANDROID_SCRIPTS_DIR}")"
+    elif [ -n "${DEVBOX_PROJECT_ROOT:-}" ] && [ -d "${DEVBOX_PROJECT_ROOT}/.devbox/virtenv/android" ]; then
+      root="${DEVBOX_PROJECT_ROOT}/.devbox/virtenv/android"
+    elif [ -n "${DEVBOX_PROJECT_DIR:-}" ] && [ -d "${DEVBOX_PROJECT_DIR}/.devbox/virtenv/android" ]; then
+      root="${DEVBOX_PROJECT_DIR}/.devbox/virtenv/android"
+    elif [ -n "${DEVBOX_WD:-}" ] && [ -d "${DEVBOX_WD}/.devbox/virtenv/android" ]; then
+      root="${DEVBOX_WD}/.devbox/virtenv/android"
     else
-      root="./devbox.d/android"
+      root="./.devbox/virtenv/android"
     fi
     ANDROID_SDK_FLAKE_PATH="$root"
     export ANDROID_SDK_FLAKE_PATH
@@ -205,7 +208,7 @@ fi
 
 if [ -z "${ANDROID_SDK_ROOT:-}" ]; then
   if [ "${ANDROID_SDK_REQUIRED:-1}" = "1" ]; then
-    echo "ANDROID_SDK_ROOT/ANDROID_HOME must be set. Enable the Devbox Android SDK package or set ANDROID_SDK_ROOT explicitly." >&2
+    echo "ANDROID_SDK_ROOT could not be resolved. Ensure Nix is available or set ANDROID_LOCAL_SDK=1 with a local Android SDK." >&2
     exit 1
   else
     # SDK not required for this task (e.g., unit tests)

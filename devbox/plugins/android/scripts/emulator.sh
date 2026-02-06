@@ -15,6 +15,12 @@ fi
 ANDROID_EMULATOR_LOADED=1
 ANDROID_EMULATOR_LOADED_PID="$$"
 
+# Source dependencies
+if [ -n "${ANDROID_SCRIPTS_DIR:-}" ]; then
+  . "${ANDROID_SCRIPTS_DIR}/env.sh"
+  . "${ANDROID_SCRIPTS_DIR}/lib.sh"
+fi
+
 # Find a running emulator by AVD name
 android_find_running_emulator() {
   avd_name="$1"

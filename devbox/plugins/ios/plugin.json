@@ -42,8 +42,7 @@
     "{{ .Virtenv }}/scripts/devices.sh": "scripts/devices.sh",
     "{{ .Virtenv }}/scripts/ios-init.sh": "scripts/ios-init.sh",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
-    "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json",
-    "{{ .DevboxDir }}/devices/devices.lock": "config/devices/devices.lock"
+    "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json"
   },
   "shell": {
     "init_hook": [
@@ -51,28 +50,28 @@
       ". {{ .Virtenv }}/scripts/env.sh"
     ],
     "scripts": {
-      "build-ios": [
+      "build:ios": [
         "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} build"
       ],
-      "test-ios": [
+      "test:ios": [
         "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} test"
       ],
-      "test-ios-e2e": [
+      "test:ios:e2e": [
         "echo 'Starting iOS E2E tests...'",
         ". {{ .Virtenv }}/scripts/simulator.sh",
         "ios_start \"${1:-}\"",
         "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'platform=iOS Simulator,name=${IOS_SIM_NAME:-iPhone 15}' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} test",
         "ios_stop"
       ],
-      "start-sim": [
+      "start:sim": [
         ". {{ .Virtenv }}/scripts/simulator.sh",
         "ios_start \"${1:-}\""
       ],
-      "stop-sim": [
+      "stop:sim": [
         ". {{ .Virtenv }}/scripts/simulator.sh",
         "ios_stop"
       ],
-      "start-ios": [
+      "start:ios": [
         ". {{ .Virtenv }}/scripts/deploy.sh",
         "ios_run_app \"${1-}\""
       ]

@@ -15,6 +15,12 @@ fi
 ANDROID_AVD_LOADED=1
 ANDROID_AVD_LOADED_PID="$$"
 
+# Source dependencies
+if [ -n "${ANDROID_SCRIPTS_DIR:-}" ]; then
+  . "${ANDROID_SCRIPTS_DIR}/env.sh"
+  . "${ANDROID_SCRIPTS_DIR}/lib.sh"
+fi
+
 # ============================================================================
 # Device Hardware Profile Resolution
 # ============================================================================
