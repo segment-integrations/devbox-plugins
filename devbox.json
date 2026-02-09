@@ -12,7 +12,7 @@
         "process-compose -f tests/process-compose-lint.yaml --tui=${TEST_TUI:-false}"
       ],
       "lint:android": [
-        "shellcheck -S warning plugins/android/scripts/*.sh"
+        "find plugins/android/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
       ],
       "lint:ios": [
         "find plugins/ios/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"

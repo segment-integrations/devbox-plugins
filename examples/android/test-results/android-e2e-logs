@@ -10,10 +10,10 @@
 {"level":"info","process":"build-app","replica":0,"message":"Actual: DefaultDaemonContext[uid=25c194c2-6adf-456a-ba7a-d28f46cb7009,javaHome=/nix/store/hlm8a8cnp4hm8xkg0a2yy4kv7cq44jii-zulu-ca-jdk-17.0.12/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home,javaVersion=17,javaVendor=Azul Systems, Inc.,daemonRegistryDir=/Users/abueide/.gradle/daemon,pid=62313,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-Xmx2g,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]"}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"  Looking for a different daemon..."}
-{"level":"info","process":"build-app","replica":0,"message":"The client will now receive all logging from the daemon (pid: 44971). The daemon log file: /Users/abueide/.gradle/daemon/8.14.4/daemon-44971.out.log"}
-{"level":"info","process":"build-app","replica":0,"message":"Starting 31st build in daemon [uptime: 2 hrs 19 mins 0.444 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 2 GiB, non-heap usage: 19% of 512 MiB]"}
 {"level":"info","process":"build-app","replica":0}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[1A\u001b[1B\u001b[1AUsing 12 worker leases."}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[1A\u001b[1B\u001b[1AThe client will now receive all logging from the daemon (pid: 44971). The daemon log file: /Users/abueide/.gradle/daemon/8.14.4/daemon-44971.out.log"}
+{"level":"info","process":"build-app","replica":0,"message":"Starting 33rd build in daemon [uptime: 4 hrs 52 mins 37.565 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 2 GiB, non-heap usage: 19% of 512 MiB]"}
+{"level":"info","process":"build-app","replica":0,"message":"Using 12 worker leases."}
 {"level":"info","process":"build-app","replica":0,"message":"Now considering [/Users/abueide/code/devbox-plugins/examples/android] as hierarchies to watch"}
 {"level":"info","process":"build-app","replica":0,"message":"Watching the file system is configured to be enabled if available"}
 {"level":"info","process":"build-app","replica":0,"message":"File system watching is active"}
@@ -24,13 +24,14 @@
 {"level":"info","process":"build-app","replica":0,"message":"Included projects: [root project 'android-example', project ':app']"}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [105ms]\u001b[m\u001b[38D\u001b[1B\u001b[1m> root project > Resolve dependencies of classpath\u001b[m\u001b[50D\u001b[1B\u001b[2A\u001b[0K"}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [103ms]\u001b[m\u001b[38D\u001b[1B\u001b[1m> root project\u001b[m\u001b[14D\u001b[1B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [202ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [302ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [400ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [502ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [603ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [700ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [803ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [903ms]\u001b[m\u001b[38D\u001b[2B\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [1s]\u001b[m\u001b[0K\u001b[35D\u001b[2B\u001b[1A\u001b[1m> root project > Resolve dependencies of classpath\u001b[m\u001b[50D\u001b[1B\u001b[1A\u001b[1m> root project > Resolve files of configuration 'classpath'\u001b[m\u001b[59D\u001b[1B\u001b[2A\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Configure project :\u001b[m\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"Evaluating root project 'android-example' using build file '/Users/abueide/code/devbox-plugins/examples/android/build.gradle.kts'."}
+{"level":"info","process":"build-app","replica":0,"message":"Resource missing. [HTTP HEAD: https://dl.google.com/dl/android/maven2/com/android/application/com.android.application.gradle.plugin/8.9.0/com.android.application.gradle.plugin-8.9.0.jar]"}
 {"level":"info","process":"build-app","replica":0,"message":"Resolved plugin [id: 'com.android.application', version: '8.9.0', apply: false]"}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m======\u001b[0;39;1m-------> 50% CONFIGURING [203ms]\u001b[m\u001b[39D\u001b[1B\u001b[1m> :app\u001b[m\u001b[6D\u001b[1B\u001b[2A\u001b[0K"}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m======\u001b[0;39;1m-------> 50% CONFIGURING [1s]\u001b[m\u001b[36D\u001b[1B\u001b[1m> :app\u001b[m\u001b[6D\u001b[1B\u001b[2A\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Configure project :app\u001b[m\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"Evaluating project ':app' using build file '/Users/abueide/code/devbox-plugins/examples/android/app/build.gradle.kts'."}
 {"level":"info","process":"build-app","replica":0,"message":"Resolved plugin [id: 'com.android.application']"}
@@ -38,10 +39,8 @@
 {"level":"info","process":"build-app","replica":0,"message":"All projects evaluated."}
 {"level":"info","process":"build-app","replica":0,"message":"Task name matched 'assembleDebug'"}
 {"level":"info","process":"build-app","replica":0,"message":"Selected primary task 'assembleDebug' from project :"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m=============\u001b[0;39;1m> 100% CONFIGURING [298ms]\u001b[m\u001b[40D\u001b[1B> IDLE\u001b[6D\u001b[1B\u001b[2AWARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 36\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
+{"level":"info","process":"build-app","replica":0,"message":"WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 36"}
+{"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"This Android Gradle plugin (8.9.0) was tested up to compileSdk = 35."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"You are strongly encouraged to update your project to use a newer"}
@@ -205,11 +204,11 @@
 {"level":"info","process":"build-app","replica":0,"message":"Build cache key for task ':app:desugarDebugFileDependencies' is ae911851124a563c11342d4f1c864c96"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:desugarDebugFileDependencies' as it is up-to-date."}
 {"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:dexBuilderDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:dexBuilderDebug (Thread[Execution worker,5,main]) started."}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m=======\u001b[0;39;1m------> 58% EXECUTING [401ms]\u001b[m\u001b[37D\u001b[1B> IDLE\u001b[6D\u001b[1B\u001b[2A:app:dexBuilderDebug (Thread[Execution worker,5,main]) started.\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:dexBuilderDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m=======\u001b[0;39;1m------> 58% EXECUTING [1s]\u001b[m\u001b[34D\u001b[1B\u001b[1m> :app:dexBuilderDebug\u001b[m\u001b[22D\u001b[1B\u001b[2A\u001b[0K"}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:dexBuilderDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"Build cache key for task ':app:dexBuilderDebug' is 2302a8e316e2346550b0c263a5cf3dcd"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:dexBuilderDebug' as it is up-to-date."}
 {"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeDebugGlobalSynthetics (Thread[Execution worker,5,main]) started."}
@@ -245,83 +244,92 @@
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:mergeExtDexDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Build cache key for task ':app:mergeExtDexDebug' is fa79999c1f1ccc8ecd118d78e2e53b41"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:mergeExtDexDebug' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeLibDexDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:mergeLibDexDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeLibDexDebug (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:mergeLibDexDebug (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:mergeLibDexDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Build cache key for task ':app:mergeLibDexDebug' is 3910f89c3e8926f693d7698d51664cc8"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:mergeLibDexDebug' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeProjectDexDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:mergeProjectDexDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeProjectDexDebug (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:mergeProjectDexDebug (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:mergeProjectDexDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Build cache key for task ':app:mergeProjectDexDebug' is 564f2817d75296ec26c65b0e9ca6c3a9"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:mergeProjectDexDebug' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeDebugJniLibFolders (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:mergeDebugJniLibFolders (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeDebugJniLibFolders (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:mergeDebugJniLibFolders (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugJniLibFolders\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Caching disabled for task ':app:mergeDebugJniLibFolders' because:"}
 {"level":"info","process":"build-app","replica":0,"message":"  Simple merging task"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:mergeDebugJniLibFolders' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeDebugNativeLibs (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:mergeDebugNativeLibs (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:mergeDebugNativeLibs (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:mergeDebugNativeLibs (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugNativeLibs\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:mergeDebugNativeLibs' as it has no source files and no previous output files."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:stripDebugDebugSymbols (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:stripDebugDebugSymbols (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:stripDebugDebugSymbols (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:stripDebugDebugSymbols (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:stripDebugDebugSymbols\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:stripDebugDebugSymbols' as it has no source files and no previous output files."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:validateSigningDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:validateSigningDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:validateSigningDebug (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:validateSigningDebug (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:validateSigningDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Caching disabled for task ':app:validateSigningDebug' because:"}
 {"level":"info","process":"build-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:validateSigningDebug' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:writeDebugAppMetadata (Thread[Execution worker Thread 11,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:writeDebugAppMetadata (Thread[Execution worker Thread 11,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:writeDebugAppMetadata (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:writeDebugAppMetadata (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:writeDebugAppMetadata\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Caching disabled for task ':app:writeDebugAppMetadata' because:"}
 {"level":"info","process":"build-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:writeDebugAppMetadata' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:writeDebugSigningConfigVersions (Thread[Execution worker Thread 11,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:writeDebugSigningConfigVersions (Thread[Execution worker Thread 11,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:writeDebugSigningConfigVersions (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:writeDebugSigningConfigVersions (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:writeDebugSigningConfigVersions\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Caching disabled for task ':app:writeDebugSigningConfigVersions' because:"}
 {"level":"info","process":"build-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:writeDebugSigningConfigVersions' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:packageDebug (Thread[Execution worker Thread 11,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:packageDebug (Thread[Execution worker Thread 11,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:packageDebug (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:packageDebug (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:packageDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Custom actions are attached to task ':app:packageDebug'."}
 {"level":"info","process":"build-app","replica":0,"message":"Caching disabled for task ':app:packageDebug' because:"}
 {"level":"info","process":"build-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:packageDebug' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 11,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 11,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:createDebugApkListingFileRedirect\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Caching disabled for task ':app:createDebugApkListingFileRedirect' because:"}
 {"level":"info","process":"build-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:createDebugApkListingFileRedirect' as it is up-to-date."}
-{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:assembleDebug (Thread[Execution worker Thread 11,5,main]) started."}
-{"level":"info","process":"build-app","replica":0,"message":":app:assembleDebug (Thread[Execution worker Thread 11,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":"Resolve mutations for :app:assembleDebug (Thread[Execution worker Thread 8,5,main]) started."}
+{"level":"info","process":"build-app","replica":0,"message":":app:assembleDebug (Thread[Execution worker Thread 8,5,main]) started."}
 {"level":"info","process":"build-app","replica":0}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[1m> Task :app:assembleDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"build-app","replica":0,"message":"Skipping task ':app:assembleDebug' as it has no actions."}
 {"level":"info","process":"build-app","replica":0}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[32;1mBUILD SUCCESSFUL\u001b[0;39m in 1s"}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[32;1mBUILD SUCCESSFUL\u001b[0;39m in 2s"}
 {"level":"info","process":"build-app","replica":0,"message":"32 actionable tasks: 32 up-to-date"}
 {"level":"info","process":"build-app","replica":0,"message":"Watched directory hierarchies: [/Users/abueide/code/devbox-plugins/examples/android]"}
+{"level":"info","process":"build-app","replica":0,"message":"Build cache (/Users/abueide/.gradle/caches/build-cache-1) removing files not accessed on or after Mon Feb 02 13:18:16 CST 2026."}
+{"level":"info","process":"build-app","replica":0,"message":"Build cache (/Users/abueide/.gradle/caches/build-cache-1) cleanup deleted 0 files/directories."}
+{"level":"info","process":"build-app","replica":0,"message":"Build cache (/Users/abueide/.gradle/caches/build-cache-1) cleaned up in 0.019 secs."}
+{"level":"info","process":"build-app","replica":0,"message":"VCS Checkout Cache (/Users/abueide/code/devbox-plugins/examples/android/.gradle/vcs-1) removing files not accessed on or after Mon Feb 02 13:18:16 CST 2026."}
+{"level":"info","process":"build-app","replica":0,"message":"VCS Checkout Cache (/Users/abueide/code/devbox-plugins/examples/android/.gradle/vcs-1) cleanup deleted 0 files/directories."}
+{"level":"info","process":"build-app","replica":0,"message":"VCS Checkout Cache (/Users/abueide/code/devbox-plugins/examples/android/.gradle/vcs-1) cleaned up in 0.0 secs."}
+{"level":"info","process":"build-app","replica":0,"message":"dependencies-accessors (/Users/abueide/.gradle/caches/8.14.4/dependencies-accessors) removing files not accessed on or after Mon Feb 02 13:18:16 CST 2026."}
+{"level":"info","process":"build-app","replica":0,"message":"dependencies-accessors (/Users/abueide/.gradle/caches/8.14.4/dependencies-accessors) cleanup deleted 0 files/directories."}
+{"level":"info","process":"build-app","replica":0,"message":"dependencies-accessors (/Users/abueide/.gradle/caches/8.14.4/dependencies-accessors) cleaned up in 0.001 secs."}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
 {"level":"info","process":"build-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% WAITING\u001b[m\u001b[26D\u001b[1B> IDLE\u001b[6D\u001b[1B\u001b[2A\u001b[2K\u001b[1B\u001b[2K\u001b[1A✓ Build complete"}
+{"level":"info","process":"build-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% WAITING\u001b[m\u001b[26D\u001b[1B\u001b[1m> :app:dexBuilderDebug\u001b[m\u001b[22D\u001b[1B\u001b[2A\u001b[2K\u001b[1B\u001b[2K\u001b[1A✓ Build complete"}
 {"level":"info","process":"sync-avds","replica":0,"message":"  ✓ Matched: medium_phone_api36 (API 36, google_apis, arm64-v8a)"}
 {"level":"info","process":"sync-avds","replica":0,"message":"  ✓ Matched: pixel_api21 (API 21, google_apis, arm64-v8a)"}
 {"level":"info","process":"sync-avds","replica":0,"message":"================================================"}
@@ -374,8 +382,10 @@
 {"level":"info","process":"deploy-app","replica":0,"message":"Actual: DefaultDaemonContext[uid=25c194c2-6adf-456a-ba7a-d28f46cb7009,javaHome=/nix/store/hlm8a8cnp4hm8xkg0a2yy4kv7cq44jii-zulu-ca-jdk-17.0.12/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home,javaVersion=17,javaVendor=Azul Systems, Inc.,daemonRegistryDir=/Users/abueide/.gradle/daemon,pid=62313,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-Xmx2g,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]"}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Looking for a different daemon..."}
-{"level":"info","process":"deploy-app","replica":0,"message":"The client will now receive all logging from the daemon (pid: 44971). The daemon log file: /Users/abueide/.gradle/daemon/8.14.4/daemon-44971.out.log"}
-{"level":"info","process":"deploy-app","replica":0,"message":"Starting 32nd build in daemon [uptime: 2 hrs 19 mins 41.574 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 2 GiB, non-heap usage: 19% of 512 MiB]"}
+{"level":"info","process":"deploy-app","replica":0}
+{"level":"info","process":"deploy-app","replica":0}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1B\u001b[1m> Connecting to Daemon\u001b[m\u001b[22D\u001b[1B\u001b[2AThe client will now receive all logging from the daemon (pid: 44971). The daemon log file: /Users/abueide/.gradle/daemon/8.14.4/daemon-44971.out.log"}
+{"level":"info","process":"deploy-app","replica":0,"message":"Starting 34th build in daemon [uptime: 4 hrs 53 mins 17.017 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 2 GiB, non-heap usage: 20% of 512 MiB]\u001b[0K"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Using 12 worker leases."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Now considering [/Users/abueide/code/devbox-plugins/examples/android] as hierarchies to watch"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Watching the file system is configured to be enabled if available"}
@@ -386,8 +396,8 @@
 {"level":"info","process":"deploy-app","replica":0,"message":"Projects loaded. Root project using build file '/Users/abueide/code/devbox-plugins/examples/android/build.gradle.kts'."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Included projects: [root project 'android-example', project ':app']"}
 {"level":"info","process":"deploy-app","replica":0}
-{"level":"info","process":"deploy-app","replica":0}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [58ms]\u001b[m\u001b[37D\u001b[1B\u001b[1m> root project > Resolve dependencies of classpath\u001b[m\u001b[50D\u001b[1B\u001b[2A\u001b[0K"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% CONFIGURING [83ms]\u001b[m\u001b[37D\u001b[1B\u001b[1m> root project > Resolve files of configuration 'classpath'\u001b[m\u001b[59D\u001b[1B\u001b[2A\u001b[0K"}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Configure project :\u001b[m\u001b[0K"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Evaluating root project 'android-example' using build file '/Users/abueide/code/devbox-plugins/examples/android/build.gradle.kts'."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Resolved plugin [id: 'com.android.application', version: '8.9.0', apply: false]"}
@@ -399,10 +409,8 @@
 {"level":"info","process":"deploy-app","replica":0,"message":"All projects evaluated."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Task name matched 'assembleDebug'"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Selected primary task 'assembleDebug' from project :"}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m=============\u001b[0;39;1m> 100% CONFIGURING [161ms]\u001b[m\u001b[40D\u001b[1B> IDLE\u001b[6D\u001b[1B\u001b[2AWARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 36\u001b[0K"}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
+{"level":"info","process":"deploy-app","replica":0,"message":"WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 36"}
+{"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"This Android Gradle plugin (8.9.0) was tested up to compileSdk = 35."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"You are strongly encouraged to update your project to use a newer"}
@@ -435,252 +443,254 @@
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugNativeDebugMetadata\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugNativeDebugMetadata' as it has no source files and no previous output files."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:javaPreCompileDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:javaPreCompileDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:javaPreCompileDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:javaPreCompileDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:javaPreCompileDebug' is 501b9f99096c5205ace7da3208599495"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:javaPreCompileDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:checkDebugAarMetadata (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:checkDebugAarMetadata (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:checkDebugAarMetadata (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:checkDebugAarMetadata (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:checkDebugAarMetadata\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:checkDebugAarMetadata' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:checkDebugAarMetadata' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:generateDebugResValues (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:generateDebugResValues (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:generateDebugResValues (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:generateDebugResValues (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:generateDebugResValues\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:generateDebugResValues' is 7586076d5bf3457906f7985489e3aee8"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:generateDebugResValues' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mapDebugSourceSetPaths (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mapDebugSourceSetPaths (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mapDebugSourceSetPaths (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mapDebugSourceSetPaths (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mapDebugSourceSetPaths\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:mapDebugSourceSetPaths' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mapDebugSourceSetPaths' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:generateDebugResources (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:generateDebugResources (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:generateDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:generateDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:generateDebugResources\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:generateDebugResources' is 90135ddd574e2ac200e21f7cc4daeadd"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:generateDebugResources' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugResources (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugResources (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugResources\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:mergeDebugResources' is 20e743ddeaa58b9bdcffc54851e69fa4"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugResources' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:packageDebugResources (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:packageDebugResources (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:packageDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:packageDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:packageDebugResources\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:packageDebugResources' is 44e94a2c8b73eedae4bcbd23ff769160"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:packageDebugResources' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:parseDebugLocalResources (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:parseDebugLocalResources (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:parseDebugLocalResources (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:parseDebugLocalResources (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:parseDebugLocalResources\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:parseDebugLocalResources' is 5a656d9c62bb72a65560158b18c20ab7"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:parseDebugLocalResources' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:createDebugCompatibleScreenManifests (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:createDebugCompatibleScreenManifests (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:createDebugCompatibleScreenManifests (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:createDebugCompatibleScreenManifests (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:createDebugCompatibleScreenManifests\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:createDebugCompatibleScreenManifests' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:createDebugCompatibleScreenManifests' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:extractDeepLinksDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:extractDeepLinksDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:extractDeepLinksDebug (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:extractDeepLinksDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:extractDeepLinksDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:extractDeepLinksDebug' is 489ff73e2f7141e535002b3eb0ff3600"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:extractDeepLinksDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugMainManifest (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugMainManifest (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugMainManifest (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugMainManifest (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:processDebugMainManifest\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:processDebugMainManifest' is f0aa2d5109a475345712e79d1b777e86"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:processDebugMainManifest' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugManifest (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugManifest (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugManifest (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugManifest (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:processDebugManifest\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:processDebugManifest' is 898d1dfe7ec3a0e85085526cc9161241"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:processDebugManifest' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugManifestForPackage (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugManifestForPackage (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugManifestForPackage (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugManifestForPackage (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:processDebugManifestForPackage\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Custom actions are attached to task ':app:processDebugManifestForPackage'."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:processDebugManifestForPackage' is f8480c6cd128e84df9d4f600874ba470"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:processDebugManifestForPackage' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugResources (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugResources (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugResources (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:processDebugResources\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:processDebugResources' is e1023041f0a0f99dc940479ba379073d"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:processDebugResources' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:compileDebugJavaWithJavac (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:compileDebugJavaWithJavac (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:compileDebugJavaWithJavac\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:compileDebugJavaWithJavac (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:compileDebugJavaWithJavac (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;32;1m=====\u001b[0;39;1m--------> 41% EXECUTING [180ms]\u001b[m\u001b[37D\u001b[1B\u001b[1m> :app:compileDebugJavaWithJavac > Resolve files of configuration ':app:android\u001b[m\u001b[79D\u001b[1B\u001b[2A\u001b[0K"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:compileDebugJavaWithJavac\u001b[m\u001b[33m UP-TO-DATE\u001b[39m\u001b[0K"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Custom actions are attached to task ':app:compileDebugJavaWithJavac'."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:compileDebugJavaWithJavac' is d3127a4b7d89e2b69b1ef396509502b7"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:compileDebugJavaWithJavac' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugShaders (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugShaders (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugShaders (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugShaders (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugShaders\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:mergeDebugShaders' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Simple merging task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugShaders' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:compileDebugShaders (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:compileDebugShaders (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:compileDebugShaders (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:compileDebugShaders (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:compileDebugShaders\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:compileDebugShaders' as it has no source files and no previous output files."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:generateDebugAssets (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:generateDebugAssets (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:generateDebugAssets (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:generateDebugAssets (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:generateDebugAssets\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:generateDebugAssets' as it has no actions."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugAssets (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugAssets (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugAssets (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugAssets (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugAssets\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:mergeDebugAssets' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Simple merging task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugAssets' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:compressDebugAssets (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:compressDebugAssets (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:compressDebugAssets (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:compressDebugAssets (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:compressDebugAssets\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:compressDebugAssets' is 5053769c6b17204526d5f6016e11dc17"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:compressDebugAssets' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:desugarDebugFileDependencies (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:desugarDebugFileDependencies (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:desugarDebugFileDependencies (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:desugarDebugFileDependencies (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:desugarDebugFileDependencies\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:desugarDebugFileDependencies' is ae911851124a563c11342d4f1c864c96"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:desugarDebugFileDependencies' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:dexBuilderDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:dexBuilderDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:dexBuilderDebug (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:dexBuilderDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:dexBuilderDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:dexBuilderDebug' is 2302a8e316e2346550b0c263a5cf3dcd"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:dexBuilderDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugGlobalSynthetics (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugGlobalSynthetics (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugGlobalSynthetics (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugGlobalSynthetics (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugGlobalSynthetics\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:mergeDebugGlobalSynthetics' is 36d316d74a3860ca28b797a0b418368b"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugGlobalSynthetics' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugJavaRes (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugJavaRes (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:processDebugJavaRes (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:processDebugJavaRes (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:processDebugJavaRes\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"file or directory '/Users/abueide/code/devbox-plugins/examples/android/app/src/main/resources', not found"}
 {"level":"info","process":"deploy-app","replica":0,"message":"file or directory '/Users/abueide/code/devbox-plugins/examples/android/app/src/debug/resources', not found"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:processDebugJavaRes' as it has no source files and no previous output files."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugJavaResource (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugJavaResource (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugJavaResource (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugJavaResource (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugJavaResource\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:mergeDebugJavaResource' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugJavaResource' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:checkDebugDuplicateClasses (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:checkDebugDuplicateClasses (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:checkDebugDuplicateClasses (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:checkDebugDuplicateClasses (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:checkDebugDuplicateClasses\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:checkDebugDuplicateClasses' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:checkDebugDuplicateClasses' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeExtDexDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeExtDexDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeExtDexDebug (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeExtDexDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeExtDexDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:mergeExtDexDebug' is fa79999c1f1ccc8ecd118d78e2e53b41"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeExtDexDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeLibDexDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeLibDexDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeLibDexDebug (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeLibDexDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeLibDexDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:mergeLibDexDebug' is 3910f89c3e8926f693d7698d51664cc8"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeLibDexDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeProjectDexDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeProjectDexDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeProjectDexDebug (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeProjectDexDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeProjectDexDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Build cache key for task ':app:mergeProjectDexDebug' is 564f2817d75296ec26c65b0e9ca6c3a9"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeProjectDexDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugJniLibFolders (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugJniLibFolders (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugJniLibFolders (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugJniLibFolders (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugJniLibFolders\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:mergeDebugJniLibFolders' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Simple merging task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugJniLibFolders' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugNativeLibs (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugNativeLibs (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:mergeDebugNativeLibs (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:mergeDebugNativeLibs (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:mergeDebugNativeLibs\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:mergeDebugNativeLibs' as it has no source files and no previous output files."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:stripDebugDebugSymbols (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:stripDebugDebugSymbols (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:stripDebugDebugSymbols (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:stripDebugDebugSymbols (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:stripDebugDebugSymbols\u001b[m\u001b[33m NO-SOURCE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:stripDebugDebugSymbols' as it has no source files and no previous output files."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:validateSigningDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:validateSigningDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:validateSigningDebug (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:validateSigningDebug (Thread[Execution worker Thread 3,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:validateSigningDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:validateSigningDebug' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:validateSigningDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:writeDebugAppMetadata (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:writeDebugAppMetadata (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:writeDebugAppMetadata (Thread[Execution worker Thread 3,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:writeDebugAppMetadata (Thread[Execution worker Thread 4,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:writeDebugAppMetadata\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:writeDebugAppMetadata' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:writeDebugAppMetadata' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:writeDebugSigningConfigVersions (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:writeDebugSigningConfigVersions (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:writeDebugSigningConfigVersions (Thread[Execution worker Thread 4,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:writeDebugSigningConfigVersions (Thread[Execution worker Thread 4,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:writeDebugSigningConfigVersions\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:writeDebugSigningConfigVersions' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:writeDebugSigningConfigVersions' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:packageDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:packageDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:packageDebug (Thread[Execution worker Thread 4,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:packageDebug (Thread[Execution worker Thread 4,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:packageDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Custom actions are attached to task ':app:packageDebug'."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:packageDebug' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:packageDebug' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:createDebugApkListingFileRedirect (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:createDebugApkListingFileRedirect (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 4,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 4,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:createDebugApkListingFileRedirect\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Caching disabled for task ':app:createDebugApkListingFileRedirect' because:"}
 {"level":"info","process":"deploy-app","replica":0,"message":"  Caching has been disabled for the task"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:createDebugApkListingFileRedirect' as it is up-to-date."}
-{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:assembleDebug (Thread[Execution worker,5,main]) started."}
-{"level":"info","process":"deploy-app","replica":0,"message":":app:assembleDebug (Thread[Execution worker,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":"Resolve mutations for :app:assembleDebug (Thread[Execution worker Thread 4,5,main]) started."}
+{"level":"info","process":"deploy-app","replica":0,"message":":app:assembleDebug (Thread[Execution worker Thread 4,5,main]) started."}
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[1m> Task :app:assembleDebug\u001b[m\u001b[33m UP-TO-DATE\u001b[39m"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Skipping task ':app:assembleDebug' as it has no actions."}
 {"level":"info","process":"deploy-app","replica":0}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[32;1mBUILD SUCCESSFUL\u001b[0;39m in 778ms"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[32;1mBUILD SUCCESSFUL\u001b[0;39m in 737ms"}
 {"level":"info","process":"deploy-app","replica":0,"message":"32 actionable tasks: 32 up-to-date"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Watched directory hierarchies: [/Users/abueide/code/devbox-plugins/examples/android]"}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
 {"level":"info","process":"deploy-app","replica":0,"message":"\u001b[0K"}
-{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% WAITING\u001b[m\u001b[26D\u001b[1B> IDLE\u001b[6D\u001b[1B\u001b[2A\u001b[2K\u001b[1B\u001b[2K\u001b[1A\u001b[1m<\u001b[0;1m-------------> 0% WAITING\u001b[m\u001b[26D\u001b[1B> IDLE\u001b[6D\u001b[1B"}
+{"level":"info","process":"deploy-app","replica":0,"message":"\u001b[2A\u001b[1m<\u001b[0;1m-------------> 0% WAITING\u001b[m\u001b[26D\u001b[1B\u001b[1m> :app:compileDebugJavaWithJavac > Resolve files of configuration ':app:android\u001b[m\u001b[79D\u001b[1B\u001b[2A\u001b[2K\u001b[1B\u001b[2K\u001b[1A"}
 {"level":"info","process":"deploy-app","replica":0,"message":"Locating APK..."}
 {"level":"info","process":"deploy-app","replica":0,"message":"Found APK: app-debug.apk"}
 {"level":"info","process":"deploy-app","replica":0}
@@ -690,4 +700,8 @@
 {"level":"info","process":"deploy-app","replica":0}
 {"level":"info","process":"deploy-app","replica":0,"message":"Deploying to: emulator-5554"}
 {"level":"info","process":"deploy-app","replica":0}
-{"level":"info","process":"deplo
+{"level":"info","process":"deploy-app","replica":0,"message":"Installing APK: app-debug.apk"}
+{"level":"info","process":"deploy-app","replica":0,"message":"✓ APK installed"}
+{"level":"info","process":"deploy-app","replica":0}
+{"level":"info","process":"deploy-app","replica":0,"message":"Launching app: com.example.devbox"}
+{"level":"info","process":"deploy-app","replica":0,"message

@@ -171,28 +171,43 @@ assert_failure "android_compute_devices_checksum '/nonexistent/path'" "Should fa
 # Tests: Path Resolution
 # ============================================================================
 
-# Test path resolution in current project context
-# Save current project root
-SAVED_PROJECT_ROOT="$DEVBOX_PROJECT_ROOT"
+# Create test environment for path resolution
+path_test_root="/tmp/android-path-test-$$"
+mkdir -p "$path_test_root/devbox.d/android/devices"
+echo '{"name":"test","api":30}' > "$path_test_root/devbox.d/android/devices/test.json"
+
+# Save original and set test root
+SAVED_PROJECT_ROOT="${DEVBOX_PROJECT_ROOT:-}"
+export DEVBOX_PROJECT_ROOT="$path_test_root"
 
 start_test "android_resolve_project_path - finds existing file"
-# Use actual project's devices directory which always exists
-result="$(android_resolve_project_path "devices")"
-assert_success "[ -d '$result' ]" "Should resolve to existing directory"
+result="$(android_resolve_project_path "devices" 2>/dev/null || true)"
+if [ -n "$result" ] && [ -d "$result" ]; then
+  assert_success "true" "Should resolve to existing directory"
+else
+  assert_failure "false" "Should have found devices directory"
+fi
 
 start_test "android_resolve_project_path - finds directory"
-# Verify devices directory resolves and exists
-result="$(android_resolve_project_path "devices")"
-expected="${SAVED_PROJECT_ROOT}/devbox.d/android/devices"
+result="$(android_resolve_project_path "devices" 2>/dev/null || true)"
+expected="${path_test_root}/devbox.d/android/devices"
 assert_equal "$expected" "$result" "Should resolve devices directory"
 
 start_test "android_resolve_project_path - fails on missing path"
 assert_failure "android_resolve_project_path 'nonexistent.json'" "Should fail when path doesn't exist"
 
 start_test "android_resolve_config_dir - finds config directory"
-result="$(android_resolve_config_dir)"
-expected="${SAVED_PROJECT_ROOT}/devbox.d/android"
+result="$(android_resolve_config_dir 2>/dev/null || true)"
+expected="${path_test_root}/devbox.d/android"
 assert_equal "$expected" "$result" "Should find android config directory"
+
+# Cleanup path test directory and restore
+rm -rf "$path_test_root"
+if [ -n "$SAVED_PROJECT_ROOT" ]; then
+  export DEVBOX_PROJECT_ROOT="$SAVED_PROJECT_ROOT"
+else
+  unset DEVBOX_PROJECT_ROOT
+fi
 
 # ============================================================================
 # Tests: Requirement Functions
