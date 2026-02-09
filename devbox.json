@@ -109,8 +109,12 @@
       "test:plugin:ios:lib": [
         "sh plugins/tests/ios/test-lib.sh"
       ],
+      "test:plugin:ios:devices": [
+        "sh plugins/tests/ios/test-devices.sh"
+      ],
       "test:plugin:ios": [
-        "devbox run test:plugin:ios:lib"
+        "devbox run test:plugin:ios:lib",
+        "devbox run test:plugin:ios:devices"
       ],
       "test:plugin:devbox-mcp": [
         "echo 'Running devbox-mcp plugin tests...'",

@@ -25,9 +25,9 @@ fi
 # ============================================================================
 
 # shellcheck disable=SC1090
-. "$script_dir/lib.sh"      # Utility functions
+. "$script_dir/lib/lib.sh"      # Utility functions
 # shellcheck disable=SC1090
-. "$script_dir/core.sh"     # Platform setup (ios_setup_environment)
+. "$script_dir/platform/core.sh"     # Platform setup (ios_setup_environment)
 
 # ============================================================================
 # Environment Setup
@@ -47,9 +47,9 @@ fi
 # ============================================================================
 
 # Run non-blocking validation
-if [ -f "${script_dir}/validate.sh" ]; then
+if [ -f "${script_dir}/domain/validate.sh" ]; then
   # shellcheck disable=SC1090
-  . "${script_dir}/validate.sh"
+  . "${script_dir}/domain/validate.sh"
   ios_validate_xcode || true
 fi
 

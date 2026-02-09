@@ -1,10 +1,36 @@
 # TODO
 
-- [ ] Create LICENSE file (MIT)
+## Priority 1: iOS Refactor & Core Code Changes
 
-- [ ] Create CHANGELOG.md for release tracking
-  - [ ] Add v1.0.0 release notes
-  - [ ] Document breaking changes
+- [ ] Refactor iOS scripts/ and tests/ to follow Android layered architecture patterns
+  - [ ] Implement script layering (lib/ → platform/ → domain/ → user/ → init/)
+  - [ ] Align test organization and naming conventions
+  - [ ] Standardize shell shebangs to POSIX sh
+
+- [ ] Move Android unit tests to plugins/android/tests/
+  - [ ] Create or move test-lib.sh
+  - [ ] Create or move test-devices.sh
+  - [ ] Update plugin.json references
+
+- [ ] Create iOS device management tests in plugins/ios/tests/
+  - [ ] Add test-devices.sh
+
+## Priority 2: Minor Code Changes & Fixes
+
+- [ ] Fix devbox-mcp README npm package name references
+
+- [ ] Add E2E test for devbox-mcp plugin to CI workflows
+
+## Priority 3: Cleanup
+
+- [ ] Deep cleanup of all git-indexed files
+  - [ ] Remove dead code and unused files
+  - [ ] Standardize formatting and style across all scripts
+  - [ ] Fix naming inconsistencies
+  - [ ] Review error messages for clarity and actionability
+  - [ ] Update .gitignore (.env, *.log, .swp, .swo)
+
+## Priority 4: Documentation
 
 - [ ] Expand iOS REFERENCE.md documentation
   - [ ] Match Android REFERENCE.md comprehensiveness (~80 lines)
@@ -20,32 +46,20 @@
   - [ ] Document all environment variables
   - [ ] Document all configuration options
 
-- [ ] Fix devbox-mcp README npm package name references
-
-- [ ] Refactor iOS scripts/ and tests/ to follow Android layered architecture patterns
-  - [ ] Implement script layering (lib/ → platform/ → domain/ → user/ → init/)
-  - [ ] Align test organization and naming conventions
-  - [ ] Standardize shell shebangs to POSIX sh
-
 - [ ] Create example project README files
   - [ ] examples/android/README.md with quick start
   - [ ] examples/ios/README.md with quick start
   - [ ] examples/react-native/README.md (if missing)
 
-- [ ] Move Android unit tests to plugins/android/tests/
-  - [ ] Create or move test-lib.sh
-  - [ ] Create or move test-devices.sh
-  - [ ] Update plugin.json references
+- [ ] Document MCP server usage with Claude Code examples
 
-- [ ] Create iOS device management tests in plugins/ios/tests/
-  - [ ] Add test-devices.sh
+## Priority 5: Repository Setup & Finishing Touches
 
-- [ ] Deep cleanup of all git-indexed files
-  - [ ] Remove dead code and unused files
-  - [ ] Standardize formatting and style across all scripts
-  - [ ] Fix naming inconsistencies
-  - [ ] Review error messages for clarity and actionability
-  - [ ] Update .gitignore (.env, *.log, .swp, .swo)
+- [ ] Create LICENSE file (MIT)
+
+- [ ] Create CHANGELOG.md for release tracking
+  - [ ] Add v1.0.0 release notes
+  - [ ] Document breaking changes
 
 - [ ] Create standard repository files
   - [ ] CONTRIBUTING.md
@@ -77,11 +91,7 @@
   - [ ] Configure treefmt + prettier/shfmt/swiftformat/ktlint/markdownlint
   - [ ] Set up pre-commit hooks for automatic formatting
 
-- [ ] Document MCP server usage with Claude Code examples
-
 - [ ] Add npm publish workflow for devbox-mcp plugin
-
-- [ ] Add E2E test for devbox-mcp plugin to CI workflows
 
 - [ ] Create v1.0.0 release automation
   - [ ] .github/workflows/release.yml for semantic versioning

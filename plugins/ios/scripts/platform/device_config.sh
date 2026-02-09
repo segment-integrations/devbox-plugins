@@ -17,11 +17,11 @@ IOS_DEVICE_CONFIG_LOADED_PID="$$"
 
 # Source dependencies
 if [ -n "${IOS_SCRIPTS_DIR:-}" ]; then
-  if [ -f "${IOS_SCRIPTS_DIR}/lib.sh" ]; then
-    . "${IOS_SCRIPTS_DIR}/lib.sh"
+  if [ -f "${IOS_SCRIPTS_DIR}/lib/lib.sh" ]; then
+    . "${IOS_SCRIPTS_DIR}/lib/lib.sh"
   fi
-  if [ -f "${IOS_SCRIPTS_DIR}/core.sh" ]; then
-    . "${IOS_SCRIPTS_DIR}/core.sh"
+  if [ -f "${IOS_SCRIPTS_DIR}/platform/core.sh" ]; then
+    . "${IOS_SCRIPTS_DIR}/platform/core.sh"
   fi
 fi
 

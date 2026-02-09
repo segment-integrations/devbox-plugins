@@ -19,7 +19,7 @@ if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
 fi
 
 # shellcheck disable=SC1090
-. "$script_dir/lib.sh"
+. "$script_dir/lib/lib.sh"
 
 ios_validate_xcode() {
   # Only validate on macOS

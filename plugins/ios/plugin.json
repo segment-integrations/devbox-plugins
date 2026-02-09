@@ -34,25 +34,25 @@
   "create_files": {
     "{{ .Virtenv }}/process-compose.yaml": "config/process-compose.yaml",
     "{{ .Virtenv }}/test-suite.yaml": "config/test-suite.yaml",
-    "{{ .Virtenv }}/scripts/lib.sh": "scripts/lib.sh",
-    "{{ .Virtenv }}/scripts/core.sh": "scripts/core.sh",
-    "{{ .Virtenv }}/scripts/device_config.sh": "scripts/device_config.sh",
-    "{{ .Virtenv }}/scripts/device_manager.sh": "scripts/device_manager.sh",
-    "{{ .Virtenv }}/scripts/env.sh": "scripts/env.sh",
-    "{{ .Virtenv }}/scripts/validate.sh": "scripts/validate.sh",
-    "{{ .Virtenv }}/scripts/simulator.sh": "scripts/simulator.sh",
-    "{{ .Virtenv }}/scripts/deploy.sh": "scripts/deploy.sh",
-    "{{ .Virtenv }}/scripts/config.sh": "scripts/config.sh",
-    "{{ .Virtenv }}/scripts/ios.sh": "scripts/ios.sh",
-    "{{ .Virtenv }}/scripts/devices.sh": "scripts/devices.sh",
-    "{{ .Virtenv }}/scripts/ios-init.sh": "scripts/ios-init.sh",
+    "{{ .Virtenv }}/scripts/lib/lib.sh": "scripts/lib/lib.sh",
+    "{{ .Virtenv }}/scripts/platform/core.sh": "scripts/platform/core.sh",
+    "{{ .Virtenv }}/scripts/platform/device_config.sh": "scripts/platform/device_config.sh",
+    "{{ .Virtenv }}/scripts/domain/device_manager.sh": "scripts/domain/device_manager.sh",
+    "{{ .Virtenv }}/scripts/domain/validate.sh": "scripts/domain/validate.sh",
+    "{{ .Virtenv }}/scripts/domain/simulator.sh": "scripts/domain/simulator.sh",
+    "{{ .Virtenv }}/scripts/domain/deploy.sh": "scripts/domain/deploy.sh",
+    "{{ .Virtenv }}/scripts/user/config.sh": "scripts/user/config.sh",
+    "{{ .Virtenv }}/scripts/user/ios.sh": "scripts/user/ios.sh",
+    "{{ .Virtenv }}/scripts/user/devices.sh": "scripts/user/devices.sh",
+    "{{ .Virtenv }}/scripts/init/init-hook.sh": "scripts/init/init-hook.sh",
+    "{{ .Virtenv }}/scripts/init/setup.sh": "scripts/init/setup.sh",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
     "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json"
   },
   "shell": {
     "init_hook": [
-      "bash {{ .Virtenv }}/scripts/ios-init.sh 2>/dev/null || true",
-      ". {{ .Virtenv }}/scripts/env.sh"
+      "bash {{ .Virtenv }}/scripts/init/init-hook.sh 2>/dev/null || true",
+      ". {{ .Virtenv }}/scripts/init/setup.sh"
     ],
     "scripts": {
       "ios:devices:eval": [

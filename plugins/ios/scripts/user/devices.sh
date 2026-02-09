@@ -9,13 +9,13 @@ if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
 fi
 
 # shellcheck disable=SC1090
-. "$script_dir/lib.sh"
+. "$script_dir/lib/lib.sh"
 # shellcheck disable=SC1090
-. "$script_dir/core.sh"
+. "$script_dir/platform/core.sh"
 # shellcheck disable=SC1090
-. "$script_dir/device_config.sh"
+. "$script_dir/platform/device_config.sh"
 # shellcheck disable=SC1090
-. "$script_dir/device_manager.sh"
+. "$script_dir/domain/device_manager.sh"
 
 usage() {
   cat >&2 <<'USAGE'

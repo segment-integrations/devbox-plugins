@@ -7,12 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 IOS_SCRIPTS_DIR="${SCRIPT_DIR}/../../ios/scripts"
 export IOS_SCRIPTS_DIR
 
-# Source lib.sh
-. "${IOS_SCRIPTS_DIR}/lib.sh"
+# Source lib.sh (new location in lib/)
+. "${IOS_SCRIPTS_DIR}/lib/lib.sh"
 
 # Test 1: Load-once guard
 echo "  Test 1: Load-once guard"
-. "${IOS_SCRIPTS_DIR}/lib.sh"
+. "${IOS_SCRIPTS_DIR}/lib/lib.sh"
 if [ "${IOS_LIB_LOADED}" != "1" ]; then
   echo "    FAIL: Load-once guard failed"
   exit 1
@@ -21,7 +21,7 @@ echo "    PASS"
 
 # Test 2: Execution protection
 echo "  Test 2: Execution protection"
-if sh "${IOS_SCRIPTS_DIR}/lib.sh" 2>/dev/null; then
+if sh "${IOS_SCRIPTS_DIR}/lib/lib.sh" 2>/dev/null; then
   echo "    FAIL: Execution protection failed"
   exit 1
 fi

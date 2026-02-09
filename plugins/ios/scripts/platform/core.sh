@@ -16,8 +16,8 @@ IOS_CORE_LOADED=1
 IOS_CORE_LOADED_PID="$$"
 
 # Source dependencies
-if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -f "${IOS_SCRIPTS_DIR}/lib.sh" ]; then
-  . "${IOS_SCRIPTS_DIR}/lib.sh"
+if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -f "${IOS_SCRIPTS_DIR}/lib/lib.sh" ]; then
+  . "${IOS_SCRIPTS_DIR}/lib/lib.sh"
 fi
 
 # ============================================================================

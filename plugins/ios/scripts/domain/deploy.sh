@@ -17,14 +17,14 @@ IOS_DEPLOY_LOADED_PID="$$"
 
 # Source dependencies
 if [ -n "${IOS_SCRIPTS_DIR:-}" ]; then
-  if [ -f "${IOS_SCRIPTS_DIR}/lib.sh" ]; then
-    . "${IOS_SCRIPTS_DIR}/lib.sh"
+  if [ -f "${IOS_SCRIPTS_DIR}/lib/lib.sh" ]; then
+    . "${IOS_SCRIPTS_DIR}/lib/lib.sh"
   fi
-  if [ -f "${IOS_SCRIPTS_DIR}/core.sh" ]; then
-    . "${IOS_SCRIPTS_DIR}/core.sh"
+  if [ -f "${IOS_SCRIPTS_DIR}/platform/core.sh" ]; then
+    . "${IOS_SCRIPTS_DIR}/platform/core.sh"
   fi
-  if [ -f "${IOS_SCRIPTS_DIR}/simulator.sh" ]; then
-    . "${IOS_SCRIPTS_DIR}/simulator.sh"
+  if [ -f "${IOS_SCRIPTS_DIR}/domain/simulator.sh" ]; then
+    . "${IOS_SCRIPTS_DIR}/domain/simulator.sh"
   fi
 fi
 

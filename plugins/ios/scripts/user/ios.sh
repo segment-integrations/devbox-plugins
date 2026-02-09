@@ -33,13 +33,13 @@ fi
 
 case "$command_name" in
   devices)
-    exec "${script_dir}/devices.sh" "$@"
+    exec "${script_dir}/user/devices.sh" "$@"
     ;;
   config)
     sub="${1-}"
     shift || true
     # shellcheck disable=SC1090
-    . "${script_dir}/config.sh"
+    . "${script_dir}/user/config.sh"
     case "$sub" in
       show)
         ios_config_show
@@ -56,13 +56,13 @@ case "$command_name" in
     esac
     ;;
   info)
-    # Source env.sh to get the ios_show_summary function
-    if [ -f "${script_dir}/env.sh" ]; then
+    # Source init/setup.sh to get the ios_show_summary function
+    if [ -f "${script_dir}/init/setup.sh" ]; then
       # shellcheck disable=SC1090
-      . "${script_dir}/env.sh"
+      . "${script_dir}/init/setup.sh"
       ios_show_summary
     else
-      echo "Error: env.sh not found" >&2
+      echo "Error: init/setup.sh not found" >&2
       exit 1
     fi
     ;;
