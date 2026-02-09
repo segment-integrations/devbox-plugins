@@ -15,7 +15,7 @@
         "shellcheck -S warning plugins/android/scripts/*.sh"
       ],
       "lint:ios": [
-        "shellcheck -S warning plugins/ios/scripts/*.sh"
+        "find plugins/ios/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
       ],
       "lint:rn": [
         "bash -c 'if ls plugins/react-native/scripts/*.sh 1>/dev/null 2>&1; then shellcheck -S warning plugins/react-native/scripts/*.sh; else echo \"No React Native shell scripts to lint\"; fi'"

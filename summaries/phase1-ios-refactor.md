@@ -195,41 +195,38 @@ Updated `init_hook` section:
 
 ## Overall Test Results
 
-### Unit Tests
+### Full iOS Test Suite ✅ 32/32 PASSING
 ```bash
-$ sh plugins/tests/ios/test-lib.sh
+$ devbox run test:ios
+
 Testing iOS lib.sh...
-  Test 1: Load-once guard - PASS
-  Test 2: Execution protection - PASS
-  Test 3: ios_sanitize_device_name - PASS
-  Test 4: ios_config_path - PASS
-  Test 5: ios_devices_dir - PASS
-  Test 6: ios_compute_devices_checksum - PASS
-  Test 7: ios_require_jq - PASS
-  Test 8: ios_require_tool - PASS
-All lib.sh tests passed!
+  8/8 tests PASS ✅
+
+iOS devices.sh Integration Tests...
+  15/15 tests PASS ✅
+
+iOS Device Management Integration Tests...
+  4/4 tests PASS ✅
+
+iOS Cache Integration Tests...
+  5/5 tests PASS ✅
+
+iOS Linting...
+  0 warnings/errors ✅
 ```
 
-**Result:** ✅ 8/8 tests passing
+**Total:** ✅ 32/32 tests passing (100%)
 
-### Manual Verification
-```bash
-# Device creation test
-$ test_root="/tmp/ios-test-debug-$$"
-$ mkdir -p "$test_root/devices" "$test_root/scripts/{lib,platform,domain,user}"
-$ # Copy layered scripts...
-$ IOS_CONFIG_DIR="$test_root" IOS_DEVICES_DIR="$test_root/devices" \
-  sh "$test_root/scripts/user/devices.sh" create test_iphone --runtime 17.5
-$ ls -la "$test_root/devices/"
--rw-r--r-- 1 abueide wheel 49 test_iphone.json
-$ cat "$test_root/devices/test_iphone.json"
-{
-  "name": "test_iphone",
-  "runtime": "17.5"
-}
-```
+### Test Fixes Applied
 
-**Result:** ✅ Device management working correctly
+Four issues found and fixed during test verification:
+
+1. **Integration Tests Script Paths** - Updated paths for layered structure
+2. **Arithmetic Expression Bug** - Fixed `((VAR++))` causing `set -e` exit
+3. **Unit Test chmod** - Added chmod for copied scripts
+4. **Lint Command** - Updated to recursively check subdirectories
+
+See `summaries/phase1-test-results.md` for complete test fix details.
 
 ---
 
@@ -279,12 +276,12 @@ $ cat "$test_root/devices/test_iphone.json"
 - `plugins/ios/SCRIPTS.md` (646 lines, obsolete flat structure documentation)
 
 **Total Changes:**
-- 17 files modified
-- 4 files created
-- 1 file removed
+- 21 files modified (17 refactor + 4 test fixes)
+- 5 files created (test-devices.sh, LAYERS.md, 3 summaries)
+- 1 file removed (SCRIPTS.md)
 - ~200 lines of import paths updated
 - +91 lines net documentation (+791 added, -700 removed)
-- 0 functional changes (refactor + documentation only)
+- 0 functional changes (refactor + documentation + test fixes only)
 
 ---
 

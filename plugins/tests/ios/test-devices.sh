@@ -36,6 +36,7 @@ cp "$script_dir/../../ios/scripts/platform/core.sh" "$test_root/scripts/platform
 cp "$script_dir/../../ios/scripts/platform/device_config.sh" "$test_root/scripts/platform/"
 cp "$script_dir/../../ios/scripts/domain/device_manager.sh" "$test_root/scripts/domain/"
 cp "$script_dir/../../ios/scripts/user/devices.sh" "$test_root/scripts/user/"
+chmod +x "$test_root/scripts/user/devices.sh"
 
 # Set environment variables
 export IOS_CONFIG_DIR="$test_root"
