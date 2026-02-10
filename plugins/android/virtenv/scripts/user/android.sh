@@ -19,12 +19,12 @@ usage() {
 Usage: android.sh <command> [args]
 
 Commands:
-  devices <command> [args]     Manage device definitions
-  info                         Display resolved SDK information
-  emulator start [device]      Start Android emulator
-  emulator stop                Stop running emulator
-  emulator reset               Reset all emulator AVDs
-  deploy [device]              Deploy and launch app on emulator
+  devices <command> [args]         Manage device definitions
+  info                             Display resolved SDK information
+  emulator start [device]          Start Android emulator
+  emulator stop                    Stop running emulator
+  emulator reset                   Reset all emulator AVDs
+  run [apk_path] [device]          Build, install, and launch app on emulator
 
 Examples:
   android.sh devices list
@@ -32,7 +32,10 @@ Examples:
   android.sh info
   android.sh emulator start max
   android.sh emulator stop
-  android.sh deploy max
+  android.sh run                             # Build, install, launch
+  android.sh run max                         # Same, but on 'max' device
+  android.sh run path/to/app.apk             # Install provided APK
+  android.sh run path/to/app.apk max         # Install APK on 'max' device
 
 Note: Configuration is managed via environment variables in devbox.json.
 USAGE
@@ -215,17 +218,31 @@ case "$command_name" in
     ;;
 
   # --------------------------------------------------------------------------
-  # deploy - Deploy and launch app on emulator
+  # run - Build, install, and launch app on emulator
+  # Usage: android.sh run [apk_path] [device]
   # --------------------------------------------------------------------------
-  deploy)
+  run)
+    # Parse arguments - first arg could be APK path or device name
+    apk_arg=""
+    device_name=""
+
+    if [ $# -gt 0 ]; then
+      # If first arg looks like a file path (contains / or ends with .apk), treat as APK
+      if printf '%s' "$1" | grep -q -e '/' -e '\.apk$'; then
+        apk_arg="$1"
+        shift
+      fi
+    fi
+
+    # Remaining arg is device name
     device_name="${1:-}"
 
     # Source layer 3 dependencies
     avd_script="${scripts_dir%/}/domain/avd.sh"
     emulator_script="${scripts_dir%/}/domain/emulator.sh"
-    deploy_script="${scripts_dir%/}/domain/deploy.sh"
+    run_script="${scripts_dir%/}/domain/run.sh"
 
-    for script in "$avd_script" "$emulator_script" "$deploy_script"; do
+    for script in "$avd_script" "$emulator_script" "$run_script"; do
       if [ ! -f "$script" ]; then
         echo "ERROR: Required script not found: $script" >&2
         exit 1
@@ -238,17 +255,17 @@ case "$command_name" in
     # shellcheck source=/dev/null
     . "$emulator_script"
     # shellcheck source=/dev/null
-    . "$deploy_script"
+    . "$run_script"
 
     # Verify functions are available
-    for func in android_setup_avds android_start_emulator android_deploy_app; do
+    for func in android_setup_avds android_start_emulator android_run_app; do
       if ! command -v "$func" >/dev/null 2>&1; then
         echo "ERROR: $func function not available" >&2
         exit 1
       fi
     done
 
-    # Layer 4 orchestration: setup → start → deploy
+    # Layer 4 orchestration: setup → start → run
     echo "Setting up Android Virtual Devices..."
     android_setup_avds
 
@@ -257,7 +274,12 @@ case "$command_name" in
     android_start_emulator "$device_name"
 
     echo ""
-    android_deploy_app "$device_name"
+    # Pass both APK (if provided) and device name to run
+    if [ -n "$apk_arg" ]; then
+      android_run_app "$apk_arg" "$device_name"
+    else
+      android_run_app "$device_name"
+    fi
     ;;
 
   # --------------------------------------------------------------------------

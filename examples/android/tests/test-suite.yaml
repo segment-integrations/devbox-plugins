@@ -2,7 +2,7 @@ version: "0.5"
 
 environment:
   - "TEST_TIMEOUT=300"
-  - "BOOT_TIMEOUT=180"
+  - "BOOT_TIMEOUT=90"
   - "ANDROID_DEBUG_SETUP=${ANDROID_DEBUG_SETUP:-}"
 
 log_location: "reports/android-e2e-logs"
@@ -11,7 +11,13 @@ log_level: info
 processes:
   # Phase 1: Build - runs first (no dependency)
   build-app:
-    command: "echo '[BUILD-APP] Starting build process (PID=$$)...' && echo '📦 Building Android app...' && gradle assembleDebug --info && echo '✓ Build complete'"
+    command: |
+      echo '[BUILD-APP] Starting build process (PID=$$)...'
+      # Source Android environment to set ANDROID_SDK_ROOT
+      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      echo '📦 Building Android app...'
+      gradle assembleDebug --info
+      echo '✓ Build complete'
     availability:
       restart: "no"
 
@@ -28,51 +34,30 @@ processes:
     depends_on:
       sync-avds:
         condition: process_completed_successfully
+    environment:
+      - "ANDROID_EMULATOR_FOREGROUND=1"  # Run emulator in foreground for process-compose monitoring
     command: |
-      echo "[ANDROID-EMULATOR] Starting (PID=$$)..."
+      echo "[ANDROID-EMULATOR] Starting emulator in foreground mode..."
       # Source Android environment
-      echo "[ANDROID-EMULATOR] About to source setup.sh..."
       . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
-      echo "[ANDROID-EMULATOR] setup.sh sourced"
-      echo "DEBUG: Setup sourced, checking PATH..."
-      echo "DEBUG: android.sh location: $(which android.sh 2>&1 || echo 'NOT FOUND')"
 
-      # Detect running emulator or start new one
-      # Set TEST_PURE=1 to always start fresh with clean state (for deterministic testing)
+      # Determine which device to start
+      device="${ANDROID_DEFAULT_DEVICE:-max}"
+
+      # In pure mode, always start fresh
       if [ "${TEST_PURE:-0}" = "1" ]; then
-        echo "🚀 Starting fresh Android emulator with clean state (${ANDROID_DEFAULT_DEVICE:-max})..."
-        echo "DEBUG: About to call android.sh emulator start..."
-
-        # Run emulator start command (outputs to console in real-time)
-        android.sh emulator start --pure ${ANDROID_DEFAULT_DEVICE:-max}
-
-        # Read serial from temp file written by emulator.sh
-        export ANDROID_SERIAL=$(cat /tmp/android-emulator-serial.txt)
-        echo "✓ Using emulator: $ANDROID_SERIAL"
+        echo "🚀 Starting fresh Android emulator (pure mode): $device"
+        export ANDROID_EMULATOR_PURE=1
       else
-        existing_emu=$(adb devices | grep emulator | head -1 | awk '{print $1}')
-
-        if [ -n "$existing_emu" ]; then
-          echo "✓ Reusing existing running emulator: $existing_emu"
-          export ANDROID_SERIAL="$existing_emu"
-        else
-          echo "🚀 Starting Android emulator (${ANDROID_DEFAULT_DEVICE:-max})..."
-
-          # Run emulator start command (outputs to console in real-time)
-          android.sh emulator start ${ANDROID_DEFAULT_DEVICE:-max}
-
-          # Read serial from temp file written by emulator.sh
-          export ANDROID_SERIAL=$(cat /tmp/android-emulator-serial.txt)
-          echo "✓ Using emulator: $ANDROID_SERIAL"
-        fi
+        echo "🚀 Starting Android emulator: $device"
       fi
 
-      # Write serial to file for other processes to read
-      echo "$ANDROID_SERIAL" > /tmp/android-emu-serial.txt
-      echo "✓ Emulator ready for testing"
+      # Write expected serial for readiness probe (emulator always starts on 5554 first)
+      echo "emulator-5554" > /tmp/android-emu-serial.txt
 
-      # Keep process alive so emulator stays running
-      tail -f /dev/null
+      # Start emulator in foreground - this blocks and runs the emulator
+      # Process-compose will monitor it and use readiness probe to check when ready
+      android.sh emulator start "$device"
     availability:
       restart: "no"
     readiness_probe:
@@ -81,13 +66,13 @@ processes:
           serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo "")
           [ -n "$serial" ] && adb -s $serial shell getprop sys.boot_completed 2>/dev/null | grep -q "1"
       initial_delay_seconds: 10
-      period_seconds: 5
+      period_seconds: 10
       timeout_seconds: 180
       success_threshold: 1
-      failure_threshold: 3
+      failure_threshold: 12
 
-  # Phase 3: Deploy app - depends on both build and emulator being ready
-  deploy-app:
+  # Phase 3: Run app - depends on both build and emulator being ready
+  run-app:
     command: |
       # Source Android environment
       . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
@@ -95,8 +80,8 @@ processes:
       serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo emulator-5554)
       export ANDROID_EMULATOR_SERIAL="$serial"
 
-      echo "📲 Deploying app to emulator: $serial"
-      android.sh deploy
+      echo "📲 Running app on emulator: $serial"
+      android.sh run
 
       echo ""
       echo "Waiting for app to start..."
@@ -145,7 +130,7 @@ processes:
         echo "✓ App stopped (emulator still running)"
       fi
     depends_on:
-      deploy-app:
+      run-app:
         condition: process_completed_successfully
     availability:
       restart: "no"

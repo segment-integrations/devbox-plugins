@@ -333,7 +333,7 @@ Plugin scripts are organized into strict layers to prevent circular dependencies
 scripts/
 ├── lib/        # Layer 1: Pure utilities
 ├── platform/   # Layer 2: SDK/platform setup
-├── domain/     # Layer 3: Domain operations (AVD, emulator, deploy)
+├── domain/     # Layer 3: Domain operations (AVD, emulator, run)
 ├── user/       # Layer 4: User-facing CLI
 └── init/       # Layer 5: Environment initialization
 ```

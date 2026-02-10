@@ -20,14 +20,8 @@
       "stop:emu": [
         "android.sh emulator stop"
       ],
-      "start:android": [
-        "android.sh emulator start ${1:-${ANDROID_DEFAULT_DEVICE:-max}}",
-        "adb install -r ${ANDROID_APP_APK}",
-        "adb shell am start -n ${ANDROID_APP_ID}/.MainActivity"
-      ],
-      "deploy": [
-        "devbox run build",
-        "devbox run start:android"
+      "run": [
+        "android.sh run ${1:-${ANDROID_DEFAULT_DEVICE:-max}}"
       ],
       "test": [
         "gradle test"
@@ -37,9 +31,6 @@
       ],
       "test:e2e:debug": [
         "ANDROID_DEBUG_SETUP=1 process-compose -f tests/test-suite.yaml --no-server --tui=false --log-level=debug"
-      ],
-      "test:e2e:simple": [
-        "echo 'Testing if process-compose works at all...' && process-compose --version"
       ]
     }
   }

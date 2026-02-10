@@ -102,9 +102,22 @@
       "test:plugin:android:devices": [
         "bash plugins/tests/android/test-devices.sh"
       ],
+      "test:plugin:android:emulator-detection": [
+        "(cd examples/android && devbox run bash ../../plugins/tests/android/test-emulator-detection.sh)"
+      ],
+      "test:plugin:android:emulator-modes": [
+        "(cd examples/android && devbox run bash ../../plugins/tests/android/test-emulator-modes.sh)"
+      ],
       "test:plugin:android": [
         "devbox run test:plugin:android:lib",
         "devbox run test:plugin:android:devices"
+      ],
+      "test:plugin:android:all": [
+        "echo 'Running all Android plugin tests (including emulator tests)...'",
+        "devbox run test:plugin:android:lib",
+        "devbox run test:plugin:android:devices",
+        "devbox run test:plugin:android:emulator-detection",
+        "devbox run test:plugin:android:emulator-modes"
       ],
       "test:plugin:ios:lib": [
         "sh plugins/tests/ios/test-lib.sh"

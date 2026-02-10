@@ -1,0 +1,31 @@
+version: "0.5"
+
+log_location: "reports/emulator-test-logs"
+log_level: info
+
+processes:
+  android-emulator:
+    environment:
+      - "ANDROID_EMULATOR_FOREGROUND=1"
+    command: |
+      echo "[EMULATOR-ONLY] Starting emulator..."
+      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+
+      device="${ANDROID_DEFAULT_DEVICE:-max}"
+      export ANDROID_EMULATOR_PURE=1
+
+      echo "emulator-5554" > /tmp/android-emu-serial.txt
+
+      android.sh emulator start "$device"
+    availability:
+      restart: "no"
+    readiness_probe:
+      exec:
+        command: |
+          serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo "")
+          [ -n "$serial" ] && adb -s $serial shell getprop sys.boot_completed 2>/dev/null | grep -q "1"
+      initial_delay_seconds: 10
+      period_seconds: 10
+      timeout_seconds: 180
+      success_threshold: 1
+      failure_threshold: 10

@@ -53,10 +53,12 @@ Configure the plugin by setting environment variables in `plugin.json`. These ar
 - Without `--pure`: Checks if an emulator with the same AVD is already running and reuses it
 - With `--pure`: Always starts a new emulator instance with `-wipe-data` flag (fresh Android OS)
 
-### Build + run
+### Run app
 
-- `devbox run --pure start-android [device]`
-  - Runs `devbox run --pure build-android` in the project and installs the APK matched by `ANDROID_APP_APK`.
+- `devbox run run [apk_path] [device]`
+  - Builds, installs, and launches the app on the emulator
+  - If `apk_path` is provided, skips build step and installs provided APK
+  - If no arguments, builds project and installs APK matched by `ANDROID_APP_APK`
 
 ### Device management
 
@@ -77,13 +79,24 @@ Configure the plugin by setting environment variables in `plugin.json`. These ar
 
 ## Environment variables
 
-- `ANDROID_CONFIG_DIR`
-- `ANDROID_DEVICES_DIR`
-- `ANDROID_SCRIPTS_DIR`
-- `ANDROID_DEFAULT_DEVICE`
-- `EVALUATE_DEVICES`
-- `ANDROID_APP_APK`
-- `EMU_HEADLESS`
-- `EMU_PORT`
-- `ANDROID_DEVICE_NAME`
-- `TARGET_DEVICE`
+### Plugin directories
+- `ANDROID_CONFIG_DIR` - Configuration directory
+- `ANDROID_DEVICES_DIR` - Device definitions directory
+- `ANDROID_SCRIPTS_DIR` - Runtime scripts directory
+
+### Device selection
+- `ANDROID_DEFAULT_DEVICE` - Default device name when none specified
+- `EVALUATE_DEVICES` - Device names to evaluate in flake (comma-separated, empty = all)
+- `ANDROID_DEVICE_NAME` - Override device selection for current command
+- `TARGET_DEVICE` - Alternative device selection (deprecated, use ANDROID_DEVICE_NAME)
+
+### Emulator configuration
+- `EMU_HEADLESS` - Run emulator headless (no GUI window)
+- `EMU_PORT` - Preferred emulator port (default: 5554)
+- `ANDROID_EMULATOR_PURE` - Always start fresh emulator with clean state (0/1, default: 0)
+- `ANDROID_SKIP_CLEANUP` - Skip offline emulator cleanup during startup (0/1, default: 0)
+  - Set to 1 in multi-emulator scenarios to prevent cleanup from killing emulators that are still booting
+- `ANDROID_DISABLE_SNAPSHOTS` - Disable snapshot boots, force cold boot (0/1, default: 0)
+
+### App configuration
+- `ANDROID_APP_APK` - Path or glob pattern for APK (relative to project root)

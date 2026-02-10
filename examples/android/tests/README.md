@@ -17,15 +17,19 @@ TEST_PURE=1 devbox run test:e2e
 TEST_TUI=true devbox run test:e2e
 ```
 
-## Test Suite
+## Test Suites
 
-The test suite (`test-suite.yaml`) orchestrates:
+### test-suite.yaml (Main E2E Test)
+Standard E2E test for single emulator:
 1. **Build** - Gradle assembleDebug
 2. **Sync AVDs** - Ensure emulator definitions match device configs
 3. **Start Emulator** - Boot Android emulator (or reuse existing)
 4. **Deploy** - Install and launch APK
 5. **Cleanup** - Stop app (and emulator in pure mode)
 6. **Summary** - Display results
+
+**Duration**: 2-3 minutes (faster with warm cache)
+**Use for**: Standard CI/CD testing, development validation
 
 ## Copy to Your Project
 

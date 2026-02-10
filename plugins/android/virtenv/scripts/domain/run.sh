@@ -1,19 +1,19 @@
 #!/usr/bin/env sh
-# Android Plugin - Application Deployment
+# Android Plugin - Application Run
 # See SCRIPTS.md for detailed documentation
 
 set -eu
 
 if ! (return 0 2>/dev/null); then
-  echo "ERROR: deploy.sh must be sourced, not executed directly" >&2
+  echo "ERROR: run.sh must be sourced, not executed directly" >&2
   exit 1
 fi
 
-if [ "${ANDROID_DEPLOY_LOADED:-}" = "1" ] && [ "${ANDROID_DEPLOY_LOADED_PID:-}" = "$$" ]; then
+if [ "${ANDROID_RUN_LOADED:-}" = "1" ] && [ "${ANDROID_RUN_LOADED_PID:-}" = "$$" ]; then
   return 0 2>/dev/null || exit 0
 fi
-ANDROID_DEPLOY_LOADED=1
-ANDROID_DEPLOY_LOADED_PID="$$"
+ANDROID_RUN_LOADED=1
+ANDROID_RUN_LOADED_PID="$$"
 
 # Source dependencies (Layer 1 & 2 only)
 if [ -n "${ANDROID_SCRIPTS_DIR:-}" ]; then
@@ -22,7 +22,7 @@ if [ -n "${ANDROID_SCRIPTS_DIR:-}" ]; then
 fi
 
 # NOTE: This script assumes the emulator is already running.
-# Layer 4 is responsible for starting the emulator before calling android_deploy_app.
+# Layer 4 is responsible for starting the emulator before calling android_run_app.
 
 # Run Android project build via devbox
 android_run_build() {
@@ -34,7 +34,13 @@ android_run_build() {
   fi
 
   echo "Building Android project: $project_root"
-  (cd "$project_root" && devbox run --pure build:android)
+
+  # Try platform-specific build command first (for React Native), then fall back to generic build
+  if (cd "$project_root" && devbox run --list 2>/dev/null | grep -q "build:android"); then
+    (cd "$project_root" && devbox run --pure build:android)
+  else
+    (cd "$project_root" && devbox run --pure build)
+  fi
 }
 
 # Resolve APK path from glob pattern
@@ -238,8 +244,24 @@ android_launch_app() {
   echo "         App may still have launched successfully" >&2
 }
 
-# Deploy Android app (build, install, launch)
-android_deploy_app() {
+# Run Android app (build, install, launch)
+# Usage: android_run_app [apk_path] [device]
+#   apk_path - Optional path to APK file. If provided, skips build step.
+#   device   - Optional device name. If omitted, uses ANDROID_DEFAULT_DEVICE.
+android_run_app() {
+  # Parse arguments - first arg could be APK path or device name
+  apk_arg=""
+  device_choice=""
+
+  if [ $# -gt 0 ]; then
+    # If first arg looks like a file path (contains / or ends with .apk), treat as APK
+    if printf '%s' "$1" | grep -q -e '/' -e '\.apk$'; then
+      apk_arg="$1"
+      shift
+    fi
+  fi
+
+  # Remaining arg is device choice
   device_choice="${1:-}"
 
   # ---- Resolve Device Selection ----
@@ -260,38 +282,59 @@ android_deploy_app() {
   echo "================================================"
   echo ""
 
-  # ---- Resolve Project Root ----
+  # ---- Resolve APK Path ----
 
-  project_root="${DEVBOX_PROJECT_ROOT:-${DEVBOX_PROJECT_DIR:-${DEVBOX_WD:-$PWD}}}"
-  if [ -z "$project_root" ] || [ ! -d "$project_root" ]; then
-    echo "ERROR: Unable to resolve project root for Android build" >&2
-    exit 1
+  if [ -n "$apk_arg" ]; then
+    # APK provided as argument - use it directly
+    apk_path="$apk_arg"
+
+    # Make absolute if relative
+    if [ "${apk_path#/}" = "$apk_path" ]; then
+      apk_path="$PWD/$apk_path"
+    fi
+
+    if [ ! -f "$apk_path" ]; then
+      echo "ERROR: APK not found: $apk_path" >&2
+      exit 1
+    fi
+
+    echo "Using provided APK: $(basename "$apk_path")"
+  else
+    # No APK provided - build and locate
+
+    # ---- Resolve Project Root ----
+
+    project_root="${DEVBOX_PROJECT_ROOT:-${DEVBOX_PROJECT_DIR:-${DEVBOX_WD:-$PWD}}}"
+    if [ -z "$project_root" ] || [ ! -d "$project_root" ]; then
+      echo "ERROR: Unable to resolve project root for Android build" >&2
+      exit 1
+    fi
+
+    echo ""
+    echo "Project root: $project_root"
+
+    # ---- Build App ----
+
+    echo ""
+    android_run_build "$project_root"
+
+    # ---- Find APK ----
+
+    echo ""
+    echo "Locating APK..."
+
+    apk_pattern="${ANDROID_APP_APK:-app/build/outputs/apk/debug/*.apk}"
+    apk_path="$(android_resolve_apk_path "$project_root" "$apk_pattern" || true)"
+
+    if [ -z "$apk_path" ] || [ ! -f "$apk_path" ]; then
+      echo "ERROR: Unable to locate APK" >&2
+      echo "       Pattern: $apk_pattern" >&2
+      echo "       Set ANDROID_APP_APK to correct path or pattern" >&2
+      exit 1
+    fi
+
+    echo "Found APK: $(basename "$apk_path")"
   fi
-
-  echo ""
-  echo "Project root: $project_root"
-
-  # ---- Build App ----
-
-  echo ""
-  android_run_build "$project_root"
-
-  # ---- Find APK ----
-
-  echo ""
-  echo "Locating APK..."
-
-  apk_pattern="${ANDROID_APP_APK:-app/build/outputs/apk/debug/*.apk}"
-  apk_path="$(android_resolve_apk_path "$project_root" "$apk_pattern" || true)"
-
-  if [ -z "$apk_path" ] || [ ! -f "$apk_path" ]; then
-    echo "ERROR: Unable to locate APK" >&2
-    echo "       Pattern: $apk_pattern" >&2
-    echo "       Set ANDROID_APP_APK to correct path or pattern" >&2
-    exit 1
-  fi
-
-  echo "Found APK: $(basename "$apk_path")"
 
   # ---- Extract Metadata ----
 
