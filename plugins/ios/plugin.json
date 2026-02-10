@@ -9,11 +9,6 @@
     "IOS_SCRIPTS_DIR": "{{ .Virtenv }}/scripts",
     "IOS_DEFAULT_DEVICE": "max",
     "IOS_DEFAULT_RUNTIME": "",
-    "IOS_APP_PROJECT": "ios.xcodeproj",
-    "IOS_APP_SCHEME": "ios",
-    "IOS_APP_BUNDLE_ID": "com.example.ios",
-    "IOS_APP_ARTIFACT": ".devbox/virtenv/ios/DerivedData/Build/Products/Debug-iphonesimulator/ios.app",
-    "IOS_APP_DERIVED_DATA": "",
     "IOS_DEVELOPER_DIR": "",
     "IOS_DOWNLOAD_RUNTIME": "1",
     "IOS_XCODE_ENV_PATH": ""
@@ -32,20 +27,18 @@
     }
   },
   "create_files": {
-    "{{ .Virtenv }}/process-compose.yaml": "config/process-compose.yaml",
-    "{{ .Virtenv }}/test-suite.yaml": "config/test-suite.yaml",
-    "{{ .Virtenv }}/scripts/lib/lib.sh": "scripts/lib/lib.sh",
-    "{{ .Virtenv }}/scripts/platform/core.sh": "scripts/platform/core.sh",
-    "{{ .Virtenv }}/scripts/platform/device_config.sh": "scripts/platform/device_config.sh",
-    "{{ .Virtenv }}/scripts/domain/device_manager.sh": "scripts/domain/device_manager.sh",
-    "{{ .Virtenv }}/scripts/domain/validate.sh": "scripts/domain/validate.sh",
-    "{{ .Virtenv }}/scripts/domain/simulator.sh": "scripts/domain/simulator.sh",
-    "{{ .Virtenv }}/scripts/domain/deploy.sh": "scripts/domain/deploy.sh",
-    "{{ .Virtenv }}/scripts/user/config.sh": "scripts/user/config.sh",
-    "{{ .Virtenv }}/scripts/user/ios.sh": "scripts/user/ios.sh",
-    "{{ .Virtenv }}/scripts/user/devices.sh": "scripts/user/devices.sh",
-    "{{ .Virtenv }}/scripts/init/init-hook.sh": "scripts/init/init-hook.sh",
-    "{{ .Virtenv }}/scripts/init/setup.sh": "scripts/init/setup.sh",
+    "{{ .Virtenv }}/scripts/lib/lib.sh": "virtenv/scripts/lib/lib.sh",
+    "{{ .Virtenv }}/scripts/platform/core.sh": "virtenv/scripts/platform/core.sh",
+    "{{ .Virtenv }}/scripts/platform/device_config.sh": "virtenv/scripts/platform/device_config.sh",
+    "{{ .Virtenv }}/scripts/domain/device_manager.sh": "virtenv/scripts/domain/device_manager.sh",
+    "{{ .Virtenv }}/scripts/domain/validate.sh": "virtenv/scripts/domain/validate.sh",
+    "{{ .Virtenv }}/scripts/domain/simulator.sh": "virtenv/scripts/domain/simulator.sh",
+    "{{ .Virtenv }}/scripts/domain/deploy.sh": "virtenv/scripts/domain/deploy.sh",
+    "{{ .Virtenv }}/scripts/user/config.sh": "virtenv/scripts/user/config.sh",
+    "{{ .Virtenv }}/scripts/user/ios.sh": "virtenv/scripts/user/ios.sh",
+    "{{ .Virtenv }}/scripts/user/devices.sh": "virtenv/scripts/user/devices.sh",
+    "{{ .Virtenv }}/scripts/init/init-hook.sh": "virtenv/scripts/init/init-hook.sh",
+    "{{ .Virtenv }}/scripts/init/setup.sh": "virtenv/scripts/init/setup.sh",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
     "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json"
   },
@@ -58,29 +51,11 @@
       "ios:devices:eval": [
         "ios.sh devices eval"
       ],
-      "build:ios": [
-        "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} build"
-      ],
-      "test:ios": [
-        "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} test"
-      ],
-      "test:ios:e2e": [
-        "echo 'Starting iOS E2E tests...'",
-        "ios_start \"${1:-}\"",
-        "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'platform=iOS Simulator,name=${IOS_SIM_NAME:-iPhone 15}' -derivedDataPath ${IOS_APP_DERIVED_DATA:-.devbox/virtenv/ios/DerivedData} test",
-        "ios_stop"
-      ],
-      "test:e2e": [
-        "process-compose -f {{ .Virtenv }}/test-suite.yaml --no-server --tui=${TEST_TUI:-true}"
-      ],
       "start:sim": [
         "bash -c '. {{ .Virtenv }}/scripts/lib/lib.sh && . {{ .Virtenv }}/scripts/platform/core.sh && . {{ .Virtenv }}/scripts/domain/simulator.sh && ios_start \"${1:-}\"'"
       ],
       "stop:sim": [
         "bash -c '. {{ .Virtenv }}/scripts/lib/lib.sh && . {{ .Virtenv }}/scripts/platform/core.sh && . {{ .Virtenv }}/scripts/domain/simulator.sh && ios_stop'"
-      ],
-      "start:ios": [
-        "bash -c '. {{ .Virtenv }}/scripts/lib/lib.sh && . {{ .Virtenv }}/scripts/platform/core.sh && . {{ .Virtenv }}/scripts/domain/simulator.sh && . {{ .Virtenv }}/scripts/domain/deploy.sh && ios_run_app \"${1-}\"'"
       ],
       "doctor": [
         "echo 'iOS Environment Check'",

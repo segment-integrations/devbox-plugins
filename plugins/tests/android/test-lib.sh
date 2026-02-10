@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+# Setup logging - redirect all output to log file
+SCRIPT_DIR_NAME="$(basename "$(dirname "$0")")"
+SCRIPT_NAME="$(basename "$0" .sh)"
+mkdir -p "${TEST_LOGS_DIR:-reports/logs}"
+LOG_FILE="${TEST_LOGS_DIR:-reports/logs}/${SCRIPT_DIR_NAME}-${SCRIPT_NAME}.txt"
+exec > >(tee "$LOG_FILE")
+exec 2>&1
+
 # ============================================================================
 # Test Framework
 # ============================================================================
@@ -75,6 +83,18 @@ test_summary() {
   echo "Failed: $test_failed"
   echo ""
 
+  # Write results file for summary aggregation
+  results_dir="${TEST_RESULTS_DIR:-$(cd "$(dirname "$0")/../../../reports/results" 2>/dev/null && pwd || echo "/tmp")}"
+  mkdir -p "$results_dir" 2>/dev/null || true
+  cat > "$results_dir/android-lib.json" << EOF
+{
+  "suite": "android-lib",
+  "passed": $test_passed,
+  "failed": $test_failed,
+  "total": $total
+}
+EOF
+
   if [ "$test_failed" -gt 0 ]; then
     echo "RESULT: ✗ FAILED"
     exit 1
@@ -89,7 +109,7 @@ test_summary() {
 # ============================================================================
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-lib_path="$script_dir/../../android/scripts/lib/lib.sh"
+lib_path="$script_dir/../../android/virtenv/scripts/lib/lib.sh"
 
 if [ ! -f "$lib_path" ]; then
   echo "ERROR: lib.sh not found at: $lib_path"
@@ -97,13 +117,17 @@ if [ ! -f "$lib_path" ]; then
 fi
 
 # Source lib.sh
-# shellcheck source=../../android/scripts/lib/lib.sh
+# shellcheck source=../../android/virtenv/scripts/lib/lib.sh
 . "$lib_path"
 
 echo "========================================"
 echo "Android lib.sh Unit Tests"
 echo "========================================"
 echo "Testing: $lib_path"
+
+# Prepare results directory
+results_base="${TEST_RESULTS_DIR:-$(cd "$script_dir/../../.." 2>/dev/null && pwd)/reports/results}"
+mkdir -p "$results_base"
 
 # ============================================================================
 # Tests: String Normalization

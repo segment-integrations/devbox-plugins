@@ -1,6 +1,6 @@
 version: "0.5"
 
-log_location: "test-results/e2e-logs"
+log_location: "${REPORTS_DIR:-reports}/e2e-logs"
 log_level: info
 
 environment:
@@ -23,7 +23,7 @@ processes:
 
   # React Native E2E - waits for both Android and iOS
   e2e-react-native:
-    command: "cd examples/react-native && devbox run test:e2e"
+    command: "cd examples/react-native && devbox run test:e2e:all"
     working_dir: "."
     depends_on:
       e2e-android:
@@ -44,7 +44,7 @@ processes:
       echo "Results:"
       echo "  Check logs above for individual test results"
       echo ""
-      echo "Logs: test-results/e2e-logs"
+      echo "Logs: ${REPORTS_DIR:-reports}/e2e-logs"
       echo ""
     depends_on:
       e2e-android:

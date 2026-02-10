@@ -3,6 +3,14 @@
 
 set -euo pipefail
 
+# Setup logging - redirect all output to log file
+SCRIPT_DIR_NAME="$(basename "$(dirname "$0")")"
+SCRIPT_NAME="$(basename "$0" .sh)"
+mkdir -p "${TEST_LOGS_DIR:-reports/logs}"
+LOG_FILE="${TEST_LOGS_DIR:-reports/logs}/${SCRIPT_DIR_NAME}-${SCRIPT_NAME}.txt"
+exec > >(tee "$LOG_FILE")
+exec 2>&1
+
 test_passed=0
 test_failed=0
 
@@ -31,11 +39,11 @@ mkdir -p "$test_root/scripts/user"
 
 # Copy required scripts with new layer structure
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-cp "$script_dir/../../android/scripts/lib/lib.sh" "$test_root/scripts/lib/"
-cp "$script_dir/../../android/scripts/platform/core.sh" "$test_root/scripts/platform/"
-cp "$script_dir/../../android/scripts/platform/device_config.sh" "$test_root/scripts/platform/"
-cp "$script_dir/../../android/scripts/domain/avd.sh" "$test_root/scripts/domain/"
-cp "$script_dir/../../android/scripts/user/devices.sh" "$test_root/scripts/user/"
+cp "$script_dir/../../android/virtenv/scripts/lib/lib.sh" "$test_root/scripts/lib/"
+cp "$script_dir/../../android/virtenv/scripts/platform/core.sh" "$test_root/scripts/platform/"
+cp "$script_dir/../../android/virtenv/scripts/platform/device_config.sh" "$test_root/scripts/platform/"
+cp "$script_dir/../../android/virtenv/scripts/domain/avd.sh" "$test_root/scripts/domain/"
+cp "$script_dir/../../android/virtenv/scripts/user/devices.sh" "$test_root/scripts/user/"
 
 # Set environment variables (new config approach)
 export ANDROID_CONFIG_DIR="$test_root"
@@ -93,6 +101,18 @@ echo "Total:  $total"
 echo "Passed: $test_passed"
 echo "Failed: $test_failed"
 echo ""
+
+# Write results file for summary aggregation
+results_dir="${TEST_RESULTS_DIR:-$(cd "$(dirname "$0")/../../../reports/results" 2>/dev/null && pwd || echo "/tmp")}"
+mkdir -p "$results_dir" 2>/dev/null || true
+cat > "$results_dir/android-devices.json" << EOF
+{
+  "suite": "android-devices",
+  "passed": $test_passed,
+  "failed": $test_failed,
+  "total": $total
+}
+EOF
 
 if [ "$test_failed" -gt 0 ]; then
   echo "RESULT: ✗ FAILED"

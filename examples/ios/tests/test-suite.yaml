@@ -11,58 +11,53 @@ log_level: info
 processes:
   # Phase 1: Build app - runs first
   build-app:
-    command: "devbox run --pure build:ios"
+    command: "devbox run --pure build"
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -d ${IOS_APP_ARTIFACT:-.devbox/virtenv/ios/DerivedData/Build/Products/Debug-iphonesimulator/*.app}"
-      initial_delay_seconds: 5
-      period_seconds: 5
-      timeout_seconds: 300
-      success_threshold: 1
 
   # Phase 2: Sync simulators - ensure all simulators match device definitions
   sync-simulators:
     command: "devbox run ios.sh devices sync"
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "echo 'Sync complete'"
-      initial_delay_seconds: 1
-      period_seconds: 2
-      timeout_seconds: 120
-      success_threshold: 1
 
   # Phase 3: Start simulator - depends on sync completing
   ios-simulator:
-    command: "devbox run --pure start:sim ${IOS_DEVICE}"
+    command: |
+      # In pure mode (TEST_PURE=1), start fresh simulator with clean state
+      # Otherwise, reuse existing simulator if available
+      if [ "${TEST_PURE:-0}" = "1" ]; then
+        echo "🚀 Starting fresh iOS simulator with clean state (${IOS_DEVICE})..."
+        devbox run start:sim ${IOS_DEVICE} --pure
+      else
+        # Check if simulator is already running
+        existing_udid=$(xcrun simctl list devices | grep "${IOS_DEVICE}" | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1 || true)
+        if [ -n "$existing_udid" ]; then
+          echo "✓ Reusing existing running simulator: ${IOS_DEVICE} ($existing_udid)"
+        else
+          echo "🚀 Starting iOS simulator (${IOS_DEVICE})..."
+          devbox run start:sim ${IOS_DEVICE}
+        fi
+      fi
+      echo "✓ Simulator ready for testing"
+
+      # Keep process alive so simulator stays running
+      tail -f /dev/null
     depends_on:
       sync-simulators:
         condition: process_completed_successfully
     availability:
-      restart: "on_failure"
-      max_restarts: 2
+      restart: "no"
     readiness_probe:
       exec:
-        command: "xcrun simctl list devices | grep ${IOS_DEVICE} | grep -q '(Booted)'"
-      initial_delay_seconds: 5
-      period_seconds: 3
+        command: |
+          DEVICE_UDID=$(xcrun simctl list devices | grep "${IOS_DEVICE}" | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1 || echo "")
+          [ -n "$DEVICE_UDID" ] && xcrun simctl bootstatus "$DEVICE_UDID" >/dev/null 2>&1
+      initial_delay_seconds: 10
+      period_seconds: 5
       timeout_seconds: 120
       success_threshold: 1
       failure_threshold: 3
-    liveness_probe:
-      exec:
-        command: "xcrun simctl list devices | grep ${IOS_DEVICE} | grep -q '(Booted)'"
-      initial_delay_seconds: 10
-      period_seconds: 10
-      timeout_seconds: 5
-      success_threshold: 1
-      failure_threshold: 3
-    shutdown:
-      command: "devbox run --pure stop:sim"
-      timeout_seconds: 30
 
   # Phase 4: Deploy app - depends on both build and simulator
   deploy-app:
@@ -106,7 +101,26 @@ processes:
 
   # Cleanup
   cleanup:
-    command: "echo 'Cleanup complete'"
+    command: |
+      echo "🧹 Cleaning up..."
+
+      # If TEST_PURE=1, delete the test simulator
+      if [ "${TEST_PURE:-0}" = "1" ]; then
+        echo "Deleting test simulator (pure mode)..."
+        # Find and delete any simulator with "Test" suffix
+        test_sim_udid=$(xcrun simctl list devices | grep "Test" | grep -oE '[0-9A-F-]{36}' | head -1 || true)
+        if [ -n "$test_sim_udid" ]; then
+          xcrun simctl shutdown "$test_sim_udid" >/dev/null 2>&1 || true
+          xcrun simctl delete "$test_sim_udid" >/dev/null 2>&1 || true
+          echo "✓ Test simulator deleted"
+        else
+          echo "✓ No test simulator to clean up"
+        fi
+      else
+        echo "✓ Simulator still running (dev mode)"
+      fi
+
+      echo "Cleanup complete"
     depends_on:
       verify-app-running:
         condition: process_completed

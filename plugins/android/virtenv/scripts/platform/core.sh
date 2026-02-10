@@ -60,9 +60,13 @@ android_debug_dump_vars() {
 
 resolve_flake_sdk_root() {
   output="$1"
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] resolve_flake_sdk_root: output=$output" >&2
+
   if ! command -v nix >/dev/null 2>&1; then
+    [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] nix command not found" >&2
     return 1
   fi
+
   root="${ANDROID_SDK_FLAKE_PATH:-}"
   if [ -z "$root" ]; then
     if [ -n "${ANDROID_FLAKE_DIR:-}" ] && [ -d "${ANDROID_FLAKE_DIR}" ]; then
@@ -82,6 +86,9 @@ resolve_flake_sdk_root() {
     ANDROID_SDK_FLAKE_PATH="$root"
     export ANDROID_SDK_FLAKE_PATH
   fi
+
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] Flake root: $root" >&2
+
   if android_debug_enabled; then
     android_debug_log "Android SDK flake path: ${ANDROID_SDK_FLAKE_PATH:-$root}"
   fi
@@ -94,10 +101,12 @@ resolve_flake_sdk_root() {
   fi
 
   # Nix handles caching internally - no need for our own cache file
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] Starting nix eval for path:${root}#${output}.outPath" >&2
   sdk_out=$(
     nix --extra-experimental-features 'nix-command flakes' \
       eval --raw "path:${root}#${output}.outPath" 2>&1 || true
   )
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] nix eval returned: ${sdk_out:-(empty)}" >&2
 
   if android_debug_enabled; then
     android_debug_log "Flake eval returned: ${sdk_out:-empty}"

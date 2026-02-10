@@ -24,4 +24,4 @@
 .claude/
 
 # Test results (only last run kept locally)
-/test-results/
+/reports/

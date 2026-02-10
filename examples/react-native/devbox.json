@@ -1,19 +1,62 @@
 {
   "include": ["path:../../plugins/react-native/plugin.json"],
-  "packages": ["nodejs@20", "watchman@latest"],
+  "packages": [
+    "nodejs@20",
+    "watchman@latest",
+    "jdk17@latest",
+    "gradle@latest"
+  ],
   "env": {
-    "IOS_APP_PROJECT": "ReactNativeExample.xcodeproj",
+    "IOS_APP_PROJECT": "ios/ReactNativeExample.xcodeproj",
     "IOS_APP_SCHEME": "ReactNativeExample",
+    "IOS_APP_BUNDLE_ID": "com.reactnativeexample",
+    "IOS_APP_ARTIFACT": ".devbox/virtenv/ios/DerivedData/Build/Products/Debug-iphonesimulator/ReactNativeExample.app",
+    "ANDROID_APP_ID": "com.reactnativeexample",
+    "ANDROID_APP_APK": "android/app/build/outputs/apk/debug/app-debug.apk",
     "DEVBOX_COREPACK_ENABLED": "",
     "ANDROID_SDK_REQUIRED": "0"
   },
   "shell": {
     "scripts": {
-      "build-web": "devbox run --pure build-node && node -e \"const path = process.env.WEB_BUILD_PATH || 'web/build'; require('fs').mkdirSync(path, { recursive: true });\"",
+      "install": [
+        "npm install"
+      ],
+      "build:android": [
+        "devbox run install",
+        "cd android && gradle assembleDebug"
+      ],
+      "build:ios": [
+        "devbox run install",
+        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT} -scheme ${IOS_APP_SCHEME} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData build"
+      ],
+      "build:web": [
+        "devbox run install",
+        "node -e \"const path = 'web/build'; require('fs').mkdirSync(path, { recursive: true });\""
+      ],
       "build": [
-        "devbox run --pure build-android",
-        "devbox run --pure build-ios",
-        "devbox run --pure build-web"
+        "devbox run build:android",
+        "devbox run build:ios",
+        "devbox run build:web"
+      ],
+      "start:android": [
+        "devbox services start android-emulator || devbox services up -b android-emulator",
+        "npx react-native run-android --no-packager"
+      ],
+      "start:ios": [
+        "devbox services start ios-simulator || devbox services up -b ios-simulator",
+        "npx react-native run-ios --no-packager"
+      ],
+      "test": [
+        "npm test"
+      ],
+      "test:e2e:android": [
+        "process-compose -f tests/test-suite-android.yaml --no-server --tui=${TEST_TUI:-true}"
+      ],
+      "test:e2e:ios": [
+        "process-compose -f tests/test-suite-ios.yaml --no-server --tui=${TEST_TUI:-true}"
+      ],
+      "test:e2e:all": [
+        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-true}"
       ]
     }
   }

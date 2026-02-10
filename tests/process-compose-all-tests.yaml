@@ -1,29 +1,44 @@
 version: "0.5"
 
-log_location: "test-results/devbox-all-tests-logs"
+log_location: "${REPORTS_DIR:-reports}/devbox-all-tests-logs"
 log_level: info
 
 processes:
-  # Phase 1: Static Analysis (runs in parallel)
+  # Phase 0: Cleanup (runs first)
+  cleanup:
+    command: |
+      echo "Cleaning previous test results..."
+      rm -rf ${REPORTS_DIR:-reports}/*
+      echo "✓ Test results directory cleaned"
+    availability:
+      restart: "no"
+
+  # Phase 1: Static Analysis (depends on cleanup)
   lint-android:
-    command: "find plugins/android/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
+    command: "find plugins/android/virtenv/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
+    depends_on:
+      cleanup:
+        condition: process_completed_successfully
     availability:
       restart: "no"
     readiness_probe:
       exec:
-        command: "find plugins/android/scripts -name '*.sh' -type f"
+        command: "find plugins/android/virtenv/scripts -name '*.sh' -type f"
       initial_delay_seconds: 1
       period_seconds: 1
       timeout_seconds: 30
       success_threshold: 1
 
   lint-ios:
-    command: "find plugins/ios/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
+    command: "find plugins/ios/virtenv/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
+    depends_on:
+      cleanup:
+        condition: process_completed_successfully
     availability:
       restart: "no"
     readiness_probe:
       exec:
-        command: "find plugins/ios/scripts -name '*.sh' -type f"
+        command: "find plugins/ios/virtenv/scripts -name '*.sh' -type f"
       initial_delay_seconds: 1
       period_seconds: 1
       timeout_seconds: 30
@@ -138,8 +153,8 @@ processes:
       echo "Total individual tests: ~40+"
       echo ""
       echo "Logs available at:"
-      echo "  - Linting: test-results/devbox-lint-logs"
-      echo "  - Unit tests: test-results/devbox-unit-tests-logs"
+      echo "  - Linting: reports/devbox-lint-logs"
+      echo "  - Unit tests: reports/devbox-unit-tests-logs"
       echo ""
       echo "To run E2E tests:"
       echo "  devbox run test:e2e:android"

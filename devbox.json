@@ -3,25 +3,22 @@
     "process-compose": "latest",
     "act": "latest",
     "shellcheck": "latest",
-    "nodejs": "latest"
+    "nodejs": "latest",
+    "treefmt": "latest"
+  },
+  "env": {
+    "REPORTS_DIR": "reports",
+    "TEST_RESULTS_DIR": "reports/results",
+    "TEST_LOGS_DIR": "reports/logs",
+    "TEST_TUI": "false"
   },
   "shell": {
     "scripts": {
       "lint": [
-        "echo 'Running orchestrated linting and validation...'",
-        "process-compose -f tests/process-compose-lint.yaml --tui=${TEST_TUI:-false}"
-      ],
-      "lint:android": [
-        "find plugins/android/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
-      ],
-      "lint:ios": [
-        "find plugins/ios/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
-      ],
-      "lint:rn": [
-        "bash -c 'if ls plugins/react-native/scripts/*.sh 1>/dev/null 2>&1; then shellcheck -S warning plugins/react-native/scripts/*.sh; else echo \"No React Native shell scripts to lint\"; fi'"
+        "echo 'Running linting and validation...'",
+        "treefmt --fail-on-change"
       ],
       "test:android": [
-        "devbox run lint:android",
         "echo 'Running Android plugin tests...'",
         "cd examples/android && devbox run test"
       ],
@@ -29,12 +26,8 @@
         "sh plugins/tests/ios/test-lib.sh"
       ],
       "test:ios": [
-        "devbox run lint:ios",
         "devbox run test:plugin:ios",
         "devbox run test:integration:ios"
-      ],
-      "test:rn": [
-        "devbox run lint:rn"
       ],
       "test:unit": [
         "echo 'Running orchestrated unit tests...'",
@@ -56,16 +49,6 @@
         "echo 'Running E2E tests (orchestrated: android+ios parallel, then rn)...'",
         "process-compose -f tests/process-compose-e2e.yaml --no-server --tui=${TEST_TUI:-false}"
       ],
-      "test:fast": [
-        "echo 'Cleaning previous test results...'",
-        "rm -rf test-results/",
-        "mkdir -p test-results/",
-        "echo '========================================'",
-        "echo 'Running FAST tests (lint + unit)'",
-        "echo '========================================'",
-        "echo ''",
-        "process-compose -f tests/process-compose-all-tests.yaml --tui=${TEST_TUI:-false}"
-      ],
       "test": [
         "echo '========================================'",
         "echo 'Running ALL tests (fast + e2e)'",
@@ -78,11 +61,13 @@
         "echo '========================================'",
         "devbox run test:e2e"
       ],
-      "check:workflows": [
-        "for f in .github/workflows/*.yml; do",
-        "  act -W \"$f\" -l > /dev/null 2>&1 || { echo \"✗ $f\"; exit 1; }",
-        "  echo \"✓ $(basename $f)\"",
-        "done"
+      "format": [
+        "echo 'Running treefmt (validates shell scripts, workflows, and process-compose configs)...'",
+        "treefmt"
+      ],
+      "format:check": [
+        "echo 'Checking formatting with treefmt...'",
+        "treefmt --fail-on-change"
       ],
       "sync": [
         "echo 'Syncing example projects with latest plugins...'",
@@ -173,10 +158,11 @@
         "/bin/bash tests/integration/ios/test-cache.sh"
       ],
       "test:fast": [
-        "echo 'Running fast tests (lint + unit + integration)...' ",
+        "echo 'Running fast tests (lint + unit + integration)...'",
         "devbox run lint",
         "devbox run test:plugin:unit",
-        "devbox run test:integration"
+        "devbox run test:integration",
+        "bash tests/test-summary.sh"
       ]
     }
   }

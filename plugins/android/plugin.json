@@ -16,7 +16,6 @@
     "ANDROID_TARGET_SDK": "36",
     "ANDROID_DEFAULT_DEVICE": "max",
     "ANDROID_SYSTEM_IMAGE_TAG": "google_apis",
-    "ANDROID_APP_APK": "app/build/outputs/apk/debug/app-debug.apk",
     "ANDROID_BUILD_TOOLS_VERSION": "36.1.0",
     "ANDROID_INCLUDE_NDK": "false",
     "ANDROID_NDK_VERSION": "27.0.12077973",
@@ -32,30 +31,25 @@
     "gnugrep": "latest",
     "gawk": "latest",
     "jq": "latest",
-    "jdk17": "latest",
-    "gradle": "latest",
     "process-compose": "latest"
   },
   "create_files": {
     "{{ .Virtenv }}/android": "",
     "{{ .Virtenv }}/android/avd": "",
-    "{{ .DevboxDir }}/process-compose.yaml": "process-compose.yaml",
-    "{{ .DevboxDir }}/test-suite.yaml": "test-suite.yaml",
-    "{{ .Virtenv }}/test-summary.sh": "test-summary.sh",
-    "{{ .Virtenv }}/scripts/lib/lib.sh": "scripts/lib/lib.sh",
-    "{{ .Virtenv }}/scripts/platform/core.sh": "scripts/platform/core.sh",
-    "{{ .Virtenv }}/scripts/platform/device_config.sh": "scripts/platform/device_config.sh",
-    "{{ .Virtenv }}/scripts/user/android.sh": "scripts/user/android.sh",
-    "{{ .Virtenv }}/scripts/user/devices.sh": "scripts/user/devices.sh",
-    "{{ .Virtenv }}/flake.nix": "flake.nix",
+    "{{ .Virtenv }}/scripts/lib/lib.sh": "virtenv/scripts/lib/lib.sh",
+    "{{ .Virtenv }}/scripts/platform/core.sh": "virtenv/scripts/platform/core.sh",
+    "{{ .Virtenv }}/scripts/platform/device_config.sh": "virtenv/scripts/platform/device_config.sh",
+    "{{ .Virtenv }}/scripts/domain/avd.sh": "virtenv/scripts/domain/avd.sh",
+    "{{ .Virtenv }}/scripts/domain/avd-reset.sh": "virtenv/scripts/domain/avd-reset.sh",
+    "{{ .Virtenv }}/scripts/domain/emulator.sh": "virtenv/scripts/domain/emulator.sh",
+    "{{ .Virtenv }}/scripts/domain/deploy.sh": "virtenv/scripts/domain/deploy.sh",
+    "{{ .Virtenv }}/scripts/domain/validate.sh": "virtenv/scripts/domain/validate.sh",
+    "{{ .Virtenv }}/scripts/user/android.sh": "virtenv/scripts/user/android.sh",
+    "{{ .Virtenv }}/scripts/user/devices.sh": "virtenv/scripts/user/devices.sh",
+    "{{ .Virtenv }}/scripts/init/setup.sh": "virtenv/scripts/init/setup.sh",
+    "{{ .Virtenv }}/flake.nix": "virtenv/flake.nix",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
-    "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json",
-    "{{ .Virtenv }}/scripts/domain/avd.sh": "scripts/domain/avd.sh",
-    "{{ .Virtenv }}/scripts/domain/avd-reset.sh": "scripts/domain/avd-reset.sh",
-    "{{ .Virtenv }}/scripts/domain/emulator.sh": "scripts/domain/emulator.sh",
-    "{{ .Virtenv }}/scripts/domain/deploy.sh": "scripts/domain/deploy.sh",
-    "{{ .Virtenv }}/scripts/domain/validate.sh": "scripts/domain/validate.sh",
-    "{{ .Virtenv }}/scripts/init/setup.sh": "scripts/init/setup.sh"
+    "{{ .DevboxDir }}/devices/max.json": "config/devices/max.json"
   },
   "shell": {
     "init_hook": [
@@ -66,42 +60,13 @@
       "android:devices:eval": [
         "ANDROID_SDK_REQUIRED=0 android.sh devices eval"
       ],
-      "build:android": [
-        "echo 'Building Android app...'",
-        "gradle assembleDebug --info"
-      ],
-      "build:android:debug": [
-        "echo 'Building Android app with debug output...'",
-        "gradle assembleDebug --debug --stacktrace"
-      ],
-      "test:android": [
-        "gradle test"
-      ],
-      "test:android:e2e": [
-        "echo 'Starting Android E2E tests...'",
-        "android_start_emulator \"${1:-}\"",
-        "gradle connectedAndroidTest",
-        "android_stop_emulator"
-      ],
-      "test:e2e": [
-        "process-compose -f {{ .DevboxDir }}/test-suite.yaml --no-server --tui=${TEST_TUI:-false}"
-      ],
-      "test": [
-        "echo 'Running Android plugin tests...'",
-        "devbox run test:unit",
-        "devbox run test:e2e"
-      ],
       "start:emu": [
         "android.sh emulator start \"${1:-}\""
-      ],
-      "start:android": [
-        "android.sh deploy \"${1-}\""
       ],
       "stop:emu": [
         "android.sh emulator stop"
       ],
       "reset:emu": [
-        "echo 'Resetting Android emulators...'",
         "android.sh emulator reset"
       ],
       "doctor": [

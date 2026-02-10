@@ -26,68 +26,11 @@
     "ANDROID_CMAKE_VERSION": "4.1.2"
   },
   "create_files": {
-    "{{ .Virtenv }}/process-compose.yaml": "config/process-compose.yaml",
-    "{{ .Virtenv }}/test-suite-android.yaml": "config/test-suite-android.yaml",
-    "{{ .Virtenv }}/test-suite-ios.yaml": "config/test-suite-ios.yaml",
-    "{{ .Virtenv }}/test-suite-all.yaml": "config/test-suite-all.yaml"
   },
   "shell": {
     "init_hook": [
     ],
     "scripts": {
-      "build:node": [
-        "npm install"
-      ],
-      "test": [
-        "ANDROID_SDK_REQUIRED=0 npm test"
-      ],
-      "test:unit": [
-        "ANDROID_SDK_REQUIRED=0 npm test"
-      ],
-      "build:android": [
-        "devbox run --pure build:node",
-        "cd android && gradle assembleDebug"
-      ],
-      "build:ios": [
-        "devbox run --pure build:node",
-        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData build"
-      ],
-      "test:android": [
-        "devbox run --pure build:node",
-        "cd android && gradle test"
-      ],
-      "test:android:e2e": [
-        "devbox run --pure build:node",
-        "devbox services start android-emulator || devbox services up -b android-emulator",
-        "cd android && gradle connectedAndroidTest"
-      ],
-      "test:ios": [
-        "devbox run --pure build:node",
-        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData test"
-      ],
-      "test:ios:e2e": [
-        "devbox run --pure build:node",
-        "devbox services start ios-simulator || devbox services up -b ios-simulator",
-        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'platform=iOS Simulator,name=${IOS_SIM_NAME:-iPhone 15}' -derivedDataPath ../.devbox/virtenv/ios/DerivedData test"
-      ],
-      "test:e2e:android": [
-        "process-compose -f {{ .Virtenv }}/test-suite-android.yaml --no-server --tui=${TEST_TUI:-true}"
-      ],
-      "test:e2e:ios": [
-        "process-compose -f {{ .Virtenv }}/test-suite-ios.yaml --no-server --tui=${TEST_TUI:-true}"
-      ],
-      "test:e2e:all": [
-        "process-compose -f {{ .Virtenv }}/test-suite-all.yaml --no-server --tui=${TEST_TUI:-true}"
-      ],
-      "start:android": [
-        "devbox services start rn-metro || devbox services up -b rn-metro",
-        "npx react-native run-android --no-packager"
-      ],
-      "start:ios": [
-        "devbox services start rn-metro || devbox services up -b rn-metro",
-        "npx react-native run-ios --no-packager"
-      ],
-      "start:web": "devbox services start rn-metro || devbox services up rn-metro",
       "doctor": [
         "echo 'React Native Environment Check'",
         "echo '=============================='",

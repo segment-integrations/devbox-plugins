@@ -1,17 +1,17 @@
 version: "0.5"
 
-log_location: "test-results/devbox-unit-tests-logs"
+log_location: "${REPORTS_DIR:-reports}/devbox-unit-tests-logs"
 log_level: info
 
 processes:
   # Phase 1: Linting (parallel)
   lint-android:
-    command: "shellcheck -S warning plugins/android/scripts/*.sh"
+    command: "shellcheck -S warning plugins/android/virtenv/scripts/*.sh"
     availability:
       restart: "no"
 
   lint-ios:
-    command: "shellcheck -S warning plugins/ios/scripts/*.sh"
+    command: "shellcheck -S warning plugins/ios/virtenv/scripts/*.sh"
     availability:
       restart: "no"
 

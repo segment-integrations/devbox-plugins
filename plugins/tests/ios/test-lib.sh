@@ -1,10 +1,18 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -eu
+
+# Setup logging - redirect all output to log file
+SCRIPT_DIR_NAME="$(basename "$(dirname "$0")")"
+SCRIPT_NAME="$(basename "$0" .sh)"
+mkdir -p "${TEST_LOGS_DIR:-reports/logs}"
+LOG_FILE="${TEST_LOGS_DIR:-reports/logs}/${SCRIPT_DIR_NAME}-${SCRIPT_NAME}.txt"
+exec > >(tee "$LOG_FILE")
+exec 2>&1
 
 echo "Testing iOS lib.sh..."
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-IOS_SCRIPTS_DIR="${SCRIPT_DIR}/../../ios/scripts"
+IOS_SCRIPTS_DIR="${SCRIPT_DIR}/../../ios/virtenv/scripts"
 export IOS_SCRIPTS_DIR
 
 # Source lib.sh (new location in lib/)
@@ -143,5 +151,17 @@ if (ios_require_tool "nonexistent_tool_xyz" 2>/dev/null); then
   exit 1
 fi
 echo "    PASS"
+
+# Write results file for summary aggregation
+results_dir="${TEST_RESULTS_DIR:-$(cd "$(dirname "$0")/../../../reports/results" 2>/dev/null && pwd || echo "/tmp")}"
+mkdir -p "$results_dir" 2>/dev/null || true
+cat > "$results_dir/ios-lib.json" << EOF
+{
+  "suite": "ios-lib",
+  "passed": 8,
+  "failed": 0,
+  "total": 8
+}
+EOF
 
 echo "All lib.sh tests passed!"

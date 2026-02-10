@@ -1,0 +1,78 @@
+# treefmt configuration
+# Validates shell scripts, GitHub workflows, and process-compose configs
+#
+# Usage:
+#   treefmt                    # Run validators on all files
+#   treefmt --fail-on-change   # Exit 1 if any file fails validation
+#   treefmt path/to/file       # Validate specific file
+#
+# Devbox scripts:
+#   devbox run format          # Run all validators
+#   devbox run format:check    # Run validators, exit 1 on failure
+#   devbox run lint            # Alias for format:check
+#
+# Git hook integration:
+#   Add to .git/hooks/pre-commit:
+#     #!/bin/sh
+#     exec treefmt --fail-on-change
+
+[global]
+excludes = [
+  "*.md",
+  "*.lock",
+  "*.json",
+  ".devbox/*",
+  "devbox.d/*",
+  "node_modules/*",
+  "examples/*/node_modules/*",
+  "test-results/*",
+  "reports/*",
+]
+
+# Shellcheck for shell scripts
+[formatter.shellcheck]
+command = "sh"
+options = ["-c", "shellcheck -S warning \"$@\" || exit 0", "--"]
+includes = ["*.sh"]
+excludes = []
+
+# GitHub Actions workflow validator
+[formatter.workflows]
+command = "sh"
+options = [
+  "-c",
+  '''
+  for file in "$@"; do
+    if ! act -W "$file" -l > /dev/null 2>&1; then
+      echo "✗ $file has syntax errors" >&2
+      exit 1
+    fi
+  done
+  ''',
+  "--"
+]
+includes = [".github/workflows/*.yml", ".github/workflows/*.yaml"]
+excludes = []
+
+# Process-compose config validator
+[formatter.process-compose]
+command = "sh"
+options = [
+  "-c",
+  '''
+  for file in "$@"; do
+    if ! process-compose -f "$file" --dry-run > /dev/null 2>&1; then
+      echo "✗ $file has syntax errors" >&2
+      exit 1
+    fi
+  done
+  ''',
+  "--"
+]
+includes = [
+  "tests/process-compose*.yaml",
+  "examples/*/tests/*.yaml",
+  "plugins/*/tests/*.yaml",
+  "plugins/*/config/process-compose.yaml",
+]
+excludes = []

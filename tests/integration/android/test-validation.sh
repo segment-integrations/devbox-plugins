@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Setup logging - redirect all output to log file
+SCRIPT_DIR_NAME="$(basename "$(dirname "$0")")"
+SCRIPT_NAME="$(basename "$0" .sh)"
+mkdir -p "${TEST_LOGS_DIR:-reports/logs}"
+LOG_FILE="${TEST_LOGS_DIR:-reports/logs}/${SCRIPT_DIR_NAME}-${SCRIPT_NAME}.txt"
+exec > >(tee "$LOG_FILE")
+exec 2>&1
+
 echo "Android Validation Integration Tests"
 echo "====================================="
 echo ""
@@ -20,7 +28,7 @@ mkdir -p "$TEST_ROOT/devbox.d/android/scripts"
 cp "$SCRIPT_DIR/../../fixtures/android/devices/"*.json "$TEST_ROOT/devbox.d/android/devices/"
 
 # Copy plugin scripts
-cp -r "$REPO_ROOT/plugins/android/scripts/"* "$TEST_ROOT/devbox.d/android/scripts/"
+cp -r "$REPO_ROOT/plugins/android/virtenv/scripts/"* "$TEST_ROOT/devbox.d/android/scripts/"
 find "$TEST_ROOT/devbox.d/android/scripts" -name "*.sh" -type f -exec chmod +x {} +
 
 # Set environment for tests
@@ -99,4 +107,4 @@ fi
 cd /
 rm -rf "$TEST_ROOT"
 
-test_summary
+test_summary "android-integration-validation"

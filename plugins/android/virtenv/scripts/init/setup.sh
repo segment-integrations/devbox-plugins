@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 # Android Plugin - Setup and Environment Initialization
-#wh
+#
 # Execution modes:
 # 1. bash setup.sh   - Generates config files (android.json, devices.lock)
 # 2. . setup.sh      - Initializes environment (sources core.sh, runs validation)
+
+# Debug logging
+if [ -n "${ANDROID_DEBUG_SETUP:-}" ]; then
+  echo "[SETUP-$$] Entry: PID=$$, PPID=$PPID, Caller=$(ps -p $PPID -o comm= 2>/dev/null || echo unknown)" >&2
+  echo "[SETUP-$$] PWD: $(pwd)" >&2
+  echo "[SETUP-$$] Call stack:" >&2
+  caller 0 2>/dev/null | while read line; do echo "[SETUP-$$]   $line" >&2; done || true
+fi
 
 # ============================================================================
 # Detect Execution Mode
@@ -11,8 +19,10 @@
 
 if (return 0 2>/dev/null); then
   SOURCED=true
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Mode: SOURCED" >&2
 else
   SOURCED=false
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Mode: EXECUTED" >&2
 fi
 
 # ============================================================================
@@ -153,10 +163,15 @@ fi
 # Part 2: Environment Initialization (sourced mode only)
 # ============================================================================
 
+[ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Starting environment initialization (sourced mode)" >&2
+
 # Prevent double-loading
 if [ "${ANDROID_ENV_LOADED:-}" = "1" ] && [ "${ANDROID_ENV_LOADED_PID:-}" = "$$" ]; then
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Already loaded in this PID, returning" >&2
   return 0
 fi
+
+[ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Setting ANDROID_ENV_LOADED=1 for PID $$" >&2
 ANDROID_ENV_LOADED=1
 ANDROID_ENV_LOADED_PID="$$"
 export ANDROID_ENV_LOADED ANDROID_ENV_LOADED_PID
@@ -166,22 +181,34 @@ set -eu
 # Source core.sh which handles SDK resolution, PATH setup, etc.
 # core.sh will automatically source lib.sh as a dependency
 if [ -n "${ANDROID_SCRIPTS_DIR:-}" ] && [ -f "${ANDROID_SCRIPTS_DIR}/platform/core.sh" ]; then
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Sourcing core.sh..." >&2
   . "${ANDROID_SCRIPTS_DIR}/platform/core.sh"
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] core.sh sourced" >&2
 
   # Setup SDK and PATH (functions from core.sh)
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Calling android_setup_sdk_environment..." >&2
   android_setup_sdk_environment
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] android_setup_sdk_environment done" >&2
+
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Calling android_setup_path..." >&2
   android_setup_path
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] android_setup_path done" >&2
 
   # Optional validation
   if [ -f "${ANDROID_SCRIPTS_DIR}/domain/validate.sh" ]; then
+    [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Running validation..." >&2
     . "${ANDROID_SCRIPTS_DIR}/domain/validate.sh"
     android_validate_sdk || true
+    [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Validation complete" >&2
   fi
 
   # Optional summary display
   if [ -n "${INIT_ANDROID:-}" ] && [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && [ -z "${ANDROID_SDK_SUMMARY_PRINTED:-}" ]; then
+    [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Showing summary..." >&2
     ANDROID_SDK_SUMMARY_PRINTED=1
     export ANDROID_SDK_SUMMARY_PRINTED
     android_show_summary
   fi
 fi
+
+[ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Exit" >&2 || true

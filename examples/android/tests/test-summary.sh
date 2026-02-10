@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SUITE_NAME="${1:-Test Suite}"
-LOG_PATH="${2:-test-results/logs}"
+LOG_PATH="${2:-reports/logs}"
 
 echo ""
 echo "===================================="

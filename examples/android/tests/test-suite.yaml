@@ -1,38 +1,25 @@
- version: "0.5"
+version: "0.5"
 
 environment:
   - "TEST_TIMEOUT=300"
   - "BOOT_TIMEOUT=180"
+  - "ANDROID_DEBUG_SETUP=${ANDROID_DEBUG_SETUP:-}"
 
-log_location: "test-results/android-e2e-logs"
+log_location: "reports/android-e2e-logs"
 log_level: info
 
 processes:
   # Phase 1: Build - runs first (no dependency)
   build-app:
-    command: "echo '📦 Building Android app...' && gradle assembleDebug --info && echo '✓ Build complete'"
+    command: "echo '[BUILD-APP] Starting build process (PID=$$)...' && echo '📦 Building Android app...' && gradle assembleDebug --info && echo '✓ Build complete'"
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f ${ANDROID_APP_APK:-app/build/outputs/apk/debug/app-debug.apk}"
-      initial_delay_seconds: 5
-      period_seconds: 5
-      timeout_seconds: 300
-      success_threshold: 1
 
   # Phase 2a: Sync AVDs - ensure all AVDs match device definitions
   sync-avds:
-    command: ". ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh && echo '🔄 Syncing AVDs with device definitions...' && android.sh devices sync && echo '✓ Sync complete'"
+    command: "echo '[SYNC-AVDS] Starting (PID=$$)...' && echo '[SYNC-AVDS] About to source setup.sh...' && . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh && echo '[SYNC-AVDS] setup.sh sourced' && echo '🔄 Syncing AVDs with device definitions...' && android.sh devices sync && echo '✓ Sync complete'"
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "echo 'Sync complete'"
-      initial_delay_seconds: 1
-      period_seconds: 2
-      timeout_seconds: 120
-      success_threshold: 1
 
   # Phase 2b: Start emulator (depends on sync completing)
   # Reuses existing emulator if already running
@@ -42,9 +29,11 @@ processes:
       sync-avds:
         condition: process_completed_successfully
     command: |
+      echo "[ANDROID-EMULATOR] Starting (PID=$$)..."
       # Source Android environment
-      echo "DEBUG: Sourcing setup.sh..."
+      echo "[ANDROID-EMULATOR] About to source setup.sh..."
       . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      echo "[ANDROID-EMULATOR] setup.sh sourced"
       echo "DEBUG: Setup sourced, checking PATH..."
       echo "DEBUG: android.sh location: $(which android.sh 2>&1 || echo 'NOT FOUND')"
 
@@ -81,8 +70,21 @@ processes:
       # Write serial to file for other processes to read
       echo "$ANDROID_SERIAL" > /tmp/android-emu-serial.txt
       echo "✓ Emulator ready for testing"
+
+      # Keep process alive so emulator stays running
+      tail -f /dev/null
     availability:
       restart: "no"
+    readiness_probe:
+      exec:
+        command: |
+          serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo "")
+          [ -n "$serial" ] && adb -s $serial shell getprop sys.boot_completed 2>/dev/null | grep -q "1"
+      initial_delay_seconds: 10
+      period_seconds: 5
+      timeout_seconds: 180
+      success_threshold: 1
+      failure_threshold: 3
 
   # Phase 3: Deploy app - depends on both build and emulator being ready
   deploy-app:
@@ -120,7 +122,7 @@ processes:
       build-app:
         condition: process_completed_successfully
       android-emulator:
-        condition: process_completed_successfully
+        condition: process_healthy
     availability:
       restart: "no"
 
@@ -150,7 +152,7 @@ processes:
 
   # Summary - displays results and optionally stays open
   summary:
-    command: "bash ${ANDROID_FLAKE_DIR}/test-summary.sh 'Android E2E Test Suite' 'test-results/android-e2e-logs'"
+    command: "bash tests/test-summary.sh 'Android E2E Test Suite' 'reports/android-e2e-logs'"
     depends_on:
       cleanup-app:
         condition: process_completed

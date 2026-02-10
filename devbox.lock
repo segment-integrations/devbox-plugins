@@ -285,6 +285,54 @@
           "store_path": "/nix/store/ghz6z8fvri862mgdg5kl95cpfls931h5-shellcheck-0.11.0-bin"
         }
       }
+    },
+    "treefmt@latest": {
+      "last_modified": "2026-01-23T17:20:52Z",
+      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#treefmt",
+      "source": "devbox-search",
+      "version": "2.4.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/37qcrdrfdf8b9pyli0j0vj9d69dykmpr-treefmt-2.4.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/37qcrdrfdf8b9pyli0j0vj9d69dykmpr-treefmt-2.4.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ccv7dxwff3xpivsdhrjbq3mpk0br5v7d-treefmt-2.4.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ccv7dxwff3xpivsdhrjbq3mpk0br5v7d-treefmt-2.4.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/sbq2psv4q9hvfvalk00g0pkqjl2912m1-treefmt-2.4.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/sbq2psv4q9hvfvalk00g0pkqjl2912m1-treefmt-2.4.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/z8xrjfswqqpydc42lyas064pp8kxgnl0-treefmt-2.4.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/z8xrjfswqqpydc42lyas064pp8kxgnl0-treefmt-2.4.0"
+        }
+      }
     }
   }
 }
