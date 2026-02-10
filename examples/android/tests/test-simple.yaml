@@ -1,9 +1,0 @@
-version: "0.5"
-
-log_level: debug
-
-processes:
-  test:
-    command: "echo 'Hello from process-compose' && sleep 2 && echo 'Done'"
-    availability:
-      restart: "no"

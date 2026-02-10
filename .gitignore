@@ -25,3 +25,7 @@
 
 # Test results (only last run kept locally)
 /reports/
+/test-results/
+examples/*/reports/
+examples/*/test-results/
+plugins/*/tests/reports/

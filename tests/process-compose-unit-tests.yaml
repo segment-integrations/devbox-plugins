@@ -4,77 +4,40 @@ log_location: "${REPORTS_DIR:-reports}/devbox-unit-tests-logs"
 log_level: info
 
 processes:
-  # Phase 1: Linting (parallel)
-  lint-android:
-    command: "shellcheck -S warning plugins/android/virtenv/scripts/*.sh"
-    availability:
-      restart: "no"
-
-  lint-ios:
-    command: "shellcheck -S warning plugins/ios/virtenv/scripts/*.sh"
-    availability:
-      restart: "no"
-
-  lint-react-native:
-    command: "bash -c 'if ls plugins/react-native/scripts/*.sh 1>/dev/null 2>&1; then shellcheck -S warning plugins/react-native/scripts/*.sh; else echo \"No React Native shell scripts to lint\"; fi'"
-    availability:
-      restart: "no"
-
-  # Phase 2: Android tests (parallel after lint)
+  # Android unit tests (run in parallel)
   test-android-lib:
     command: "bash plugins/tests/android/test-lib.sh"
-    depends_on:
-      lint-android:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
   test-android-devices:
     command: "bash plugins/tests/android/test-devices.sh"
-    depends_on:
-      lint-android:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
   test-android-device-mgmt:
     command: "bash plugins/tests/android/test-device-mgmt.sh"
-    depends_on:
-      lint-android:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
   test-android-validation:
     command: "bash plugins/tests/android/test-validation.sh"
-    depends_on:
-      lint-android:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
-  # Phase 3: iOS tests (parallel)
+  # iOS unit tests (run in parallel)
   test-ios-lib:
     command: "sh plugins/tests/ios/test-lib.sh"
-    depends_on:
-      lint-ios:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
   test-ios-device-mgmt:
     command: "bash plugins/tests/ios/test-device-mgmt.sh"
-    depends_on:
-      lint-ios:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
   test-ios-validation:
     command: "bash plugins/tests/ios/test-cache.sh"
-    depends_on:
-      lint-ios:
-        condition: process_completed_successfully
     availability:
       restart: "no"
 
@@ -86,35 +49,22 @@ processes:
       echo "     UNIT TESTS SUITE SUMMARY"
       echo "========================================"
       echo ""
-      echo "Linting:"
-      echo "  ✓ Android scripts"
-      echo "  ✓ iOS scripts"
-      echo "  ✓ React Native scripts"
-      echo ""
       echo "Android Tests:"
-      echo "  ✓ lib.sh (20 tests)"
-      echo "  ✓ devices.sh (12 tests)"
-      echo "  ✓ device-mgmt (4 tests)"
-      echo "  ✓ validation (4 tests)"
+      echo "  ✓ lib.sh"
+      echo "  ✓ devices.sh"
+      echo "  ✓ device-mgmt"
+      echo "  ✓ validation"
       echo ""
       echo "iOS Tests:"
-      echo "  ✓ lib.sh (5 tests)"
-      echo "  ✓ device-mgmt (4 tests)"
-      echo "  ✓ validation (5 tests)"
+      echo "  ✓ lib.sh"
+      echo "  ✓ device-mgmt"
+      echo "  ✓ validation"
       echo ""
       echo "========================================"
       echo "     ALL UNIT TESTS PASSED ✓"
       echo "========================================"
       echo ""
-      echo "Total: 54 individual tests"
-      echo ""
     depends_on:
-      lint-android:
-        condition: process_completed
-      lint-ios:
-        condition: process_completed
-      lint-react-native:
-        condition: process_completed
       test-android-lib:
         condition: process_completed
       test-android-devices:

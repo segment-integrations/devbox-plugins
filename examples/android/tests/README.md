@@ -1,34 +1,31 @@
-# Example Android Tests
+# Android E2E Tests
 
-These are simple, educational tests showing how to test your Android app with devbox.
+This directory contains the E2E test suite for the Android example app.
 
 ## Running Tests
 
 From the `examples/android` directory:
 
 ```bash
-# Test that the app builds
-devbox run bash tests/test-build.sh
-
-# Test that the emulator starts
-devbox run bash tests/test-emulator.sh
-
-# Or use the plugin's built-in E2E test
+# Run complete E2E test (build → emulator → deploy → verify)
 devbox run test:e2e
+
+# Run in deterministic mode (fresh emulator, clean state)
+TEST_PURE=1 devbox run test:e2e
+
+# Run with TUI for interactive monitoring
+TEST_TUI=true devbox run test:e2e
 ```
 
-## Plugin Tests vs Example Tests
+## Test Suite
 
-### Plugin Tests (`devbox run test:e2e`)
-- **Purpose:** Test the plugin itself works correctly
-- **Scope:** Complete workflow (build → emulator → deploy → verify)
-- **Portable:** Works for any Android project that includes the plugin
-- **Configuration:** Via environment variables
-
-### Example Tests (these files)
-- **Purpose:** Educational - show you how to write your own tests
-- **Scope:** Simple, focused examples
-- **Usage:** Copy these into your own projects and customize
+The test suite (`test-suite.yaml`) orchestrates:
+1. **Build** - Gradle assembleDebug
+2. **Sync AVDs** - Ensure emulator definitions match device configs
+3. **Start Emulator** - Boot Android emulator (or reuse existing)
+4. **Deploy** - Install and launch APK
+5. **Cleanup** - Stop app (and emulator in pure mode)
+6. **Summary** - Display results
 
 ## Copy to Your Project
 
