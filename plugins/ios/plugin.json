@@ -74,13 +74,13 @@
         "process-compose -f {{ .Virtenv }}/test-suite.yaml --no-server --tui=${TEST_TUI:-true}"
       ],
       "start:sim": [
-        "ios_start \"${1:-}\""
+        "bash -c '. {{ .Virtenv }}/scripts/lib/lib.sh && . {{ .Virtenv }}/scripts/platform/core.sh && . {{ .Virtenv }}/scripts/domain/simulator.sh && ios_start \"${1:-}\"'"
       ],
       "stop:sim": [
-        "ios_stop"
+        "bash -c '. {{ .Virtenv }}/scripts/lib/lib.sh && . {{ .Virtenv }}/scripts/platform/core.sh && . {{ .Virtenv }}/scripts/domain/simulator.sh && ios_stop'"
       ],
       "start:ios": [
-        "ios_run_app \"${1-}\""
+        "bash -c '. {{ .Virtenv }}/scripts/lib/lib.sh && . {{ .Virtenv }}/scripts/platform/core.sh && . {{ .Virtenv }}/scripts/domain/simulator.sh && . {{ .Virtenv }}/scripts/domain/deploy.sh && ios_run_app \"${1-}\"'"
       ],
       "doctor": [
         "echo 'iOS Environment Check'",

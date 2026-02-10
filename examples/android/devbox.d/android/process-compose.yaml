@@ -1,0 +1,10 @@
+version: "0.5"
+
+processes:
+  android-emulator:
+    command: "bash -lc '. \"/Users/abueide/code/devbox-plugins/examples/android/.devbox/virtenv/android/scripts/env.sh\"; android_run_emulator_service'"
+    availability:
+      restart: "on_failure"
+    shutdown:
+      signal: 15
+      timeout: 120

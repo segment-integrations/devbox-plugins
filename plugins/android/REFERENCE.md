@@ -39,8 +39,19 @@ Configure the plugin by setting environment variables in `plugin.json`. These ar
 
 ### Emulator
 
-- `devbox run --pure start-emu [device]`
-- `devbox run --pure stop-emu`
+- `devbox run --pure android.sh emulator start [--pure] [device]`
+  - `--pure`: Start fresh emulator with wiped data (clean Android OS state for deterministic tests)
+  - Without `--pure`: Reuses existing emulator if running (faster for development, preserves data)
+- `devbox run --pure android.sh emulator stop`
+- `devbox run --pure android.sh emulator reset [device]`
+
+**Convenience aliases:**
+- `devbox run --pure start-emu [device]` (equivalent to `android.sh emulator start` without `--pure`)
+- `devbox run --pure stop-emu` (equivalent to `android.sh emulator stop`)
+
+**Behavior:**
+- Without `--pure`: Checks if an emulator with the same AVD is already running and reuses it
+- With `--pure`: Always starts a new emulator instance with `-wipe-data` flag (fresh Android OS)
 
 ### Build + run
 

@@ -6,12 +6,12 @@ log_level: info
 processes:
   # Shellcheck linting (all run in parallel)
   lint-android-scripts:
-    command: "shellcheck -S warning plugins/android/scripts/*.sh"
+    command: "find plugins/android/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
     availability:
       restart: "no"
 
   lint-ios-scripts:
-    command: "shellcheck -S warning plugins/ios/scripts/*.sh"
+    command: "find plugins/ios/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
     availability:
       restart: "no"
 

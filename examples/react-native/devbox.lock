@@ -2,8 +2,8 @@
   "lockfile_version": "1",
   "packages": {
     "bash@latest": {
-      "last_modified": "2026-01-23T17:20:52Z",
-      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#bash",
+      "last_modified": "2026-02-02T23:09:17Z",
+      "resolved": "github:NixOS/nixpkgs/47472570b1e607482890801aeaf29bfb749884f6#bash",
       "source": "devbox-search",
       "version": "5.3p9",
       "systems": {
@@ -78,16 +78,16 @@
               "default": true
             },
             {
-              "name": "info",
-              "path": "/nix/store/z9v40pvapyx3qd6liy9q4v6iwncwapl5-bash-interactive-5.3p9-info"
-            },
-            {
               "name": "dev",
               "path": "/nix/store/7px2mpd1qj0106g64qp411p2y5cwlzbz-bash-interactive-5.3p9-dev"
             },
             {
               "name": "doc",
               "path": "/nix/store/s9wwkzamvd36hwz94661rzg0s8bs86bc-bash-interactive-5.3p9-doc"
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/z9v40pvapyx3qd6liy9q4v6iwncwapl5-bash-interactive-5.3p9-info"
             }
           ],
           "store_path": "/nix/store/n129ikd89z3didy0p2xw8hqgfaphyv11-bash-interactive-5.3p9"
@@ -213,12 +213,12 @@
               "default": true
             },
             {
-              "name": "debug",
-              "path": "/nix/store/fzcbb02abzvmyrvpa360abfbspnz9l1j-coreutils-9.9-debug"
-            },
-            {
               "name": "info",
               "path": "/nix/store/7c3i7919ys6jk8qkccspz3bkc1lv82d9-coreutils-9.9-info"
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/fzcbb02abzvmyrvpa360abfbspnz9l1j-coreutils-9.9-debug"
             }
           ],
           "store_path": "/nix/store/i2vmgx46q9hd3z6rigaiman3wl3i2gc4-coreutils-9.9"
@@ -310,8 +310,8 @@
       }
     },
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
-      "last_modified": "2026-02-04T01:49:30Z",
-      "resolved": "github:NixOS/nixpkgs/aa290c9891fa4ebe88f8889e59633d20cc06a5f2?lastModified=1770169770"
+      "last_modified": "2026-02-08T07:51:33Z",
+      "resolved": "github:NixOS/nixpkgs/fef9403a3e4d31b0a23f0bacebbec52c248fbb51?lastModified=1770537093"
     },
     "gnugrep@latest": {
       "last_modified": "2026-01-23T17:20:52Z",
@@ -519,8 +519,8 @@
       }
     },
     "jq@latest": {
-      "last_modified": "2026-01-26T13:12:53Z",
-      "resolved": "github:NixOS/nixpkgs/13b0f9e6ac78abbbb736c635d87845c4f4bee51b#jq",
+      "last_modified": "2026-02-06T12:24:04Z",
+      "resolved": "github:NixOS/nixpkgs/ae67888ff7ef9dff69b3cf0cc0fbfbcd3a722abe#jq",
       "source": "devbox-search",
       "version": "1.8.1",
       "systems": {
@@ -537,16 +537,16 @@
               "default": true
             },
             {
-              "name": "dev",
-              "path": "/nix/store/bhryp10d5w5h9rsav5k9m9jb55z26bsl-jq-1.8.1-dev"
-            },
-            {
               "name": "doc",
               "path": "/nix/store/238sn0gg3i3i9v6kgx4g1k6b19frzy49-jq-1.8.1-doc"
             },
             {
               "name": "out",
               "path": "/nix/store/n64h0247s3674kry90l6kszx06zyrgfn-jq-1.8.1"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/bhryp10d5w5h9rsav5k9m9jb55z26bsl-jq-1.8.1-dev"
             }
           ],
           "store_path": "/nix/store/qjs0qndyz1g97rsc1zp4cd692y5iph64-jq-1.8.1-bin"
@@ -591,16 +591,16 @@
               "default": true
             },
             {
-              "name": "dev",
-              "path": "/nix/store/pp2hrljvalrrwyxh7is69nnlmxb2m7lk-jq-1.8.1-dev"
-            },
-            {
               "name": "doc",
               "path": "/nix/store/h05xaf7fsasgp8cpyar2195cc8lbgih8-jq-1.8.1-doc"
             },
             {
               "name": "out",
               "path": "/nix/store/bmg2xfw86wavg7fm062nyf6v48xzxh0j-jq-1.8.1"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/pp2hrljvalrrwyxh7is69nnlmxb2m7lk-jq-1.8.1-dev"
             }
           ],
           "store_path": "/nix/store/51343hgchh7by4l8r1g244ma05ny3x0b-jq-1.8.1-bin"
@@ -635,9 +635,9 @@
       }
     },
     "nodejs@20": {
-      "last_modified": "2026-01-24T23:43:55Z",
+      "last_modified": "2026-02-06T12:24:04Z",
       "plugin_version": "0.0.2",
-      "resolved": "github:NixOS/nixpkgs/26b0093bc977081dc7653175a3fadab11e07bed7#nodejs_20",
+      "resolved": "github:NixOS/nixpkgs/ae67888ff7ef9dff69b3cf0cc0fbfbcd3a722abe#nodejs_20",
       "source": "devbox-search",
       "version": "20.20.0",
       "systems": {
@@ -649,12 +649,12 @@
               "default": true
             },
             {
-              "name": "dev",
-              "path": "/nix/store/ffv0m7yqk3zdrjcbz030l5h4drd3qpxi-nodejs-20.20.0-dev"
-            },
-            {
               "name": "libv8",
               "path": "/nix/store/na6qprgp6izbr2acc67rv45i8f567c61-nodejs-20.20.0-libv8"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/ffv0m7yqk3zdrjcbz030l5h4drd3qpxi-nodejs-20.20.0-dev"
             }
           ],
           "store_path": "/nix/store/lpxs72iagg4hxnd8swgpvaiajgpdiaiv-nodejs-20.20.0"
@@ -667,12 +667,12 @@
               "default": true
             },
             {
-              "name": "dev",
-              "path": "/nix/store/sj3dkxdbgi6aw7bdw3y4g6f1p3167mzi-nodejs-20.20.0-dev"
-            },
-            {
               "name": "libv8",
               "path": "/nix/store/w43cfcpz1d205xwixvyb0wnrq62nfs5r-nodejs-20.20.0-libv8"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/sj3dkxdbgi6aw7bdw3y4g6f1p3167mzi-nodejs-20.20.0-dev"
             }
           ],
           "store_path": "/nix/store/j99h1wchrxq7yjgsgdfzpb471gd9ffzz-nodejs-20.20.0"
@@ -685,12 +685,12 @@
               "default": true
             },
             {
-              "name": "libv8",
-              "path": "/nix/store/0g5s1xy86aqbi1cfa35z63rak73hki6y-nodejs-20.20.0-libv8"
-            },
-            {
               "name": "dev",
               "path": "/nix/store/gafdza0dkjvhqsx0xlmi1wsgw1ha6ash-nodejs-20.20.0-dev"
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/0g5s1xy86aqbi1cfa35z63rak73hki6y-nodejs-20.20.0-libv8"
             }
           ],
           "store_path": "/nix/store/93b8p46bmm8qrwymi6aw99h8n0nnni03-nodejs-20.20.0"
@@ -703,12 +703,12 @@
               "default": true
             },
             {
-              "name": "libv8",
-              "path": "/nix/store/7sljbl366m4vlf79va6l4441j1qmpjax-nodejs-20.20.0-libv8"
-            },
-            {
               "name": "dev",
               "path": "/nix/store/p6c5l3l0p5cymnzybcyil9dqbiymi6ly-nodejs-20.20.0-dev"
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/7sljbl366m4vlf79va6l4441j1qmpjax-nodejs-20.20.0-libv8"
             }
           ],
           "store_path": "/nix/store/mcy5n3l8z7dbvaic7kgh80b86xj7smkn-nodejs-20.20.0"
@@ -716,50 +716,50 @@
       }
     },
     "process-compose@latest": {
-      "last_modified": "2026-01-23T17:20:52Z",
-      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#process-compose",
+      "last_modified": "2026-02-02T23:09:17Z",
+      "resolved": "github:NixOS/nixpkgs/47472570b1e607482890801aeaf29bfb749884f6#process-compose",
       "source": "devbox-search",
-      "version": "1.87.0",
+      "version": "1.90.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/vp8dbw54aif4cbx8h11q99nr8kbyd8y6-process-compose-1.87.0",
+              "path": "/nix/store/ky986spyv6sfijb1k44hddla7hvi56lp-process-compose-1.90.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/vp8dbw54aif4cbx8h11q99nr8kbyd8y6-process-compose-1.87.0"
+          "store_path": "/nix/store/ky986spyv6sfijb1k44hddla7hvi56lp-process-compose-1.90.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/4bry8d3a5s6dypb41g2b48vizimzbhbc-process-compose-1.87.0",
+              "path": "/nix/store/iqx95vl5dwkrsfcf4mj2643bfisyj1ff-process-compose-1.90.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/4bry8d3a5s6dypb41g2b48vizimzbhbc-process-compose-1.87.0"
+          "store_path": "/nix/store/iqx95vl5dwkrsfcf4mj2643bfisyj1ff-process-compose-1.90.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/yr15a9rgjmwma28n3hjpilw77hhb3aqk-process-compose-1.87.0",
+              "path": "/nix/store/fki23dffy7nzlma507q5lhf3dkm5l6wv-process-compose-1.90.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/yr15a9rgjmwma28n3hjpilw77hhb3aqk-process-compose-1.87.0"
+          "store_path": "/nix/store/fki23dffy7nzlma507q5lhf3dkm5l6wv-process-compose-1.90.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/xgixy092whsar7fwm9lmcn4mv9kqn983-process-compose-1.87.0",
+              "path": "/nix/store/c7fywarscr5c07bxgd6d5g0isn0ijysz-process-compose-1.90.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/xgixy092whsar7fwm9lmcn4mv9kqn983-process-compose-1.87.0"
+          "store_path": "/nix/store/c7fywarscr5c07bxgd6d5g0isn0ijysz-process-compose-1.90.0"
         }
       }
     },

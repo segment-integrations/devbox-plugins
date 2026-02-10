@@ -1,4 +1,4 @@
- version: "0.5"
+version: "0.5"
 
 environment:
   - "TEST_TIMEOUT=300"
@@ -23,7 +23,7 @@ processes:
 
   # Phase 2a: Sync AVDs - ensure all AVDs match device definitions
   sync-avds:
-    command: ". ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh && echo '🔄 Syncing AVDs with device definitions...' && android.sh devices sync && echo '✓ Sync complete'"
+    command: "echo '🔄 Syncing AVDs with device definitions...' && android.sh devices sync && echo '✓ Sync complete'"
     availability:
       restart: "no"
     readiness_probe:
@@ -42,23 +42,18 @@ processes:
       sync-avds:
         condition: process_completed_successfully
     command: |
-      # Source Android environment
-      echo "DEBUG: Sourcing setup.sh..."
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
-      echo "DEBUG: Setup sourced, checking PATH..."
-      echo "DEBUG: android.sh location: $(which android.sh 2>&1 || echo 'NOT FOUND')"
-
       # Detect running emulator or start new one
       # Set TEST_PURE=1 to always start fresh with clean state (for deterministic testing)
       if [ "${TEST_PURE:-0}" = "1" ]; then
         echo "🚀 Starting fresh Android emulator with clean state (${ANDROID_DEFAULT_DEVICE:-max})..."
-        echo "DEBUG: About to call android.sh emulator start..."
 
-        # Run emulator start command (outputs to console in real-time)
-        android.sh emulator start --pure ${ANDROID_DEFAULT_DEVICE:-max}
+        # Capture output and extract serial
+        output=$(android.sh emulator start --pure ${ANDROID_DEFAULT_DEVICE:-max} 2>&1)
+        echo "$output"
 
-        # Read serial from temp file written by emulator.sh
-        export ANDROID_SERIAL=$(cat /tmp/android-emulator-serial.txt)
+        # Extract serial from output (looks for "emulator-XXXX" pattern)
+        serial=$(echo "$output" | grep -o 'emulator-[0-9]*' | head -1)
+        export ANDROID_SERIAL="${serial:-emulator-5554}"
         echo "✓ Using emulator: $ANDROID_SERIAL"
       else
         existing_emu=$(adb devices | grep emulator | head -1 | awk '{print $1}')
@@ -69,11 +64,13 @@ processes:
         else
           echo "🚀 Starting Android emulator (${ANDROID_DEFAULT_DEVICE:-max})..."
 
-          # Run emulator start command (outputs to console in real-time)
-          android.sh emulator start ${ANDROID_DEFAULT_DEVICE:-max}
+          # Capture output and extract serial
+          output=$(android.sh emulator start ${ANDROID_DEFAULT_DEVICE:-max} 2>&1)
+          echo "$output"
 
-          # Read serial from temp file written by emulator.sh
-          export ANDROID_SERIAL=$(cat /tmp/android-emulator-serial.txt)
+          # Extract serial from output
+          serial=$(echo "$output" | grep -o 'emulator-[0-9]*' | head -1)
+          export ANDROID_SERIAL="${serial:-emulator-5554}"
           echo "✓ Using emulator: $ANDROID_SERIAL"
         fi
       fi
@@ -87,9 +84,6 @@ processes:
   # Phase 3: Deploy app - depends on both build and emulator being ready
   deploy-app:
     command: |
-      # Source Android environment
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
-
       serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo emulator-5554)
       export ANDROID_EMULATOR_SERIAL="$serial"
 
@@ -127,9 +121,6 @@ processes:
   # Cleanup - stop the app (and emulator if TEST_PURE=1)
   cleanup-app:
     command: |
-      # Source Android environment
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
-
       serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo emulator-5554)
       echo "🧹 Cleaning up: stopping app on $serial"
       adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.example.devbox} 2>/dev/null || true

@@ -217,13 +217,25 @@ android_launch_app() {
     adb -s "$emulator_serial" shell monkey -p "$package_name" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
   fi
 
-  # Verify app process is running
-  if adb -s "$emulator_serial" shell pidof "$package_name" >/dev/null 2>&1; then
-    echo "✓ App process running"
-  else
-    echo "WARNING: App process not detected after launch attempt" >&2
-    echo "         App may still have launched successfully" >&2
-  fi
+  # Wait a moment for the app process to start
+  sleep 2
+
+  # Verify app process is running (try a few times)
+  max_attempts=5
+  attempt=0
+  while [ $attempt -lt $max_attempts ]; do
+    if adb -s "$emulator_serial" shell pidof "$package_name" >/dev/null 2>&1; then
+      echo "✓ App process running"
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    if [ $attempt -lt $max_attempts ]; then
+      sleep 1
+    fi
+  done
+
+  echo "WARNING: App process not detected after ${max_attempts} attempts" >&2
+  echo "         App may still have launched successfully" >&2
 }
 
 # Deploy Android app (build, install, launch)

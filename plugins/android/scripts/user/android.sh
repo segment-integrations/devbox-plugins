@@ -139,7 +139,22 @@ case "$command_name" in
 
     case "$subcommand" in
       start)
-        device_name="${1:-}"
+        # Parse flags and device name
+        pure_mode=0
+        device_name=""
+
+        while [ $# -gt 0 ]; do
+          case "$1" in
+            --pure)
+              pure_mode=1
+              shift
+              ;;
+            *)
+              device_name="$1"
+              shift
+              ;;
+          esac
+        done
 
         # Layer 3 orchestration: setup AVDs first, then start emulator
         if ! command -v android_setup_avds >/dev/null 2>&1; then
@@ -149,6 +164,11 @@ case "$command_name" in
         if ! command -v android_start_emulator >/dev/null 2>&1; then
           echo "ERROR: android_start_emulator function not available" >&2
           exit 1
+        fi
+
+        # If --pure mode, set flag for emulator to wipe data
+        if [ "$pure_mode" = "1" ]; then
+          export ANDROID_EMULATOR_PURE=1
         fi
 
         # Step 1: Setup AVDs (ensures they exist and match definitions)

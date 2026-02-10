@@ -6,24 +6,24 @@ log_level: info
 processes:
   # Phase 1: Static Analysis (runs in parallel)
   lint-android:
-    command: "shellcheck -S warning plugins/android/scripts/*.sh"
+    command: "find plugins/android/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
     availability:
       restart: "no"
     readiness_probe:
       exec:
-        command: "shellcheck -S warning plugins/android/scripts/*.sh"
+        command: "find plugins/android/scripts -name '*.sh' -type f"
       initial_delay_seconds: 1
       period_seconds: 1
       timeout_seconds: 30
       success_threshold: 1
 
   lint-ios:
-    command: "shellcheck -S warning plugins/ios/scripts/*.sh"
+    command: "find plugins/ios/scripts -name '*.sh' -type f -exec shellcheck -S warning {} +"
     availability:
       restart: "no"
     readiness_probe:
       exec:
-        command: "shellcheck -S warning plugins/ios/scripts/*.sh"
+        command: "find plugins/ios/scripts -name '*.sh' -type f"
       initial_delay_seconds: 1
       period_seconds: 1
       timeout_seconds: 30
@@ -109,58 +109,6 @@ processes:
       timeout_seconds: 5
       success_threshold: 1
 
-  # Phase 3: E2E Tests (sequential, depends on unit tests)
-  e2e-android:
-    command: "bash tests/e2e/e2e-android.sh"
-    depends_on:
-      test-android-lib:
-        condition: process_completed_successfully
-      test-android-devices:
-        condition: process_completed_successfully
-    availability:
-      restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f tests/e2e/e2e-android.sh"
-      initial_delay_seconds: 1
-      period_seconds: 1
-      timeout_seconds: 5
-      success_threshold: 1
-
-  e2e-ios:
-    command: "bash tests/e2e/e2e-ios.sh"
-    depends_on:
-      test-ios-lib:
-        condition: process_completed_successfully
-      e2e-android:
-        condition: process_completed_successfully
-    availability:
-      restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f tests/e2e/e2e-ios.sh"
-      initial_delay_seconds: 1
-      period_seconds: 1
-      timeout_seconds: 5
-      success_threshold: 1
-
-  e2e-react-native:
-    command: "bash tests/e2e/e2e-react-native.sh"
-    depends_on:
-      lint-react-native:
-        condition: process_completed_successfully
-      e2e-ios:
-        condition: process_completed_successfully
-    availability:
-      restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f tests/e2e/e2e-react-native.sh"
-      initial_delay_seconds: 1
-      period_seconds: 1
-      timeout_seconds: 5
-      success_threshold: 1
-
   # Summary - runs after ALL tests complete (pass or fail)
   summary:
     command: |
@@ -181,30 +129,22 @@ processes:
       echo "  ✓ Android devices.sh (12 tests)"
       echo "  ✓ iOS lib.sh (5 tests)"
       echo ""
-      echo "Phase 3: Integration Tests"
-      echo "  ✓ Android device management (4 tests)"
-      echo "  ✓ Android validation (4 tests)"
-      echo "  ✓ iOS device management (4 tests)"
-      echo "  ✓ iOS validation (5 tests)"
-      echo ""
-      echo "Phase 4: E2E Tests"
-      echo "  ✓ Android orchestrated E2E"
-      echo "  ✓ iOS orchestrated E2E"
-      echo "  ✓ React Native orchestrated E2E"
       echo ""
       echo "========================================"
-      echo "          ALL TESTS PASSED ✓"
+      echo "      FAST TESTS COMPLETE ✓"
       echo "========================================"
       echo ""
-      echo "Total test categories: 17"
-      echo "Total individual tests: ~60+"
+      echo "Total test categories: 9"
+      echo "Total individual tests: ~40+"
       echo ""
       echo "Logs available at:"
       echo "  - Linting: test-results/devbox-lint-logs"
       echo "  - Unit tests: test-results/devbox-unit-tests-logs"
-      echo "  - Android E2E: test-results/android-repo-e2e-logs"
-      echo "  - iOS E2E: test-results/ios-repo-e2e-logs"
-      echo "  - React Native E2E: test-results/react-native-repo-e2e-logs"
+      echo ""
+      echo "To run E2E tests:"
+      echo "  devbox run test:e2e:android"
+      echo "  devbox run test:e2e:ios"
+      echo "  devbox run test:e2e:rn"
       echo ""
     depends_on:
       lint-android:
@@ -222,12 +162,6 @@ processes:
       test-android-devices:
         condition: process_completed
       test-ios-lib:
-        condition: process_completed
-      e2e-android:
-        condition: process_completed
-      e2e-ios:
-        condition: process_completed
-      e2e-react-native:
         condition: process_completed
     availability:
       restart: "no"

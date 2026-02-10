@@ -39,11 +39,9 @@
   "create_files": {
     "{{ .Virtenv }}/android": "",
     "{{ .Virtenv }}/android/avd": "",
-    "{{ .Virtenv }}/process-compose.yaml": "process-compose.yaml",
-    "{{ .Virtenv }}/test-suite.yaml": "test-suite.yaml",
+    "{{ .DevboxDir }}/process-compose.yaml": "process-compose.yaml",
+    "{{ .DevboxDir }}/test-suite.yaml": "test-suite.yaml",
     "{{ .Virtenv }}/test-summary.sh": "test-summary.sh",
-    "{{ .Virtenv }}/tests/test-lib.sh": "tests/test-lib.sh",
-    "{{ .Virtenv }}/tests/test-devices.sh": "tests/test-devices.sh",
     "{{ .Virtenv }}/scripts/lib/lib.sh": "scripts/lib/lib.sh",
     "{{ .Virtenv }}/scripts/platform/core.sh": "scripts/platform/core.sh",
     "{{ .Virtenv }}/scripts/platform/device_config.sh": "scripts/platform/device_config.sh",
@@ -85,12 +83,8 @@
         "gradle connectedAndroidTest",
         "android_stop_emulator"
       ],
-      "test:unit": [
-        "bash {{ .Virtenv }}/tests/test-lib.sh",
-        "bash {{ .Virtenv }}/tests/test-devices.sh"
-      ],
       "test:e2e": [
-        "process-compose -f {{ .Virtenv }}/test-suite.yaml --no-server --tui=${TEST_TUI:-false}"
+        "process-compose -f {{ .DevboxDir }}/test-suite.yaml --no-server --tui=${TEST_TUI:-false}"
       ],
       "test": [
         "echo 'Running Android plugin tests...'",

@@ -244,13 +244,14 @@ ios_setup_environment() {
 
   # Make scripts executable and add to PATH
   if [ -n "${IOS_SCRIPTS_DIR:-}" ] && [ -d "${IOS_SCRIPTS_DIR}" ]; then
-    for script in ios.sh devices.sh; do
-      if [ -f "${IOS_SCRIPTS_DIR%/}/$script" ]; then
-        chmod +x "${IOS_SCRIPTS_DIR%/}/$script" 2>/dev/null || true
-      fi
-    done
-    PATH="${IOS_SCRIPTS_DIR}:$PATH"
-    export PATH
+    # Make all scripts executable
+    find "${IOS_SCRIPTS_DIR}" -type f -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+
+    # Add user/ directory to PATH (contains ios.sh, devices.sh)
+    if [ -d "${IOS_SCRIPTS_DIR}/user" ]; then
+      PATH="${IOS_SCRIPTS_DIR}/user:$PATH"
+      export PATH
+    fi
   fi
 }
 

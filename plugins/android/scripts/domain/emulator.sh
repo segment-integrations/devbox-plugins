@@ -114,19 +114,25 @@ android_start_emulator() {
 
   # ---- Check if Already Running ----
 
-  android_cleanup_offline_emulators
+  # In pure mode, always start a fresh instance
+  pure_mode="${ANDROID_EMULATOR_PURE:-0}"
+  if [ "$pure_mode" != "1" ]; then
+    android_cleanup_offline_emulators
 
-  existing_serial="$(android_find_running_emulator "$avd_to_start" 2>/dev/null || true)"
-  if [ -n "$existing_serial" ]; then
-    ANDROID_EMULATOR_SERIAL="$existing_serial"
-    export ANDROID_EMULATOR_SERIAL
+    existing_serial="$(android_find_running_emulator "$avd_to_start" 2>/dev/null || true)"
+    if [ -n "$existing_serial" ]; then
+      ANDROID_EMULATOR_SERIAL="$existing_serial"
+      export ANDROID_EMULATOR_SERIAL
 
-    # Extract port from serial (emulator-5554 -> 5554)
-    EMU_PORT="${existing_serial#emulator-}"
-    export EMU_PORT
+      # Extract port from serial (emulator-5554 -> 5554)
+      EMU_PORT="${existing_serial#emulator-}"
+      export EMU_PORT
 
-    echo "Android emulator already running: ${existing_serial} (${avd_to_start})"
-    return 0
+      echo "Android emulator already running: ${existing_serial} (${avd_to_start})"
+      return 0
+    fi
+  else
+    echo "Pure mode: Starting fresh emulator with clean state..."
   fi
 
   # ---- Find Available Port ----
@@ -154,6 +160,11 @@ android_start_emulator() {
   emulator_flags="$emulator_flags -no-boot-anim"
   emulator_flags="$emulator_flags -camera-back none"
   emulator_flags="$emulator_flags -accel on"
+
+  # Pure mode: wipe data for clean state
+  if [ "$pure_mode" = "1" ]; then
+    emulator_flags="$emulator_flags -wipe-data"
+  fi
 
   # Snapshot configuration - default to enabled for fast boots (5-10s vs 2-5min)
   # Set ANDROID_DISABLE_SNAPSHOTS=1 to force cold boots (needed for writable-system)
@@ -219,6 +230,9 @@ android_start_emulator() {
 
   echo ""
   echo "✓ Emulator ready: $emulator_serial"
+
+  # Write serial to temp file for scripts to read
+  echo "$emulator_serial" > /tmp/android-emulator-serial.txt
 }
 
 # Run emulator as a service (blocks until stopped)

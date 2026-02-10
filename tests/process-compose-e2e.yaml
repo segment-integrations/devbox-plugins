@@ -1,87 +1,50 @@
 version: "0.5"
 
-log_location: "test-results/devbox-e2e-logs"
+log_location: "test-results/e2e-logs"
 log_level: info
 
+environment:
+  - "TEST_PURE=1"
+
 processes:
-  # Sequential E2E tests to avoid resource conflicts
+  # Android E2E - runs plugin's test suite with deterministic mode
   e2e-android:
-    command: "bash tests/e2e/e2e-android.sh"
+    command: "cd examples/android && devbox run test:e2e"
+    working_dir: "."
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f tests/e2e/e2e-android.sh"
-      initial_delay_seconds: 1
-      period_seconds: 1
-      timeout_seconds: 5
-      success_threshold: 1
 
+  # iOS E2E - runs plugin's test suite (parallel with Android)
   e2e-ios:
-    command: "bash tests/e2e/e2e-ios.sh"
+    command: "cd examples/ios && devbox run test:e2e"
+    working_dir: "."
+    availability:
+      restart: "no"
+
+  # React Native E2E - waits for both Android and iOS
+  e2e-react-native:
+    command: "cd examples/react-native && devbox run test:e2e"
+    working_dir: "."
     depends_on:
       e2e-android:
-        condition: process_completed_successfully
-    availability:
-      restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f tests/e2e/e2e-ios.sh"
-      initial_delay_seconds: 1
-      period_seconds: 1
-      timeout_seconds: 5
-      success_threshold: 1
-
-  e2e-react-native:
-    command: "bash tests/e2e/e2e-react-native.sh"
-    depends_on:
+        condition: process_completed
       e2e-ios:
-        condition: process_completed_successfully
+        condition: process_completed
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -f tests/e2e/e2e-react-native.sh"
-      initial_delay_seconds: 1
-      period_seconds: 1
-      timeout_seconds: 5
-      success_threshold: 1
 
-  # Summary - runs after all E2E tests complete
+  # Summary
   summary:
     command: |
       echo ""
       echo "========================================"
-      echo "       E2E TESTS SUITE SUMMARY"
+      echo "      E2E TESTS COMPLETE"
       echo "========================================"
       echo ""
-      echo "Android E2E:"
-      echo "  ✓ Sync AVDs"
-      echo "  ✓ Build Android app"
-      echo "  ✓ Start emulator"
-      echo "  ✓ Deploy app"
-      echo "  ✓ Verify app running"
+      echo "Results:"
+      echo "  Check logs above for individual test results"
       echo ""
-      echo "iOS E2E:"
-      echo "  ✓ Sync simulators"
-      echo "  ✓ Build iOS app"
-      echo "  ✓ Start simulator"
-      echo "  ✓ Deploy app"
-      echo "  ✓ Verify app running"
-      echo ""
-      echo "React Native E2E:"
-      echo "  ✓ Build Node dependencies"
-      echo "  ✓ Android workflow (sync, build, deploy, verify)"
-      echo "  ✓ iOS workflow (sync, build, deploy, verify)"
-      echo ""
-      echo "========================================"
-      echo "       ALL E2E TESTS PASSED ✓"
-      echo "========================================"
-      echo ""
-      echo "Logs available at:"
-      echo "  - Android: test-results/android-repo-e2e-logs"
-      echo "  - iOS: test-results/ios-repo-e2e-logs"
-      echo "  - React Native: test-results/react-native-repo-e2e-logs"
+      echo "Logs: test-results/e2e-logs"
       echo ""
     depends_on:
       e2e-android:
