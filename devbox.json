@@ -34,16 +34,16 @@
         "process-compose -f tests/process-compose-unit-tests.yaml --tui=${TEST_TUI:-false}"
       ],
       "test:e2e:android": [
-        "echo 'Running Android example E2E test (deterministic mode)...'",
-        "cd examples/android && TEST_PURE=1 devbox run test:e2e"
+        "echo 'Running Android example E2E test...'",
+        "cd examples/android && devbox run test:e2e"
       ],
       "test:e2e:ios": [
-        "echo 'Running iOS example E2E test (deterministic mode)...'",
-        "cd examples/ios && TEST_PURE=1 devbox run test:e2e"
+        "echo 'Running iOS example E2E test...'",
+        "cd examples/ios && devbox run test:e2e"
       ],
       "test:e2e:rn": [
-        "echo 'Running React Native example E2E test (deterministic mode)...'",
-        "cd examples/react-native && TEST_PURE=1 devbox run test:e2e"
+        "echo 'Running React Native example E2E test...'",
+        "cd examples/react-native && devbox run test:e2e"
       ],
       "test:e2e": [
         "echo 'Running E2E tests (orchestrated: android+ios parallel, then rn)...'",

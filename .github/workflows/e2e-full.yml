@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   android-e2e:
-    name: Android E2E (Orchestrated) - ${{ matrix.device }}
+    name: Android E2E - ${{ matrix.device }}
     if: ${{ github.event_name == 'schedule' || inputs.run_android }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -47,7 +47,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated Android E2E test
+      - name: Run Android E2E test
         working-directory: examples/android
         env:
           EMU_HEADLESS: 1
@@ -55,7 +55,7 @@ jobs:
           TEST_TIMEOUT: 600
           ANDROID_DEFAULT_DEVICE: ${{ matrix.device }}
           TEST_TUI: false
-        run: bash ../../tests/e2e-android-orchestrated.sh
+        run: devbox run --pure test:e2e
 
       - name: Upload logs
         if: failure()
@@ -63,13 +63,13 @@ jobs:
         with:
           name: android-${{ matrix.device }}-logs
           path: |
-            test-results/android-repo-e2e-logs/
+            examples/android/reports/android-e2e-logs/
             examples/android/app/build/outputs/
             examples/android/build/
           retention-days: 7
 
   ios-e2e:
-    name: iOS E2E (Orchestrated) - ${{ matrix.device }}
+    name: iOS E2E - ${{ matrix.device }}
     if: ${{ github.event_name == 'schedule' || inputs.run_ios }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
@@ -92,7 +92,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated iOS E2E test
+      - name: Run iOS E2E test
         working-directory: examples/ios
         env:
           SIM_HEADLESS: 1
@@ -100,7 +100,7 @@ jobs:
           TEST_TIMEOUT: 600
           IOS_DEFAULT_DEVICE: ${{ matrix.device }}
           TEST_TUI: false
-        run: bash ../../tests/e2e-ios-orchestrated.sh
+        run: devbox run --pure test:e2e
 
       - name: Upload logs
         if: failure()
@@ -108,12 +108,12 @@ jobs:
         with:
           name: ios-${{ matrix.device }}-logs
           path: |
-            test-results/ios-repo-e2e-logs/
+            /tmp/ios-e2e-logs/
             ~/Library/Logs/CoreSimulator/
           retention-days: 7
 
   react-native-e2e:
-    name: React Native E2E (Orchestrated) - ${{ matrix.platform }}-${{ matrix.device }}
+    name: React Native E2E - ${{ matrix.platform }}-${{ matrix.device }}
     if: ${{ github.event_name == 'schedule' || inputs.run_react_native }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -161,7 +161,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated React Native E2E test
+      - name: Run React Native E2E test
         working-directory: examples/react-native
         env:
           EMU_HEADLESS: ${{ matrix.platform == 'android' && '1' || '0' }}
@@ -171,7 +171,7 @@ jobs:
           ANDROID_DEFAULT_DEVICE: ${{ matrix.device }}
           IOS_DEFAULT_DEVICE: ${{ matrix.device }}
           TEST_TUI: false
-        run: bash ../../tests/e2e-react-native-orchestrated.sh
+        run: devbox run --pure test:e2e:${{ matrix.platform }}
 
       - name: Upload logs
         if: failure()
@@ -179,7 +179,7 @@ jobs:
         with:
           name: react-native-${{ matrix.platform }}-${{ matrix.device }}-logs
           path: |
-            test-results/react-native-repo-e2e-logs/
+            examples/react-native/reports/
             examples/react-native/android/app/build/outputs/
             examples/react-native/ios/build/
             ~/Library/Logs/CoreSimulator/
@@ -204,8 +204,8 @@ jobs:
              [[ "${{ needs.react-native-e2e.result }}" != "success" ]]; then
             echo "::error::One or more E2E test suites failed"
             echo "::error::Check the individual job logs for details"
-            echo "::error::Orchestrated logs available in artifacts: /tmp/*-e2e-logs/"
+            echo "::error::Logs available in artifacts"
             exit 1
           fi
 
-          echo "::notice::✅ All orchestrated E2E tests passed successfully!"
+          echo "::notice::✅ All E2E tests passed successfully!"

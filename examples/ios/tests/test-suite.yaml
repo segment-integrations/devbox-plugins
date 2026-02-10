@@ -24,9 +24,9 @@ processes:
   # Phase 3: Start simulator - depends on sync completing
   ios-simulator:
     command: |
-      # In pure mode (TEST_PURE=1), start fresh simulator with clean state
+      # In pure mode (IN_NIX_SHELL=pure), start fresh simulator with clean state
       # Otherwise, reuse existing simulator if available
-      if [ "${TEST_PURE:-0}" = "1" ]; then
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🚀 Starting fresh iOS simulator with clean state (${IOS_DEVICE})..."
         devbox run start:sim ${IOS_DEVICE} --pure
       else
@@ -99,14 +99,12 @@ processes:
       timeout_seconds: 30
       success_threshold: 1
 
-  # Cleanup
+  # Cleanup - stop everything in pure mode, keep running in dev mode
   cleanup:
     command: |
-      echo "🧹 Cleaning up..."
-
-      # If TEST_PURE=1, delete the test simulator
-      if [ "${TEST_PURE:-0}" = "1" ]; then
-        echo "Deleting test simulator (pure mode)..."
+      # In pure mode (CI), delete the test simulator for reproducibility
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
+        echo "🧹 Cleaning up (pure mode): deleting test simulator..."
         # Find and delete any simulator with "Test" suffix
         test_sim_udid=$(xcrun simctl list devices | grep "Test" | grep -oE '[0-9A-F-]{36}' | head -1 || true)
         if [ -n "$test_sim_udid" ]; then
@@ -117,10 +115,9 @@ processes:
           echo "✓ No test simulator to clean up"
         fi
       else
-        echo "✓ Simulator still running (dev mode)"
+        # In dev mode, keep app and simulator running for interaction
+        echo "✓ Test complete - app and simulator still running"
       fi
-
-      echo "Cleanup complete"
     depends_on:
       verify-app-running:
         condition: process_completed

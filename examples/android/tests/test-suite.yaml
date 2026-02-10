@@ -45,7 +45,7 @@ processes:
       device="${ANDROID_DEFAULT_DEVICE:-max}"
 
       # In pure mode, always start fresh
-      if [ "${TEST_PURE:-0}" = "1" ]; then
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🚀 Starting fresh Android emulator (pure mode): $device"
         export ANDROID_EMULATOR_PURE=1
       else
@@ -111,23 +111,23 @@ processes:
     availability:
       restart: "no"
 
-  # Cleanup - stop the app (and emulator if TEST_PURE=1)
+  # Cleanup - stop everything in pure mode, keep running in dev mode
   cleanup-app:
     command: |
       # Source Android environment
       . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
 
       serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo emulator-5554)
-      echo "🧹 Cleaning up: stopping app on $serial"
-      adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.example.devbox} 2>/dev/null || true
 
-      # If TEST_PURE=1, also stop the emulator
-      if [ "${TEST_PURE:-0}" = "1" ]; then
-        echo "Stopping emulator (pure mode)..."
+      # In pure mode (CI), stop app and emulator for reproducibility
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
+        echo "🧹 Cleaning up (pure mode): stopping app and emulator..."
+        adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.example.devbox} 2>/dev/null || true
         android.sh emulator stop || true
         echo "✓ App stopped, emulator stopped"
       else
-        echo "✓ App stopped (emulator still running)"
+        # In dev mode, keep app and emulator running for interaction
+        echo "✓ Test complete - app and emulator still running"
       fi
     depends_on:
       run-app:

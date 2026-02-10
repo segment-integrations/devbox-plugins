@@ -118,7 +118,7 @@ jobs:
           retention-days: 7
 
   android-quick-smoke:
-    name: Android Quick Smoke Test (Orchestrated)
+    name: Android Quick Smoke Test
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: android-plugin-tests
@@ -136,7 +136,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated Android E2E test
+      - name: Run Android E2E test
         working-directory: examples/android
         env:
           EMU_HEADLESS: 1
@@ -144,7 +144,7 @@ jobs:
           TEST_TIMEOUT: 300
           ANDROID_DEFAULT_DEVICE: min
           TEST_TUI: false
-        run: bash ../../tests/e2e-android-orchestrated.sh
+        run: devbox run --pure test:e2e
 
       - name: Upload logs
         if: failure()
@@ -152,12 +152,12 @@ jobs:
         with:
           name: android-smoke-logs
           path: |
-            /tmp/android-e2e-logs/
+            examples/android/reports/android-e2e-logs/
             examples/android/app/build/outputs/
           retention-days: 7
 
   ios-quick-smoke:
-    name: iOS Quick Smoke Test (Orchestrated)
+    name: iOS Quick Smoke Test
     runs-on: macos-15
     timeout-minutes: 20
     needs: ios-plugin-tests
@@ -172,14 +172,14 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated iOS E2E test
+      - name: Run iOS E2E test
         working-directory: examples/ios
         env:
           SIM_HEADLESS: 1
           BOOT_TIMEOUT: 120
           TEST_TIMEOUT: 300
           TEST_TUI: false
-        run: bash ../../tests/e2e-ios-orchestrated.sh
+        run: devbox run --pure test:e2e
 
       - name: Upload logs
         if: failure()
