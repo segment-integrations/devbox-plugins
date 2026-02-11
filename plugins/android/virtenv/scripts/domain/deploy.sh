@@ -5,7 +5,7 @@
 set -eu
 
 if ! (return 0 2>/dev/null); then
-  echo "ERROR: run.sh must be sourced, not executed directly" >&2
+  echo "ERROR: deploy.sh must be sourced, not executed directly" >&2
   exit 1
 fi
 

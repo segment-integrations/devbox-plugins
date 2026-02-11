@@ -301,19 +301,19 @@ case "$command_name" in
     device_index=0
     while [ "$device_index" -lt "$device_count" ]; do
       device_json="$temp_dir/device_${device_index}.json"
-      jq -c ".devices[$device_index]" "$lock_path" > "$device_json"
+      # Extract device as properly formatted JSON (not as a JSON string)
+      jq ".devices[$device_index]" "$lock_path" > "$device_json"
 
-      # Call ensure function and track result
-      if ios_ensure_device_from_definition "$device_json"; then
-        result=$?
-        case $result in
-          0) matched=$((matched + 1)) ;;
-          1) recreated=$((recreated + 1)) ;;
-          2) created=$((created + 1)) ;;
-        esac
-      else
-        skipped=$((skipped + 1))
-      fi
+      # Call ensure function and track result (use || true to prevent early exit)
+      ios_ensure_device_from_definition "$device_json" || result=$?
+      result=${result:-0}
+      case $result in
+        0) matched=$((matched + 1)) ;;
+        1) recreated=$((recreated + 1)) ;;
+        2) created=$((created + 1)) ;;
+        3) skipped=$((skipped + 1)) ;;
+        *) skipped=$((skipped + 1)) ;;
+      esac
 
       device_index=$((device_index + 1))
     done
@@ -330,6 +330,7 @@ case "$command_name" in
     if [ "$skipped" -gt 0 ]; then
       echo "  ⚠ Skipped:   $skipped"
     fi
+    exit 0
     ;;
 
   *)

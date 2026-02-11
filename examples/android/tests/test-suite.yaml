@@ -48,16 +48,53 @@ processes:
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🚀 Starting fresh Android emulator (pure mode): $device"
         export ANDROID_EMULATOR_PURE=1
+
+        # Write expected serial for readiness probe (emulator always starts on 5554 first)
+        echo "emulator-5554" > /tmp/android-emu-serial.txt
+
+        # Start emulator in foreground - this blocks and runs the emulator
+        # Process-compose will monitor it and use readiness probe to check when ready
+        android.sh emulator start "$device"
       else
-        echo "🚀 Starting Android emulator: $device"
+        echo "🚀 Verifying Android emulator is running: $device"
+
+        # Write expected serial for readiness probe
+        serial="emulator-5554"
+        echo "$serial" > /tmp/android-emu-serial.txt
+
+        # Check if emulator is already running
+        if adb devices | grep -q "$serial"; then
+          echo "✓ Emulator already running: $serial"
+        else
+          echo "Starting emulator in background: $device"
+          # Start emulator in background (no foreground mode for reuse)
+          unset ANDROID_EMULATOR_FOREGROUND
+          android.sh emulator start "$device" &
+          echo "✓ Emulator starting (PID: $!)"
+        fi
+
+        # Wait for emulator to be fully booted
+        echo "Waiting for emulator to boot..."
+        max_attempts=60
+        attempt=0
+        while [ $attempt -lt $max_attempts ]; do
+          if adb -s $serial shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
+            echo "✓ Emulator ready for testing"
+            break
+          fi
+          attempt=$((attempt + 1))
+          sleep 2
+        done
+
+        if [ $attempt -ge $max_attempts ]; then
+          echo "ERROR: Emulator did not boot within timeout"
+          exit 1
+        fi
+
+        # Let process complete - emulator stays running in background
+        echo "✓ Emulator will remain running after tests complete"
+        exit 0
       fi
-
-      # Write expected serial for readiness probe (emulator always starts on 5554 first)
-      echo "emulator-5554" > /tmp/android-emu-serial.txt
-
-      # Start emulator in foreground - this blocks and runs the emulator
-      # Process-compose will monitor it and use readiness probe to check when ready
-      android.sh emulator start "$device"
     availability:
       restart: "no"
     readiness_probe:
@@ -107,7 +144,7 @@ processes:
       build-app:
         condition: process_completed_successfully
       android-emulator:
-        condition: process_healthy
+        condition: process_completed_successfully
     availability:
       restart: "no"
 
@@ -137,7 +174,15 @@ processes:
 
   # Summary - displays results and optionally stays open
   summary:
-    command: "bash tests/test-summary.sh 'Android E2E Test Suite' 'reports/android-e2e-logs'"
+    command: |
+      bash tests/test-summary.sh 'Android E2E Test Suite' 'reports/android-e2e-logs'
+
+      # In TUI mode, delay 30 seconds so user can view summary before exit
+      if [ "${TEST_TUI:-false}" = "true" ] || [ "${TEST_TUI:-false}" = "1" ]; then
+        echo ""
+        echo "TUI mode: Waiting 30 seconds before exit (Ctrl+C to exit now)..."
+        sleep 30
+      fi
     depends_on:
       cleanup-app:
         condition: process_completed

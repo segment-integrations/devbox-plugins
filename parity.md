@@ -528,9 +528,22 @@ examples/ios/
 - ✅ **Phase 1.1**: Fixed iOS lock file location - Removed `plugins/ios/config/devices/devices.lock`
 - ✅ **Phase 1.2**: Added `plugins/ios/SCRIPTS.md` - Comprehensive 16KB+ script documentation
 - ✅ **Phase 1.3**: Added `examples/ios/tests/README.md` - Complete test documentation with troubleshooting
+- ✅ **Phase 2.1**: Added `plugins/tests/ios/test-simulator-detection.sh` - Simulator detection tests (23 assertions)
+- ✅ **Phase 2.2**: Added `plugins/tests/ios/test-simulator-modes.sh` - Pure vs normal mode behavior tests
+- ✅ **Phase 3.1**: Expanded `plugins/ios/README.md` from 15 to 181 lines - Added quickstart, commands, troubleshooting
+- ✅ **Phase 4.1**: Added `plugins/android/virtenv/scripts/user/config.sh` - Explicit configuration management matching iOS pattern
+- ✅ **Phase 4.2**: Added `simulator reset` command to iOS - Stops simulators and deletes those matching device definitions
+- ✅ **Phase 4.3**: Renamed Android `run.sh` to `deploy.sh` - Standardized naming to match iOS pattern
+- ✅ **Phase 5.1**: Split Android `setup.sh` into `init-hook.sh` (config generation) and `setup.sh` (env init) - Clearer separation matching iOS
+- ✅ **Phase 5.2**: Added `test-simulator-only.yaml` for iOS - Faster smoke testing matching Android's test-emulator-only.yaml
+- ✅ **Phase 5.2 (bonus)**: Fixed ios.sh device name resolution and return/exit statements for proper script execution
 
-### In Progress
-- 🔄 **Phase 2**: Test Coverage improvements (ready to start)
+### All Phases Complete
+- ✅ **Phase 1**: Critical Fixes (3/3 complete)
+- ✅ **Phase 2**: Test Coverage (2/2 complete)
+- ✅ **Phase 3**: Documentation (1/1 complete)
+- ✅ **Phase 4**: Architectural Improvements (3/3 complete)
+- ✅ **Phase 5**: Refactoring (2/2 complete)
 
 ### Blocked
 - ❌ None

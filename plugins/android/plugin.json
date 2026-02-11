@@ -42,10 +42,12 @@
     "{{ .Virtenv }}/scripts/domain/avd.sh": "virtenv/scripts/domain/avd.sh",
     "{{ .Virtenv }}/scripts/domain/avd-reset.sh": "virtenv/scripts/domain/avd-reset.sh",
     "{{ .Virtenv }}/scripts/domain/emulator.sh": "virtenv/scripts/domain/emulator.sh",
-    "{{ .Virtenv }}/scripts/domain/run.sh": "virtenv/scripts/domain/run.sh",
+    "{{ .Virtenv }}/scripts/domain/deploy.sh": "virtenv/scripts/domain/deploy.sh",
     "{{ .Virtenv }}/scripts/domain/validate.sh": "virtenv/scripts/domain/validate.sh",
     "{{ .Virtenv }}/scripts/user/android.sh": "virtenv/scripts/user/android.sh",
+    "{{ .Virtenv }}/scripts/user/config.sh": "virtenv/scripts/user/config.sh",
     "{{ .Virtenv }}/scripts/user/devices.sh": "virtenv/scripts/user/devices.sh",
+    "{{ .Virtenv }}/scripts/init/init-hook.sh": "virtenv/scripts/init/init-hook.sh",
     "{{ .Virtenv }}/scripts/init/setup.sh": "virtenv/scripts/init/setup.sh",
     "{{ .Virtenv }}/flake.nix": "virtenv/flake.nix",
     "{{ .DevboxDir }}/devices/min.json": "config/devices/min.json",
@@ -53,7 +55,7 @@
   },
   "shell": {
     "init_hook": [
-      "bash {{ .Virtenv }}/scripts/init/setup.sh 2>/dev/null || true",
+      "bash {{ .Virtenv }}/scripts/init/init-hook.sh 2>/dev/null || true",
       ". {{ .Virtenv }}/scripts/init/setup.sh"
     ],
     "scripts": {

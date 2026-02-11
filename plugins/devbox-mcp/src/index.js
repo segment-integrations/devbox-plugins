@@ -195,7 +195,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "devbox_run",
         description:
-          "Execute a devbox command or script. Can run scripts from devbox.json or any binary in PATH. Use this instead of manual bash commands for devbox operations.",
+          "Execute a devbox command or script. Can run scripts from devbox.json or any binary in PATH.\n\n" +
+          "IMPORTANT: When a project has a devbox.json, ALWAYS use this tool instead of Bash commands. " +
+          "Devbox ensures the correct tools and environment are available.\n\n" +
+          "Project structure:\n" +
+          "- devbox.json: Package and script definitions\n" +
+          "- devbox.d/: Per-project configuration directory\n" +
+          "- .devbox/virtenv/: Temporary runtime directory (auto-regenerated, never edit directly)\n\n" +
+          "The .devbox/virtenv/ directory is automatically regenerated on 'devbox shell' or 'devbox run'. " +
+          "Any manual changes to files in .devbox/virtenv/ will be lost.",
         inputSchema: {
           type: "object",
           properties: {
@@ -359,6 +367,22 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             cwd: {
               type: "string",
               description: "Working directory",
+            },
+          },
+        },
+      },
+      {
+        name: "devbox_sync",
+        description:
+          "Ensure the .devbox/virtenv/ directory is up to date by regenerating it from devbox.json. " +
+          "This is useful after modifying devbox.json or when the virtenv may be stale. " +
+          "Equivalent to running 'devbox shell' which regenerates the virtenv.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            cwd: {
+              type: "string",
+              description: "Working directory (defaults to current directory)",
             },
           },
         },
@@ -593,6 +617,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             text: result.success
               ? `Environment variables in devbox shell:\n\n${result.stdout}`
               : `✗ Failed to get shell environment\n\n${result.stderr}`,
+          },
+        ],
+        isError: !result.success,
+      };
+    }
+
+    case "devbox_sync": {
+      const { cwd } = args;
+      // Run 'devbox shell --refresh' to regenerate virtenv
+      // Using echo true to exit immediately after regeneration
+      const result = await runDevbox(["shell", "--refresh", "-c", "echo Virtenv regenerated"], { cwd });
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: result.success
+              ? `✓ Virtenv synchronized\n\nThe .devbox/virtenv/ directory has been regenerated from devbox.json.\n\n${result.stdout}`
+              : `✗ Failed to sync virtenv\n\n${result.stderr}`,
           },
         ],
         isError: !result.success,

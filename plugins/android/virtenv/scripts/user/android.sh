@@ -21,6 +21,7 @@ Usage: android.sh <command> [args]
 Commands:
   devices <command> [args]         Manage device definitions
   info                             Display resolved SDK information
+  config <command>                 Manage configuration
   emulator start [device]          Start Android emulator
   emulator stop                    Stop running emulator
   emulator reset                   Reset all emulator AVDs
@@ -30,6 +31,7 @@ Examples:
   android.sh devices list
   android.sh devices create pixel_api28 --api 28 --device pixel
   android.sh info
+  android.sh config show
   android.sh emulator start max
   android.sh emulator stop
   android.sh run                             # Build, install, launch
@@ -112,6 +114,59 @@ case "$command_name" in
       echo "ERROR: android_show_summary function not available" >&2
       exit 1
     fi
+    ;;
+
+  # --------------------------------------------------------------------------
+  # config - Configuration management
+  # --------------------------------------------------------------------------
+  config)
+    subcommand="${1-}"
+    shift || true
+
+    # Source config.sh
+    config_script="${scripts_dir%/}/user/config.sh"
+    if [ ! -f "$config_script" ]; then
+      echo "ERROR: user/config.sh not found: $config_script" >&2
+      exit 1
+    fi
+
+    # shellcheck source=/dev/null
+    . "$config_script"
+
+    case "$subcommand" in
+      show)
+        if command -v android_config_show >/dev/null 2>&1; then
+          android_config_show
+        else
+          echo "ERROR: android_config_show function not available" >&2
+          exit 1
+        fi
+        ;;
+
+      set)
+        if command -v android_config_set >/dev/null 2>&1; then
+          android_config_set "$@"
+        else
+          echo "ERROR: android_config_set function not available" >&2
+          exit 1
+        fi
+        ;;
+
+      reset)
+        if command -v android_config_reset >/dev/null 2>&1; then
+          android_config_reset
+        else
+          echo "ERROR: android_config_reset function not available" >&2
+          exit 1
+        fi
+        ;;
+
+      *)
+        echo "ERROR: Unknown config subcommand: $subcommand" >&2
+        echo "Usage: android.sh config <show|set|reset>" >&2
+        exit 1
+        ;;
+    esac
     ;;
 
   # --------------------------------------------------------------------------
@@ -240,9 +295,9 @@ case "$command_name" in
     # Source layer 3 dependencies
     avd_script="${scripts_dir%/}/domain/avd.sh"
     emulator_script="${scripts_dir%/}/domain/emulator.sh"
-    run_script="${scripts_dir%/}/domain/run.sh"
+    deploy_script="${scripts_dir%/}/domain/deploy.sh"
 
-    for script in "$avd_script" "$emulator_script" "$run_script"; do
+    for script in "$avd_script" "$emulator_script" "$deploy_script"; do
       if [ ! -f "$script" ]; then
         echo "ERROR: Required script not found: $script" >&2
         exit 1
@@ -255,7 +310,7 @@ case "$command_name" in
     # shellcheck source=/dev/null
     . "$emulator_script"
     # shellcheck source=/dev/null
-    . "$run_script"
+    . "$deploy_script"
 
     # Verify functions are available
     for func in android_setup_avds android_start_emulator android_run_app; do

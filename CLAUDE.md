@@ -6,6 +6,60 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a mobile development templates repository providing Devbox plugins and example projects for Android, iOS, and React Native. The plugins enable project-local, reproducible mobile development environments without touching global state (e.g., `~/.android`).
 
+## Critical Development Rules
+
+### NEVER Modify .devbox/virtenv/ Directly
+
+**IMPORTANT:** Never edit files in `.devbox/virtenv/` directories. These are temporary runtime directories that are regenerated from plugin sources.
+
+**Correct workflow:**
+1. Edit source files in `plugins/{platform}/virtenv/scripts/`
+2. Run `devbox run sync` to copy changes to example projects
+3. The `.devbox/virtenv/` directories are automatically regenerated on `devbox shell` or `devbox run`
+
+**Why this matters:**
+- Changes to `.devbox/virtenv/` are lost when the virtenv is regenerated
+- Plugin sources in `plugins/` are the source of truth
+- Example projects sync from plugin sources
+
+**Development workflow:**
+- **Full sync:** `devbox run sync` - Reinstalls all example projects (slow, complete)
+- **Quick sync:** `scripts/dev/sync-examples.sh` - Copies plugin scripts only (fast, development-only)
+
+### Logging Guidelines
+
+**IMPORTANT:** All logs must go to `${TEST_LOGS_DIR}` (defaults to `reports/logs/`), never to `/tmp/`.
+
+**Correct:**
+```bash
+# Use environment variables (preferred)
+echo "$data" > "${TEST_LOGS_DIR}/test-output.txt"
+mkdir -p "${TEST_LOGS_DIR}"
+log_file="${TEST_LOGS_DIR}/$(date +%Y%m%d-%H%M%S)-test.log"
+
+# Or use hardcoded path if variables unavailable
+echo "$data" > reports/logs/test-output.txt
+mkdir -p reports/logs
+```
+
+**Incorrect:**
+```bash
+echo "$data" > /tmp/test-output.txt  # WRONG - /tmp not project-local
+log_file="/tmp/test.log"              # WRONG - may be cleaned up by system
+```
+
+**Environment Variables:**
+- `REPORTS_DIR`: Base reports directory (default: `reports`)
+- `TEST_LOGS_DIR`: Test logs directory (default: `reports/logs`)
+- `TEST_RESULTS_DIR`: Test results directory (default: `reports/results`)
+
+**Why this matters:**
+- `/tmp/` files may be cleaned up by the system
+- `reports/logs/` is gitignored and project-local
+- CI/CD systems expect logs in `reports/`
+- Consistent location makes debugging easier
+- Environment variables allow for configuration flexibility
+
 ## Core Architecture
 
 ### Plugin System
@@ -115,12 +169,18 @@ devbox_run({
 - `devbox_info` - Get package information
 - `devbox_search` - Search Nix package registry
 - `devbox_shell_env` - Get environment variables
+- `devbox_sync` - Regenerate .devbox/virtenv/ from devbox.json (useful when virtenv is stale)
 - `devbox_init` - Initialize devbox.json
 - `devbox_docs_search` - Search devbox documentation
 - `devbox_docs_list` - List available docs
 - `devbox_docs_read` - Read documentation files
 
 All tools (except `devbox_search`) support the `cwd` parameter to specify which project directory to operate in.
+
+**Important notes:**
+- The `.devbox/virtenv/` directory is temporary and auto-regenerated - never edit files there directly
+- Use `devbox_sync` if you suspect the virtenv is stale or after modifying devbox.json
+- The `devbox.d/` directory is for per-project configuration (e.g., device definitions)
 
 ### Setup
 ```bash

@@ -10,6 +10,19 @@ Model Context Protocol server for [Jetify's devbox](https://www.jetify.com/devbo
 - Environment variable management
 - Timeout configuration
 - Working directory support
+- Automatic virtenv synchronization
+- Access to devbox documentation
+
+## Important Notes
+
+**Always prefer devbox-mcp tools over direct Bash commands when working with devbox projects.** This ensures commands run in the correct environment with all dependencies available.
+
+**Project structure:**
+- `devbox.json` - Package and script definitions
+- `devbox.d/` - Per-project configuration directory
+- `.devbox/virtenv/` - Temporary runtime directory (auto-regenerated, never edit directly)
+
+The `.devbox/virtenv/` directory is automatically regenerated on `devbox shell` or `devbox run`. Any manual changes will be lost.
 
 ## Installation
 
@@ -91,6 +104,45 @@ Get information about a package.
 
 ### `devbox_search`
 Search for packages in Nix registry.
+
+### `devbox_shell_env`
+Get the environment variables that would be set in a devbox shell.
+
+### `devbox_sync`
+Ensure the .devbox/virtenv/ directory is up to date by regenerating it from devbox.json.
+
+```typescript
+devbox_sync({
+  cwd: "/path/to/project"
+})
+```
+
+Use this after modifying devbox.json or when the virtenv may be stale.
+
+### `devbox_init`
+Initialize a new devbox.json file in the specified directory.
+
+### `devbox_docs_search`
+Search the devbox documentation for relevant information.
+
+```typescript
+devbox_docs_search({
+  query: "init hooks",
+  maxResults: 10
+})
+```
+
+### `devbox_docs_list`
+List all available documentation files.
+
+### `devbox_docs_read`
+Read the full content of a specific documentation file.
+
+```typescript
+devbox_docs_read({
+  filePath: "app/docs/devbox.mdx"
+})
+```
 
 ## Use Cases
 

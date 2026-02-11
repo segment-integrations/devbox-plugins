@@ -9,6 +9,7 @@ Commands:
   devices <command> [args]
   simulator start [device] [--pure]
   simulator stop
+  simulator reset
   config show
   config set key=value [key=value...]
   config reset
@@ -20,6 +21,7 @@ Examples:
   ios.sh simulator start max
   ios.sh simulator start max --pure
   ios.sh simulator stop
+  ios.sh simulator reset
   ios.sh config set IOS_DEFAULT_DEVICE=max
 USAGE
   exit 1
@@ -68,22 +70,21 @@ case "$command_name" in
           esac
         done
 
-        # Set device name if provided
-        if [ -n "$device_name" ]; then
-          IOS_DEVICE_NAME="$device_name"
-          export IOS_DEVICE_NAME
-        fi
-
         # If --pure mode, create a separate test-specific simulator
         if [ "$pure_mode" = "1" ]; then
           export IOS_SIMULATOR_PURE=1
           echo "Pure mode: Creating fresh test simulator with clean state..."
 
+          # Resolve device name from selection (like "max") to actual name (like "iPhone 17")
+          if [ -n "$device_name" ]; then
+            export IOS_DEFAULT_DEVICE="$device_name"
+          fi
+
           # Get base device name and runtime
           device_base="$(resolve_service_device_name || true)"
           if [ -z "$device_base" ]; then
             echo "No iOS simulator device configured; set IOS_DEVICE_NAME or IOS_DEFAULT_DEVICE." >&2
-            return 1
+            exit 1
           fi
 
           preferred_runtime="$(ios_device_runtime_for_name "$device_base" || true)"
@@ -97,7 +98,7 @@ case "$command_name" in
           choice="$(resolve_runtime "$preferred_runtime" || true)"
           if [ -z "$choice" ]; then
             echo "No available iOS simulator runtime found. Install one in Xcode (Settings > Platforms) and retry." >&2
-            return 1
+            exit 1
           fi
 
           runtime_id="$(printf '%s' "$choice" | cut -d'|' -f1)"
@@ -117,7 +118,7 @@ case "$command_name" in
           device_type="$(devicetype_id_for_name "$device_base" || true)"
           if [ -z "$device_type" ]; then
             echo "Device type '$device_base' not available" >&2
-            return 1
+            exit 1
           fi
 
           # Create fresh test simulator
@@ -126,7 +127,7 @@ case "$command_name" in
 
           if [ -z "$test_udid" ]; then
             echo "Failed to create test simulator" >&2
-            return 1
+            exit 1
           fi
 
           # Boot the test simulator
@@ -155,6 +156,10 @@ case "$command_name" in
           echo "Test simulator ready: ${test_sim_name} (${test_udid})"
         else
           # Normal mode - use regular simulator (don't touch dev's simulator)
+          # Resolve device name from selection if provided
+          if [ -n "$device_name" ]; then
+            export IOS_DEFAULT_DEVICE="$device_name"
+          fi
           ios_start
         fi
         ;;
@@ -173,6 +178,63 @@ case "$command_name" in
           # Normal mode - just stop the simulator
           ios_stop
         fi
+        ;;
+      reset)
+        # Stop all simulators and delete those matching device definitions
+        echo "================================================"
+        echo "iOS Simulator Reset"
+        echo "================================================"
+        echo ""
+
+        # Stop all running simulators
+        echo "Stopping all running simulators..."
+        xcrun simctl shutdown all >/dev/null 2>&1 || true
+        echo "  ✓ All simulators stopped"
+        echo ""
+
+        # Get device definitions
+        devices_dir="${IOS_DEVICES_DIR:-./devbox.d/ios/devices}"
+        if [ ! -d "$devices_dir" ]; then
+          echo "No device definitions found at: $devices_dir"
+          echo "Simulators stopped but not deleted."
+          exit 0
+        fi
+
+        # Delete simulators matching device definitions
+        echo "Deleting simulators matching device definitions..."
+        deleted_count=0
+
+        for device_file in "$devices_dir"/*.json; do
+          [ -f "$device_file" ] || continue
+
+          device_name="$(jq -r '.name // empty' "$device_file" 2>/dev/null || true)"
+          if [ -z "$device_name" ]; then
+            continue
+          fi
+
+          # Find simulators with this name
+          matching_udids="$(xcrun simctl list devices -j | jq -r --arg name "$device_name" '.devices[]?[]? | select(.name == $name) | .udid' || true)"
+
+          if [ -n "$matching_udids" ]; then
+            echo "$matching_udids" | while read -r udid; do
+              if [ -n "$udid" ]; then
+                echo "  Deleting: $device_name ($udid)"
+                xcrun simctl delete "$udid" >/dev/null 2>&1 || true
+                deleted_count=$((deleted_count + 1))
+              fi
+            done
+          fi
+        done
+
+        echo ""
+        echo "================================================"
+        echo "✓ Reset complete!"
+        echo "================================================"
+        echo ""
+        echo "Deleted $deleted_count simulator(s) matching device definitions."
+        echo ""
+        echo "To recreate simulators, run:"
+        echo "  devbox run ios.sh simulator start [device]"
         ;;
       *)
         echo "Error: Unknown simulator command: $sub" >&2

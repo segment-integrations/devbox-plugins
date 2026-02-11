@@ -49,6 +49,20 @@ pick_runtime() {
   return 1
 }
 
+# Pick runtime strictly (no fallback to latest)
+# Args: preferred_version
+# Returns: runtime_id|runtime_name
+pick_runtime_strict() {
+  preferred="$1"
+  json="$(xcrun simctl list runtimes -j)"
+  choice="$(echo "$json" | jq -r --arg v "$preferred" '.runtimes[] | select(.isAvailable and (.name|startswith("iOS \($v)"))) | "\(.identifier)|\(.name)"' | head -n1)"
+  if [ -n "$choice" ] && [ "$choice" != "null" ]; then
+    printf '%s\n' "$choice"
+    return 0
+  fi
+  return 1
+}
+
 # Resolve runtime with auto-download fallback
 # Args: preferred_version
 # Returns: runtime_id|runtime_name
@@ -79,7 +93,7 @@ resolve_runtime() {
 # Returns: runtime_id|runtime_name
 resolve_runtime_strict() {
   preferred="$1"
-  if choice="$(pick_runtime "$preferred")"; then
+  if choice="$(pick_runtime_strict "$preferred")"; then
     printf '%s\n' "$choice"
     return 0
   fi
@@ -87,7 +101,7 @@ resolve_runtime_strict() {
   if [ "${IOS_DOWNLOAD_RUNTIME:-1}" != "0" ] && command -v xcodebuild >/dev/null 2>&1; then
     echo "Preferred runtime iOS ${preferred} not found. Attempting to download via xcodebuild -downloadPlatform iOS..." >&2
     if xcodebuild -downloadPlatform iOS; then
-      if choice="$(pick_runtime "$preferred")"; then
+      if choice="$(pick_runtime_strict "$preferred")"; then
         printf '%s\n' "$choice"
         return 0
       fi
@@ -220,17 +234,17 @@ ensure_device() {
 ios_get_device_runtime() {
   name="$1"
   xcrun simctl list devices -j | jq -r --arg name "$name" '
-    .devices[] as $devices |
-    ($devices | keys[0]) as $runtime_key |
-    $devices[$runtime_key][] |
+    .devices | to_entries[] |
+    .key as $runtime_key |
+    .value[] |
     select(.name == $name) |
-    ($runtime_key | capture("iOS-(?<version>[0-9]+\\.[0-9]+)") | .version)
+    ($runtime_key | capture("iOS-(?<version>[0-9]+-[0-9]+)") | .version | gsub("-"; "."))
   ' | head -n1
 }
 
 # Ensure device from definition file matches or is created
 # Args: device_file
-# Returns: 0 if matched, 1 if recreated, 2 if created new
+# Returns: 0 if matched, 1 if recreated, 2 if created new, 3 if skipped
 ios_ensure_device_from_definition() {
   file="$1"
 
@@ -239,14 +253,20 @@ ios_ensure_device_from_definition() {
 
   if [ -z "$name" ] || [ -z "$runtime" ]; then
     echo "  ⚠ Invalid device definition in $file"
-    return 0
+    return 3
   fi
 
   # Resolve runtime strictly (don't fallback)
-  choice="$(resolve_runtime_strict "$runtime" || true)"
+  choice="$(resolve_runtime_strict "$runtime" 2>&1 || true)"
   if [ -z "$choice" ]; then
     echo "  ⚠ Runtime iOS $runtime not available, skipping $name"
-    return 0
+    return 3
+  fi
+
+  # Check if choice contains error message (resolve_runtime_strict failed)
+  if echo "$choice" | grep -q "not found"; then
+    echo "  ⚠ Runtime iOS $runtime not available, skipping $name"
+    return 3
   fi
 
   runtime_id="$(printf '%s' "$choice" | cut -d'|' -f1)"
@@ -256,7 +276,7 @@ ios_ensure_device_from_definition() {
   device_type="$(devicetype_id_for_name "$name" || true)"
   if [ -z "$device_type" ]; then
     echo "  ⚠ Device type '$name' not available, skipping"
-    return 0
+    return 3
   fi
 
   # Build full device name with runtime
