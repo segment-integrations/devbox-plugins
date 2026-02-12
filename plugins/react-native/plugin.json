@@ -31,8 +31,8 @@
   },
   "create_files": {
     "{{ .Virtenv }}/metro": "",
-    "{{ .Virtenv }}/react-native/scripts/lib/lib.sh": "virtenv/scripts/lib/lib.sh",
-    "{{ .Virtenv }}/react-native/scripts/user/rn.sh": "virtenv/scripts/user/rn.sh"
+    "{{ .Virtenv }}/scripts/lib/lib.sh": "virtenv/scripts/lib/lib.sh",
+    "{{ .Virtenv }}/scripts/user/rn.sh": "virtenv/scripts/user/rn.sh"
   },
   "shell": {
     "init_hook": [

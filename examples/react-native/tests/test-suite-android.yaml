@@ -14,7 +14,7 @@ processes:
   allocate-metro-port:
     command: |
       # Source React Native lib
-      . ${REACT_NATIVE_VIRTENV}/react-native/scripts/lib/lib.sh
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
 
       # Allocate port for android test suite
       metro_port=$(rn_allocate_metro_port "android")
@@ -212,7 +212,7 @@ processes:
   cleanup:
     command: |
       . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
-      . ${REACT_NATIVE_VIRTENV}/react-native/scripts/lib/lib.sh
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
 
       serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 

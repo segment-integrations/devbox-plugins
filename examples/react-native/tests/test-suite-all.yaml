@@ -15,7 +15,7 @@ processes:
   allocate-metro-port:
     command: |
       # Source React Native lib
-      . ${REACT_NATIVE_VIRTENV}/react-native/scripts/lib/lib.sh
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
 
       # Allocate port for all test suite
       metro_port=$(rn_allocate_metro_port "all")
