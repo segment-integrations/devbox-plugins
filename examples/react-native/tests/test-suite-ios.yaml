@@ -9,7 +9,6 @@ environment:
   - "LANG=en_US.UTF-8"
   - "LC_ALL=en_US.UTF-8"
   - "REACT_NATIVE_VIRTENV=${REACT_NATIVE_VIRTENV}"
-  - "IOS_BUILD_CONFIG=${IOS_BUILD_CONFIG:-Release}"
 
 log_location: "reports/react-native-ios-e2e-logs"
 log_level: info
@@ -218,17 +217,14 @@ processes:
 
       # Install the built app
       echo "Installing app to simulator..."
-      echo "DEBUG: BUILD_CONFIG='${BUILD_CONFIG}'"
-      echo "DEBUG: PROJECT_ROOT='${PROJECT_ROOT}'"
 
-      APP_PATH="$PROJECT_ROOT/.devbox/virtenv/ios/DerivedData/Build/Products/${BUILD_CONFIG}-iphonesimulator/ReactNativeExample.app"
-      echo "DEBUG: APP_PATH='${APP_PATH}'"
+      # Use Release build for E2E tests
+      APP_PATH="${DEVBOX_PROJECT_ROOT}/.devbox/virtenv/ios/DerivedData/Build/Products/Release-iphonesimulator/ReactNativeExample.app"
 
       if [ ! -d "$APP_PATH" ]; then
         echo "ERROR: App bundle not found at $APP_PATH" >&2
-        echo "ERROR: BUILD_CONFIG was: '${BUILD_CONFIG}'" >&2
         echo "ERROR: Contents of Products directory:" >&2
-        ls -la "$PROJECT_ROOT/.devbox/virtenv/ios/DerivedData/Build/Products/" >&2 || true
+        ls -la "${DEVBOX_PROJECT_ROOT}/.devbox/virtenv/ios/DerivedData/Build/Products/" >&2 || true
         exit 1
       fi
 
@@ -278,19 +274,9 @@ processes:
     availability:
       restart: "no"
 
-  # Cleanup - runs after verify completes OR after timeout
+  # Cleanup - runs after verify completes
   cleanup:
     command: |
-      # Wait for verify-app-running to complete (or timeout after 5 minutes)
-      max_wait=300
-      waited=0
-      while [ $waited -lt $max_wait ]; do
-        # Check if verify-app-running process exists and completed
-        # (We can't easily check process status in shell, so just wait a reasonable time)
-        sleep 1
-        waited=$((waited + 1))
-      done
-
       # Note: Process-compose will automatically kill Metro when tests complete
       # Don't delete Metro state files here - Metro may restart and need them
 
@@ -316,10 +302,8 @@ processes:
         echo "✓ Test complete - app and simulator still running"
       fi
     depends_on:
-      allocate-metro-port:
-        condition: process_completed_successfully
-      ios-simulator:
-        condition: process_completed_successfully
+      verify-app-running:
+        condition: process_completed
     availability:
       restart: "no"
 

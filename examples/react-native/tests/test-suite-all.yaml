@@ -6,7 +6,6 @@ environment:
   - "TEST_TIMEOUT=300"
   - "BOOT_TIMEOUT=180"
   - "TEST_TUI=false"
-  - "IOS_BUILD_CONFIG=${IOS_BUILD_CONFIG:-Release}"
 
 log_location: "reports/react-native-all-e2e-logs"
 log_level: info
@@ -260,16 +259,13 @@ processes:
     command: |
       set -e
 
-      # Set build configuration (default to Release for E2E tests)
-      BUILD_CONFIG="Release"
-      test -n "${IOS_BUILD_CONFIG:-}" && BUILD_CONFIG="$IOS_BUILD_CONFIG"
-
       # Source Metro environment so React Native uses correct port
       . ${REACT_NATIVE_VIRTENV}/metro/env-all.sh
 
       echo "📲 Deploying React Native app to iOS (Metro port: $METRO_PORT)..."
-      echo "Build configuration: $BUILD_CONFIG"
-      npx react-native run-ios --no-packager --configuration "$BUILD_CONFIG"
+      echo "Build configuration: Release"
+      # Use Release build for E2E tests
+      npx react-native run-ios --no-packager --configuration Release
     depends_on:
       install-pods:
         condition: process_completed_successfully

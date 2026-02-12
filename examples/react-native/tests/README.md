@@ -15,6 +15,46 @@ This directory contains E2E test suites for React Native development.
 devbox run test:e2e:all
 ```
 
+## Test Modes: --pure vs Development
+
+The tests support two modes for different use cases:
+
+### CI Mode (`--pure`)
+**Purpose:** Deterministic, reproducible test runs for continuous integration.
+
+**Behavior:**
+- **Always starts fresh** - Creates a new simulator/emulator from scratch
+- **Clean state** - No cached data or previous state
+- **Automatic cleanup** - Stops and deletes simulators/emulators after tests complete
+- **Isolated** - Each test run is completely independent
+
+```bash
+# Run in pure mode (CI)
+devbox run --pure test:e2e:ios
+devbox run --pure test:e2e:android
+```
+
+### Development Mode (default)
+**Purpose:** Fast iteration during local development.
+
+**Behavior:**
+- **Reuses existing** - Uses already-running simulator/emulator if available
+- **Starts if needed** - Opens simulator/emulator only if not already running
+- **No cleanup** - Leaves simulator/emulator running after tests
+- **Fast iteration** - No startup/shutdown overhead between test runs
+
+```bash
+# Run in development mode (default)
+devbox run test:e2e:ios
+devbox run test:e2e:android
+```
+
+**Development mode is optimized for:**
+- Quick feedback loops
+- Making code changes and re-running tests immediately
+- Keeping your development environment ready
+- No waiting for simulator/emulator to boot between runs
+
 ## Test Suites
 
 - **test-suite-ios.yaml** - iOS simulator build and deployment
