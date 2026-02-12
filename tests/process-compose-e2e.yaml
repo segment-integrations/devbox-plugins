@@ -52,7 +52,9 @@ processes:
         echo ""
         echo "TUI mode: Waiting 30 seconds before exit (Ctrl+C to exit now)..."
         sleep 30
+        echo "Exiting..."
       fi
+      exit 0
     depends_on:
       e2e-android:
         condition: process_completed

@@ -34,12 +34,52 @@ rn_find_available_port() {
   return 1
 }
 
-# Allocate Metro port for a specific test suite
+# Generate unique run ID for this test suite run
+# Usage: rn_generate_run_id [suite_name]
+rn_generate_run_id() {
+  suite_name="${1:-default}"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
+  run_id_file="$metro_dir/run-id-${suite_name}.txt"
+
+  mkdir -p "$metro_dir"
+
+  # Check if run ID already exists for this suite
+  if [ -f "$run_id_file" ]; then
+    cat "$run_id_file"
+    return 0
+  fi
+
+  # Generate unique ID: timestamp-pid
+  run_id="$(date +%s)-$$"
+  echo "$run_id" > "$run_id_file"
+  echo "$run_id"
+}
+
+# Get the run ID for a test suite (generates if doesn't exist)
+# Usage: rn_get_run_id [suite_name]
+rn_get_run_id() {
+  suite_name="${1:-default}"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
+  run_id_file="$metro_dir/run-id-${suite_name}.txt"
+
+  if [ -f "$run_id_file" ]; then
+    cat "$run_id_file"
+  else
+    rn_generate_run_id "$suite_name"
+  fi
+}
+
+# Allocate Metro port for a specific test suite run
 # Usage: rn_allocate_metro_port [suite_name]
 rn_allocate_metro_port() {
   suite_name="${1:-default}"
   metro_dir="${REACT_NATIVE_VIRTENV}/metro"
-  port_file="$metro_dir/port-${suite_name}.txt"
+
+  # Generate unique run ID
+  run_id=$(rn_generate_run_id "$suite_name")
+  unique_id="${suite_name}-${run_id}"
+
+  port_file="$metro_dir/port-${unique_id}.txt"
 
   mkdir -p "$metro_dir"
 
@@ -79,15 +119,29 @@ rn_get_metro_port() {
   fi
 }
 
-# Clean Metro state for a specific test suite
+# Clean Metro state for a specific test suite run
 # Usage: rn_clean_metro [suite_name]
 rn_clean_metro() {
   suite_name="${1:-default}"
   metro_dir="${REACT_NATIVE_VIRTENV}/metro"
 
-  # Remove port allocation
-  rm -f "$metro_dir/port-${suite_name}.txt"
+  # Get run ID if it exists
+  run_id_file="$metro_dir/run-id-${suite_name}.txt"
+  if [ -f "$run_id_file" ]; then
+    run_id=$(cat "$run_id_file")
+    unique_id="${suite_name}-${run_id}"
+
+    # Remove files for this specific run
+    rm -f "$metro_dir/port-${unique_id}.txt"
+    rm -f "$metro_dir/env-${unique_id}.sh"
+    rm -f "$metro_dir/pid-${unique_id}.txt"
+    rm -f "$run_id_file"
+  fi
+
+  # Remove symlinks
   rm -f "$metro_dir/env-${suite_name}.sh"
+  rm -f "$metro_dir/port-${suite_name}.txt"
+  rm -f "$metro_dir/pid-${suite_name}.txt"
 
   # Optionally clear cache
   if [ "${RN_CLEAR_CACHE:-0}" = "1" ]; then
@@ -119,19 +173,32 @@ rn_save_metro_env() {
   suite_name="${1:-default}"
   metro_port="$2"
   metro_dir="${REACT_NATIVE_VIRTENV}/metro"
-  env_file="$metro_dir/env-${suite_name}.sh"
+
+  # Get run ID for this suite
+  run_id=$(rn_get_run_id "$suite_name")
+  unique_id="${suite_name}-${run_id}"
+
+  env_file="$metro_dir/env-${unique_id}.sh"
+  # Also create a symlink with just suite name for convenience
+  env_link="$metro_dir/env-${suite_name}.sh"
 
   mkdir -p "$metro_dir"
 
   cat > "$env_file" <<EOF
-# Metro environment for test suite: $suite_name
+# Metro environment for test suite: $suite_name (run: $run_id)
 # Generated: $(date)
 export RCT_METRO_PORT="$metro_port"
 export METRO_PORT="$metro_port"
 export REACT_NATIVE_PACKAGER_HOSTNAME="localhost"
+export METRO_CACHE_DIR="${REACT_NATIVE_VIRTENV}/metro/cache"
 EOF
 
   chmod +x "$env_file"
+
+  # Create symlink for easy access (overwrites old symlink)
+  rm -f "$env_link"
+  ln -s "$env_file" "$env_link"
+
   echo "$env_file"
 }
 
@@ -141,7 +208,12 @@ rn_track_metro_pid() {
   suite_name="${1:-default}"
   metro_pid="$2"
   metro_dir="${REACT_NATIVE_VIRTENV}/metro"
-  pid_file="$metro_dir/pid-${suite_name}.txt"
+
+  # Get run ID for this suite
+  run_id=$(rn_get_run_id "$suite_name")
+  unique_id="${suite_name}-${run_id}"
+
+  pid_file="$metro_dir/pid-${unique_id}.txt"
 
   mkdir -p "$metro_dir"
   echo "$metro_pid" > "$pid_file"
@@ -152,13 +224,21 @@ rn_track_metro_pid() {
 rn_get_metro_pid() {
   suite_name="${1:-default}"
   metro_dir="${REACT_NATIVE_VIRTENV}/metro"
-  pid_file="$metro_dir/pid-${suite_name}.txt"
 
-  if [ -f "$pid_file" ]; then
-    cat "$pid_file"
-  else
-    return 1
+  # Try to find PID file for this run
+  run_id_file="$metro_dir/run-id-${suite_name}.txt"
+  if [ -f "$run_id_file" ]; then
+    run_id=$(cat "$run_id_file")
+    unique_id="${suite_name}-${run_id}"
+    pid_file="$metro_dir/pid-${unique_id}.txt"
+
+    if [ -f "$pid_file" ]; then
+      cat "$pid_file"
+      return 0
+    fi
   fi
+
+  return 1
 }
 
 # Stop Metro ONLY if we started it (checks our tracked PID)
@@ -194,4 +274,57 @@ rn_stop_metro() {
 
   # Remove tracking file
   rm -f "$pid_file"
+}
+
+# Stop Metro by finding it via its allocated port
+# Usage: rn_stop_metro_by_port <suite_name>
+# This is useful when Metro is managed by process-compose and we don't track the PID
+rn_stop_metro_by_port() {
+  suite_name="${1:-default}"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
+
+  # Try to use symlink first (points to current run's env file)
+  env_file="$metro_dir/env-${suite_name}.sh"
+
+  # Source the environment file to get METRO_PORT
+  if [ ! -f "$env_file" ] && [ ! -L "$env_file" ]; then
+    echo "No Metro environment file found for suite: $suite_name"
+    return 0
+  fi
+
+  # shellcheck disable=SC1090
+  . "$env_file"
+
+  if [ -z "${METRO_PORT:-}" ]; then
+    echo "METRO_PORT not set in environment file"
+    return 0
+  fi
+
+  # Find process listening on Metro port
+  metro_pid=$(lsof -ti:"${METRO_PORT}" 2>/dev/null || true)
+
+  if [ -z "$metro_pid" ]; then
+    echo "No Metro process found on port ${METRO_PORT}"
+    # Clean up files even if Metro not running
+    rn_clean_metro "$suite_name"
+    return 0
+  fi
+
+  # Verify it's actually Metro before killing
+  process_cmd=$(ps -p "$metro_pid" -o command= 2>/dev/null || true)
+  if echo "$process_cmd" | grep -q "react-native start"; then
+    echo "Stopping Metro on port ${METRO_PORT} (PID: $metro_pid)..."
+    kill "$metro_pid" 2>/dev/null || true
+    sleep 1
+    # Force kill if still running
+    if ps -p "$metro_pid" >/dev/null 2>&1; then
+      kill -9 "$metro_pid" 2>/dev/null || true
+    fi
+    echo "✓ Metro stopped (port ${METRO_PORT})"
+  else
+    echo "Process on port ${METRO_PORT} (PID: $metro_pid) is not Metro, skipping"
+  fi
+
+  # Clean up files after stopping
+  rn_clean_metro "$suite_name"
 }

@@ -31,11 +31,14 @@
   },
   "create_files": {
     "{{ .Virtenv }}/metro": "",
+    "{{ .Virtenv }}/scripts/init/init-hook.sh": "virtenv/scripts/init/init-hook.sh",
     "{{ .Virtenv }}/scripts/lib/lib.sh": "virtenv/scripts/lib/lib.sh",
-    "{{ .Virtenv }}/scripts/user/rn.sh": "virtenv/scripts/user/rn.sh"
+    "{{ .Virtenv }}/scripts/user/rn.sh": "virtenv/scripts/user/rn.sh",
+    "{{ .Virtenv }}/scripts/user/metro.sh": "virtenv/scripts/user/metro.sh"
   },
   "shell": {
     "init_hook": [
+      "source {{ .Virtenv }}/scripts/init/init-hook.sh",
       "export NODE_BINARY=\"$(command -v node)\""
     ],
     "scripts": {

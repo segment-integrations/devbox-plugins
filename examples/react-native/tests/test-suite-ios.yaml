@@ -12,7 +12,7 @@ environment:
 
 log_location: "reports/react-native-ios-e2e-logs"
 log_level: info
-is_strict: true
+is_strict: false
 
 processes:
   # Phase 0: Allocate Metro port (runs first, no dependencies)
@@ -115,17 +115,7 @@ processes:
 
   # Phase 5: Start Metro bundler
   metro-bundler:
-    command: |
-      # Source Metro environment (load allocated port)
-      . ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh
-
-      echo "🚀 Starting Metro bundler on port $METRO_PORT"
-      echo "   Cache dir: ${METRO_CACHE_DIR}"
-
-      # Start Metro with isolated cache and allocated port
-      npx react-native start \
-        --port $METRO_PORT \
-        --reset-cache
+    command: "metro.sh start ios"
     depends_on:
       allocate-metro-port:
         condition: process_completed_successfully
@@ -134,6 +124,10 @@ processes:
     availability:
       restart: "on_failure"
       max_restarts: 2
+    shutdown:
+      command: "echo 'Shutting down Metro bundler...'"
+      signal: 15
+      timeout_seconds: 3
 
   # Phase 6: Build and deploy app with xcodebuild
   deploy-ios:
@@ -277,8 +271,8 @@ processes:
   # Cleanup - runs after verify completes
   cleanup:
     command: |
-      # Note: Process-compose will automatically kill Metro when tests complete
-      # Don't delete Metro state files here - Metro may restart and need them
+      # Stop Metro bundler using metro.sh script
+      metro.sh stop ios
 
       if [ "${DEVBOX_PURE_SHELL:-}" = "1" ]; then
         echo "🧹 Cleaning up (pure mode)..."

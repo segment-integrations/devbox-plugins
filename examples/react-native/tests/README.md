@@ -61,6 +61,55 @@ devbox run test:e2e:android
 - **test-suite-android.yaml** - Android emulator build and deployment
 - **test-suite-all.yaml** - Both platforms in parallel
 
+## Parallel Testing Multiple Versions
+
+Each test suite uses a unique suite name (android, ios, all) to isolate Metro bundler ports and state. To test multiple Android or iOS versions in parallel, create separate test suite files with unique names:
+
+```yaml
+# test-suite-android-api21.yaml
+environment:
+  - "ANDROID_DEFAULT_DEVICE=min"
+
+processes:
+  allocate-metro-port:
+    command: |
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
+      metro_port=$(rn_allocate_metro_port "android-api21")  # Unique suite name
+      rn_save_metro_env "android-api21" "$metro_port"
+
+  metro-bundler:
+    command: "metro.sh start android-api21"  # Matches suite name
+
+  cleanup:
+    command: "metro.sh stop android-api21"  # Matches suite name
+```
+
+```yaml
+# test-suite-android-api35.yaml
+environment:
+  - "ANDROID_DEFAULT_DEVICE=max"
+
+processes:
+  allocate-metro-port:
+    command: |
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
+      metro_port=$(rn_allocate_metro_port "android-api35")  # Different suite name
+      rn_save_metro_env "android-api35" "$metro_port"
+
+  metro-bundler:
+    command: "metro.sh start android-api35"
+
+  cleanup:
+    command: "metro.sh stop android-api35"
+```
+
+**Key requirement**: Use unique suite names for:
+- `rn_allocate_metro_port` calls
+- `metro.sh start/stop` commands
+- Environment file names
+
+This ensures each test gets its own Metro instance on a unique port with isolated state.
+
 ## Platform-Specific Optimization
 
 The wrapper scripts (`run-ios-tests.sh` and `run-android-tests.sh`) optimize startup time by skipping the unused platform:

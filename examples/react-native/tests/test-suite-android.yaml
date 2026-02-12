@@ -8,7 +8,7 @@ environment:
 
 log_location: "reports/react-native-android-e2e-logs"
 log_level: info
-is_strict: true
+is_strict: false
 
 processes:
   # Phase 0: Allocate Metro port (runs first, no dependencies)
@@ -129,17 +129,7 @@ processes:
 
   # Phase 5: Start Metro bundler
   metro-bundler:
-    command: |
-      # Source Metro environment (load allocated port)
-      . ${REACT_NATIVE_VIRTENV}/metro/env-android.sh
-
-      echo "🚀 Starting Metro bundler on port $METRO_PORT"
-      echo "   Cache dir: ${METRO_CACHE_DIR}"
-
-      # Start Metro with isolated cache and allocated port
-      npx react-native start \
-        --port $METRO_PORT \
-        --reset-cache
+    command: "metro.sh start android"
     depends_on:
       allocate-metro-port:
         condition: process_completed_successfully
@@ -148,6 +138,10 @@ processes:
     availability:
       restart: "on_failure"
       max_restarts: 2
+    shutdown:
+      command: "echo 'Shutting down Metro bundler...'"
+      signal: 15
+      timeout_seconds: 3
     readiness_probe:
       exec:
         command: |
@@ -216,8 +210,9 @@ processes:
 
       serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 
-      # Note: Process-compose will automatically kill Metro when tests complete
-      # Don't delete Metro state files here - Metro may restart and need them
+      # Stop Metro bundler using metro.sh script
+      metro.sh stop android
+
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
         adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.reactnativeexample} 2>/dev/null || true

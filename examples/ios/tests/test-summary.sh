@@ -23,4 +23,7 @@ if [ "${TEST_TUI:-false}" = "true" ] || [ "${TEST_TUI:-false}" = "1" ]; then
   echo ""
   echo "TUI mode: Waiting 30 seconds before exit (Ctrl+C to exit now)..."
   sleep 30
+  echo "Exiting..."
 fi
+
+exit 0
