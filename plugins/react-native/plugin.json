@@ -15,6 +15,9 @@
     "REACT_NATIVE_CONFIG_DIR": "{{ .DevboxDir }}",
     "REACT_NATIVE_SCRIPTS_DIR": "{{ .Virtenv }}/scripts",
     "REACT_NATIVE_WEB_BUILD_PATH": "web/build",
+    "METRO_CACHE_DIR": "{{ .Virtenv }}/metro/cache",
+    "RN_METRO_PORT_START": "8091",
+    "RN_METRO_PORT_END": "8199",
     "ANDROID_DEVICES": "",
     "IOS_DEVICES": "",
     "ANDROID_COMPILE_SDK": "35",
@@ -26,11 +29,20 @@
     "ANDROID_CMAKE_VERSION": "4.1.2"
   },
   "create_files": {
+    "{{ .Virtenv }}/metro": "",
+    "{{ .Virtenv }}/react-native/scripts/lib/lib.sh": "virtenv/scripts/lib/lib.sh",
+    "{{ .Virtenv }}/react-native/scripts/user/rn.sh": "virtenv/scripts/user/rn.sh"
   },
   "shell": {
     "init_hook": [
     ],
     "scripts": {
+      "rn:metro:port": [
+        "rn.sh metro port ${1:-default}"
+      ],
+      "rn:metro:clean": [
+        "rn.sh metro clean ${1:-default}"
+      ],
       "doctor": [
         "echo 'React Native Environment Check'",
         "echo '=============================='",

@@ -94,6 +94,74 @@ log_file="/tmp/test.log"              # WRONG - may be cleaned up by system
 - Standardized logging makes scripts identifiable in process-compose output
 - Environment variables allow for configuration flexibility
 
+### Process Isolation and Safety
+
+**CRITICAL RULE:** Only terminate processes that we explicitly started. Never interfere with external processes that may have been spawned by other projects.
+
+**This applies to ALL processes:**
+- Metro bundlers
+- Android emulators
+- iOS simulators
+- Running apps
+- Development servers
+- Any other background processes
+
+**Implementation requirements:**
+
+1. **Track Process IDs:** When starting a process, record its PID in a project-local file:
+   ```bash
+   # Example from Metro implementation
+   rn_track_metro_pid() {
+     suite_name="${1:-default}"
+     metro_pid="$2"
+     metro_dir="${DEVBOX_VIRTENV}/metro"
+     pid_file="$metro_dir/pid-${suite_name}.txt"
+
+     mkdir -p "$metro_dir"
+     echo "$metro_pid" > "$pid_file"
+   }
+   ```
+
+2. **Verify Before Killing:** Before terminating a process, verify:
+   - The PID file exists (we tracked it)
+   - The process is still running
+   - The process is actually what we expect (check command name)
+   ```bash
+   # Example from Metro implementation
+   if [ ! -f "$pid_file" ]; then
+     echo "No PID tracked - we didn't start it"
+     return 0
+   fi
+
+   metro_pid=$(cat "$pid_file")
+
+   if ps -p "$metro_pid" >/dev/null 2>&1; then
+     process_cmd=$(ps -p "$metro_pid" -o command= 2>/dev/null || true)
+     if echo "$process_cmd" | grep -q "react-native start"; then
+       kill "$metro_pid" 2>/dev/null || true
+     else
+       echo "PID $metro_pid is not Metro, skipping"
+     fi
+   fi
+   ```
+
+3. **Let Process Managers Handle Lifecycle:** When using process-compose, let it manage process termination. Cleanup scripts should only remove state files:
+   ```yaml
+   cleanup:
+     command: |
+       # DON'T kill Metro - process-compose handles it
+       # DO clean up state files
+       rm -f ${DEVBOX_VIRTENV}/metro/port-android.txt
+       rm -f ${DEVBOX_VIRTENV}/metro/env-android.sh
+   ```
+
+**Why this matters:**
+- Multiple projects may run simultaneously on the same machine
+- Developers may have long-running processes from other work
+- Killing external processes causes data loss and frustration
+- Process isolation ensures reproducible, conflict-free execution
+- Clean separation enables parallel test execution with `--pure`
+
 ## Core Architecture
 
 ### Plugin System

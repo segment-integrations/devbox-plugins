@@ -10,8 +10,27 @@ log_location: "reports/react-native-android-e2e-logs"
 log_level: info
 
 processes:
+  # Phase 0: Allocate Metro port (runs first, no dependencies)
+  allocate-metro-port:
+    command: |
+      # Source React Native lib
+      . ${DEVBOX_VIRTENV}/react-native/scripts/lib/lib.sh
+
+      # Allocate port for android test suite
+      metro_port=$(rn_allocate_metro_port "android")
+      echo "📡 Allocated Metro port: $metro_port"
+
+      # Save environment file for other processes
+      env_file=$(rn_save_metro_env "android" "$metro_port")
+      echo "✓ Metro environment saved to: $env_file"
+    availability:
+      restart: "no"
+
   # Phase 1: Build Node dependencies
   build-node:
+    depends_on:
+      allocate-metro-port:
+        condition: process_completed_successfully
     command: "devbox run --pure build:node"
     availability:
       restart: "no"
@@ -109,8 +128,20 @@ processes:
 
   # Phase 5: Start Metro bundler
   metro-bundler:
-    command: "npx react-native start --reset-cache"
+    command: |
+      # Source Metro environment (load allocated port)
+      . ${DEVBOX_VIRTENV}/metro/env-android.sh
+
+      echo "🚀 Starting Metro bundler on port $METRO_PORT"
+      echo "   Cache dir: ${METRO_CACHE_DIR}"
+
+      # Start Metro with isolated cache and allocated port
+      npx react-native start \
+        --port $METRO_PORT \
+        --reset-cache
     depends_on:
+      allocate-metro-port:
+        condition: process_completed_successfully
       build-node:
         condition: process_completed_successfully
     availability:
@@ -119,12 +150,14 @@ processes:
     readiness_probe:
       exec:
         command: |
-          # Check if Metro server is up
-          curl -sf http://localhost:8081/status >/dev/null || exit 1
+          # Source Metro environment to get correct port
+          . ${DEVBOX_VIRTENV}/metro/env-android.sh
+
+          # Check if Metro server is up on allocated port
+          curl -sf http://localhost:$METRO_PORT/status >/dev/null || exit 1
 
           # Verify Metro can actually serve the bundle (without downloading it)
-          # This ensures Metro has finished initialization and can compile
-          curl -sf -I "http://localhost:8081/index.bundle?platform=android&dev=true" | grep -q "HTTP.*200" || exit 1
+          curl -sf -I "http://localhost:$METRO_PORT/index.bundle?platform=android&dev=true" | grep -q "HTTP.*200" || exit 1
       initial_delay_seconds: 5
       period_seconds: 5
       timeout_seconds: 60
@@ -132,7 +165,12 @@ processes:
 
   # Phase 6: Deploy app
   deploy-android:
-    command: "npx react-native run-android --no-packager"
+    command: |
+      # Source Metro environment so React Native uses correct port
+      . ${DEVBOX_VIRTENV}/metro/env-android.sh
+
+      echo "📲 Deploying React Native app (Metro port: $METRO_PORT)..."
+      npx react-native run-android --no-packager
     depends_on:
       build-android:
         condition: process_completed_successfully
@@ -174,19 +212,23 @@ processes:
   cleanup:
     command: |
       . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
+      . ${DEVBOX_VIRTENV}/react-native/scripts/lib/lib.sh
+
       serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 
-      # Kill Metro bundler
-      echo "Stopping Metro bundler..."
-      lsof -ti:8081 2>/dev/null | xargs kill -9 2>/dev/null || echo "No Metro process found"
+      # Note: Process-compose will automatically kill Metro when tests complete
+      # We only clean Metro state files here
+      echo "🧹 Cleaning Metro state files..."
+      rm -f ${DEVBOX_VIRTENV}/metro/port-android.txt
+      rm -f ${DEVBOX_VIRTENV}/metro/env-android.sh
 
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
         adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.reactnativeexample} 2>/dev/null || true
         android.sh emulator stop || true
-        echo "✓ App stopped, emulator stopped"
+        echo "✓ App stopped, emulator stopped, Metro state cleaned"
       else
-        echo "✓ Test complete - app and emulator still running"
+        echo "✓ Test complete - app and emulator still running, Metro state cleaned"
       fi
     depends_on:
       verify-app-running:
