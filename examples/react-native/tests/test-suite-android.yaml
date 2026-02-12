@@ -14,7 +14,7 @@ processes:
   allocate-metro-port:
     command: |
       # Source React Native lib
-      . ${DEVBOX_VIRTENV}/react-native/scripts/lib/lib.sh
+      . ${REACT_NATIVE_VIRTENV}/react-native/scripts/lib/lib.sh
 
       # Allocate port for android test suite
       metro_port=$(rn_allocate_metro_port "android")
@@ -130,7 +130,7 @@ processes:
   metro-bundler:
     command: |
       # Source Metro environment (load allocated port)
-      . ${DEVBOX_VIRTENV}/metro/env-android.sh
+      . ${REACT_NATIVE_VIRTENV}/metro/env-android.sh
 
       echo "🚀 Starting Metro bundler on port $METRO_PORT"
       echo "   Cache dir: ${METRO_CACHE_DIR}"
@@ -151,7 +151,7 @@ processes:
       exec:
         command: |
           # Source Metro environment to get correct port
-          . ${DEVBOX_VIRTENV}/metro/env-android.sh
+          . ${REACT_NATIVE_VIRTENV}/metro/env-android.sh
 
           # Check if Metro server is up on allocated port
           curl -sf http://localhost:$METRO_PORT/status >/dev/null || exit 1
@@ -167,7 +167,7 @@ processes:
   deploy-android:
     command: |
       # Source Metro environment so React Native uses correct port
-      . ${DEVBOX_VIRTENV}/metro/env-android.sh
+      . ${REACT_NATIVE_VIRTENV}/metro/env-android.sh
 
       echo "📲 Deploying React Native app (Metro port: $METRO_PORT)..."
       npx react-native run-android --no-packager
@@ -212,15 +212,15 @@ processes:
   cleanup:
     command: |
       . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
-      . ${DEVBOX_VIRTENV}/react-native/scripts/lib/lib.sh
+      . ${REACT_NATIVE_VIRTENV}/react-native/scripts/lib/lib.sh
 
       serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 
       # Note: Process-compose will automatically kill Metro when tests complete
       # We only clean Metro state files here
       echo "🧹 Cleaning Metro state files..."
-      rm -f ${DEVBOX_VIRTENV}/metro/port-android.txt
-      rm -f ${DEVBOX_VIRTENV}/metro/env-android.sh
+      rm -f ${REACT_NATIVE_VIRTENV}/metro/port-android.txt
+      rm -f ${REACT_NATIVE_VIRTENV}/metro/env-android.sh
 
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."

@@ -13,6 +13,7 @@
   },
   "env": {
     "REACT_NATIVE_CONFIG_DIR": "{{ .DevboxDir }}",
+    "REACT_NATIVE_VIRTENV": "{{ .Virtenv }}",
     "REACT_NATIVE_SCRIPTS_DIR": "{{ .Virtenv }}/scripts",
     "REACT_NATIVE_WEB_BUILD_PATH": "web/build",
     "METRO_CACHE_DIR": "{{ .Virtenv }}/metro/cache",

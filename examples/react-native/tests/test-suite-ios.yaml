@@ -15,7 +15,7 @@ processes:
   allocate-metro-port:
     command: |
       # Source React Native lib
-      . ${DEVBOX_VIRTENV}/react-native/scripts/lib/lib.sh
+      . ${REACT_NATIVE_VIRTENV}/react-native/scripts/lib/lib.sh
 
       # Allocate port for ios test suite
       metro_port=$(rn_allocate_metro_port "ios")
@@ -112,7 +112,7 @@ processes:
   metro-bundler:
     command: |
       # Source Metro environment (load allocated port)
-      . ${DEVBOX_VIRTENV}/metro/env-ios.sh
+      . ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh
 
       echo "🚀 Starting Metro bundler on port $METRO_PORT"
       echo "   Cache dir: ${METRO_CACHE_DIR}"
@@ -133,7 +133,7 @@ processes:
       exec:
         command: |
           # Source Metro environment to get correct port
-          . ${DEVBOX_VIRTENV}/metro/env-ios.sh
+          . ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh
 
           # Check if Metro server is up on allocated port
           curl -sf http://localhost:$METRO_PORT/status >/dev/null || exit 1
@@ -149,7 +149,7 @@ processes:
   deploy-ios:
     command: |
       # Source Metro environment so React Native uses correct port
-      . ${DEVBOX_VIRTENV}/metro/env-ios.sh
+      . ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh
 
       echo "📲 Deploying React Native app (Metro port: $METRO_PORT)..."
       npx react-native run-ios --no-packager
@@ -199,8 +199,8 @@ processes:
       # Note: Process-compose will automatically kill Metro when tests complete
       # We only clean Metro state files here
       echo "🧹 Cleaning Metro state files..."
-      rm -f ${DEVBOX_VIRTENV}/metro/port-ios.txt
-      rm -f ${DEVBOX_VIRTENV}/metro/env-ios.sh
+      rm -f ${REACT_NATIVE_VIRTENV}/metro/port-ios.txt
+      rm -f ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh
 
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
