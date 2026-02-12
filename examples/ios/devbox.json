@@ -34,7 +34,7 @@
         "env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT} -scheme ${IOS_APP_SCHEME} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath .devbox/virtenv/ios/DerivedData test"
       ],
       "test:e2e": [
-        "process-compose -f tests/test-suite.yaml --no-server --tui=${TEST_TUI:-true}"
+        "process-compose -f tests/test-suite.yaml --no-server --tui=${TEST_TUI:-false}"
       ]
     }
   }

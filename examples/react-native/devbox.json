@@ -67,16 +67,16 @@
         "npm test"
       ],
       "test:e2e": [
-        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-true}"
+        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-false}"
       ],
       "test:e2e:android": [
-        "process-compose -f tests/test-suite-android.yaml --no-server --tui=${TEST_TUI:-true}"
+        "process-compose -f tests/test-suite-android.yaml --no-server --tui=${TEST_TUI:-false}"
       ],
       "test:e2e:ios": [
-        "process-compose -f tests/test-suite-ios.yaml --no-server --tui=${TEST_TUI:-true}"
+        "process-compose -f tests/test-suite-ios.yaml --no-server --tui=${TEST_TUI:-false}"
       ],
       "test:e2e:all": [
-        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-true}"
+        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-false}"
       ]
     }
   }
