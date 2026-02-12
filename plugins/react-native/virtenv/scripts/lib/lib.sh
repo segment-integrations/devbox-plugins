@@ -38,7 +38,7 @@ rn_find_available_port() {
 # Usage: rn_allocate_metro_port [suite_name]
 rn_allocate_metro_port() {
   suite_name="${1:-default}"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
   port_file="$metro_dir/port-${suite_name}.txt"
 
   mkdir -p "$metro_dir"
@@ -69,7 +69,7 @@ rn_allocate_metro_port() {
 # Usage: rn_get_metro_port [suite_name]
 rn_get_metro_port() {
   suite_name="${1:-default}"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
   port_file="$metro_dir/port-${suite_name}.txt"
 
   if [ -f "$port_file" ]; then
@@ -83,7 +83,7 @@ rn_get_metro_port() {
 # Usage: rn_clean_metro [suite_name]
 rn_clean_metro() {
   suite_name="${1:-default}"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
 
   # Remove port allocation
   rm -f "$metro_dir/port-${suite_name}.txt"
@@ -118,7 +118,7 @@ rn_export_metro_env() {
 rn_save_metro_env() {
   suite_name="${1:-default}"
   metro_port="$2"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
   env_file="$metro_dir/env-${suite_name}.sh"
 
   mkdir -p "$metro_dir"
@@ -140,7 +140,7 @@ EOF
 rn_track_metro_pid() {
   suite_name="${1:-default}"
   metro_pid="$2"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
   pid_file="$metro_dir/pid-${suite_name}.txt"
 
   mkdir -p "$metro_dir"
@@ -151,7 +151,7 @@ rn_track_metro_pid() {
 # Usage: rn_get_metro_pid <suite_name>
 rn_get_metro_pid() {
   suite_name="${1:-default}"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
   pid_file="$metro_dir/pid-${suite_name}.txt"
 
   if [ -f "$pid_file" ]; then
@@ -165,7 +165,7 @@ rn_get_metro_pid() {
 # Usage: rn_stop_metro <suite_name>
 rn_stop_metro() {
   suite_name="${1:-default}"
-  metro_dir="${DEVBOX_VIRTENV}/metro"
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
   pid_file="$metro_dir/pid-${suite_name}.txt"
 
   if [ ! -f "$pid_file" ]; then
