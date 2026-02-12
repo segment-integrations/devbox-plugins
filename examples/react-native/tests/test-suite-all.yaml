@@ -207,12 +207,11 @@ processes:
       build-node:
         condition: process_completed_successfully
     availability:
-      restart: "on_failure"
-      max_restarts: 2
+      restart: "no"
     shutdown:
-      command: "echo 'Shutting down Metro bundler...'"
+      command: "metro.sh stop all || true"
       signal: 15
-      timeout_seconds: 3
+      timeout_seconds: 5
     readiness_probe:
       exec:
         command: |
@@ -330,9 +329,7 @@ processes:
   # Cleanup - runs when both platforms complete
   cleanup:
     command: |
-      # Stop Metro bundler using metro.sh script
-      metro.sh stop all
-
+      # Metro will be stopped by its shutdown handler
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
 

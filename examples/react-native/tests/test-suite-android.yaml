@@ -136,12 +136,11 @@ processes:
       build-node:
         condition: process_completed_successfully
     availability:
-      restart: "on_failure"
-      max_restarts: 2
+      restart: "no"
     shutdown:
-      command: "echo 'Shutting down Metro bundler...'"
+      command: "metro.sh stop android || true"
       signal: 15
-      timeout_seconds: 3
+      timeout_seconds: 5
     readiness_probe:
       exec:
         command: |
@@ -210,9 +209,7 @@ processes:
 
       serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 
-      # Stop Metro bundler using metro.sh script
-      metro.sh stop android
-
+      # Metro will be stopped by its shutdown handler
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
         adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.reactnativeexample} 2>/dev/null || true

@@ -122,12 +122,11 @@ processes:
       build-node:
         condition: process_completed_successfully
     availability:
-      restart: "on_failure"
-      max_restarts: 2
+      restart: "no"
     shutdown:
-      command: "echo 'Shutting down Metro bundler...'"
+      command: "metro.sh stop ios || true"
       signal: 15
-      timeout_seconds: 3
+      timeout_seconds: 5
 
   # Phase 6: Build and deploy app with xcodebuild
   deploy-ios:
@@ -271,9 +270,7 @@ processes:
   # Cleanup - runs after verify completes
   cleanup:
     command: |
-      # Stop Metro bundler using metro.sh script
-      metro.sh stop ios
-
+      # Metro will be stopped by its shutdown handler
       if [ "${DEVBOX_PURE_SHELL:-}" = "1" ]; then
         echo "🧹 Cleaning up (pure mode)..."
 

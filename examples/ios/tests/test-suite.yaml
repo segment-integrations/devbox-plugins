@@ -200,13 +200,7 @@ processes:
   summary:
     command: |
       bash tests/test-summary.sh 'iOS E2E Test Suite' 'reports/ios-e2e-logs'
-
-      # In TUI mode, delay 30 seconds so user can view summary before exit
-      if [ "${TEST_TUI:-false}" = "true" ] || [ "${TEST_TUI:-false}" = "1" ]; then
-        echo ""
-        echo "TUI mode: Waiting 30 seconds before exit (Ctrl+C to exit now)..."
-        sleep 30
-      fi
+      exit 0
     depends_on:
       cleanup:
         condition: process_completed
