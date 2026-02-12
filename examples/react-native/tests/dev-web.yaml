@@ -1,0 +1,105 @@
+version: "0.5"
+
+# Development mode: Web bundle with hot reload
+# - Starts Metro bundler
+# - Opens browser automatically
+# - Hot reload enabled
+# - TUI enabled for interactive development
+
+log_location: "reports/react-native-web-dev-logs"
+log_level: info
+is_strict: false  # Allow graceful exit
+
+processes:
+  # Phase 0: Allocate Metro port
+  allocate-metro-port:
+    command: |
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
+      metro_port=$(rn_allocate_metro_port "web")
+      echo "📡 Allocated Metro port: $metro_port"
+      env_file=$(rn_save_metro_env "web" "$metro_port")
+      echo "✓ Metro environment saved to: $env_file"
+    availability:
+      restart: "no"
+
+  # Phase 1: Build Node dependencies
+  build-node:
+    depends_on:
+      allocate-metro-port:
+        condition: process_completed_successfully
+    command: "devbox run --pure build:node"
+    availability:
+      restart: "no"
+
+  # Phase 2: Create web directory
+  build-web:
+    command: |
+      echo '📦 Creating web build directory...'
+      mkdir -p web/build
+      echo '✓ Web build directory ready'
+    depends_on:
+      build-node:
+        condition: process_completed_successfully
+    availability:
+      restart: "no"
+
+  # Phase 3: Start Metro bundler with hot reload
+  metro-bundler:
+    command: "metro.sh start web"
+    depends_on:
+      allocate-metro-port:
+        condition: process_completed_successfully
+      build-node:
+        condition: process_completed_successfully
+    availability:
+      restart: "on_failure"
+      max_restarts: 3
+    shutdown:
+      command: "metro.sh stop web || true"
+      signal: 15
+      timeout_seconds: 5
+    readiness_probe:
+      exec:
+        command: "metro.sh health web ios"
+      initial_delay_seconds: 5
+      period_seconds: 5
+      timeout_seconds: 60
+      success_threshold: 1
+
+  # Phase 4: Open browser
+  open-browser:
+    command: |
+      . ${REACT_NATIVE_VIRTENV}/metro/env-web.sh
+
+      echo "🌐 Opening browser to Metro web bundle..."
+      echo ""
+      echo "   Metro: http://localhost:$METRO_PORT"
+      echo "   Hot reload enabled"
+      echo ""
+
+      # Open default browser
+      if command -v open >/dev/null 2>&1; then
+        open "http://localhost:$METRO_PORT"
+      elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "http://localhost:$METRO_PORT"
+      elif command -v start >/dev/null 2>&1; then
+        start "http://localhost:$METRO_PORT"
+      else
+        echo "⚠ Could not detect browser launcher"
+        echo "   Please open: http://localhost:$METRO_PORT"
+      fi
+
+      echo "✓ Browser launched"
+      echo ""
+      echo "Press Ctrl+C in the TUI to stop Metro and exit"
+      echo ""
+
+      # Keep process alive so TUI stays open
+      tail -f /dev/null
+    depends_on:
+      metro-bundler:
+        condition: process_healthy
+      build-web:
+        condition: process_completed_successfully
+    availability:
+      restart: "no"

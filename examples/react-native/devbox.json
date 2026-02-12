@@ -44,13 +44,13 @@
         "devbox run build:web"
       ],
       "start:android": [
-        "bash scripts/start-with-metro.sh android ${1:-${ANDROID_DEFAULT_DEVICE:-max}}"
+        "process-compose -f tests/dev-android.yaml --tui=${DEVBOX_TUI:-false}"
       ],
       "start:ios": [
-        "bash scripts/start-with-metro.sh ios ${1:-${IOS_DEFAULT_DEVICE:-max}}"
+        "process-compose -f tests/dev-ios.yaml --tui=${DEVBOX_TUI:-false}"
       ],
       "start:web": [
-        "bash scripts/start-with-metro.sh web"
+        "process-compose -f tests/dev-web.yaml --tui=${DEVBOX_TUI:-false}"
       ],
       "start:metro": [
         "metro.sh start ${1:-default}"
@@ -74,19 +74,19 @@
         "npm test"
       ],
       "test:e2e": [
-        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-false}"
+        "devbox run --pure test:e2e:all"
       ],
       "test:e2e:android": [
-        "process-compose -f tests/test-suite-android.yaml --no-server --tui=${TEST_TUI:-false}"
+        "devbox run --pure bash -c \"process-compose -f tests/test-suite-android-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
       ],
       "test:e2e:ios": [
-        "process-compose -f tests/test-suite-ios.yaml --no-server --tui=${TEST_TUI:-false}"
+        "devbox run --pure bash -c \"process-compose -f tests/test-suite-ios-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
       ],
       "test:e2e:all": [
-        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-false}"
+        "devbox run --pure bash -c \"process-compose -f tests/test-suite-all-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
       ],
       "test:e2e:web": [
-        "process-compose -f tests/test-suite-web.yaml --no-server --tui=${TEST_TUI:-false}"
+        "devbox run --pure bash -c \"process-compose -f tests/test-suite-web-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
       ]
     }
   }
