@@ -186,7 +186,16 @@ The wrapper scripts optimize startup time by skipping the unused platform:
 - `ANDROID_SKIP_DOWNLOADS=1` - Skip Android SDK Nix flake evaluation
 - `IOS_SKIP_SETUP=1` - Skip iOS environment setup
 
-This is particularly useful in CI/CD pipelines where you split platform tests into separate jobs.
+**Important:** When using `--pure` mode, environment variables must be passed with the `-e` flag:
+```bash
+# Correct way to skip Android SDK in pure mode
+devbox run --pure -e ANDROID_SKIP_DOWNLOADS=1 test:e2e:ios
+
+# Incorrect - env var gets reset to default
+ANDROID_SKIP_DOWNLOADS=1 devbox run --pure test:e2e:ios
+```
+
+The wrapper scripts (`run-ios-tests.sh` and `run-android-tests.sh`) use the correct `-e` flag syntax automatically. This is particularly useful in CI/CD pipelines where you split platform tests into separate jobs.
 
 ## Build Configuration
 

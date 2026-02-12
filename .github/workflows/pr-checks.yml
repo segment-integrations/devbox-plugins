@@ -11,10 +11,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-and-validate:
-    name: Lint & Workflow Validation
+  # Fast test suite (lint + unit + integration)
+  fast-tests:
+    name: Fast Tests (Lint + Unit + Integration)
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -23,22 +24,29 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated linting (shellcheck + workflow validation)
-        run: devbox run test:lint
+      - name: Run fast test suite
+        run: devbox run test:fast
 
-      - name: Upload logs
-        if: failure()
+      - name: Upload reports and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lint-logs
-          path: test-results/devbox-lint-logs/
+          name: fast-test-reports
+          path: |
+            test-results/
+            reports/
           retention-days: 7
 
-  android-plugin-tests:
-    name: Android Plugin Tests
+  # Android example E2E tests (min/max devices)
+  android-e2e:
+    name: Android E2E - ${{ matrix.device }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    needs: lint-and-validate
+    timeout-minutes: 30
+    needs: fast-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [min, max]
     steps:
       - uses: actions/checkout@v4
 
@@ -63,22 +71,40 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run orchestrated Android plugin tests
-        run: devbox run test:android
+      - name: Run Android E2E test
+        working-directory: examples/android
+        env:
+          EMU_HEADLESS: 1
+          BOOT_TIMEOUT: 180
+          TEST_TIMEOUT: 300
+          ANDROID_DEFAULT_DEVICE: ${{ matrix.device }}
+          TEST_TUI: false
+        run: devbox run --pure test:e2e
 
-      - name: Upload logs
-        if: failure()
+      - name: Upload reports and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-plugin-test-logs
-          path: test-results/devbox-unit-tests-logs/test-android-*
+          name: android-${{ matrix.device }}-reports
+          path: |
+            examples/android/reports/
+            examples/android/app/build/outputs/
           retention-days: 7
 
-  ios-plugin-tests:
-    name: iOS Plugin Tests
-    runs-on: macos-15
-    timeout-minutes: 15
-    needs: lint-and-validate
+  # iOS example E2E tests (min/max devices)
+  ios-e2e:
+    name: iOS E2E - ${{ matrix.device }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    needs: fast-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: min
+            os: macos-14
+          - device: max
+            os: macos-15
     steps:
       - uses: actions/checkout@v4
 
@@ -92,7 +118,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
 
-      - name: Setup iOS build cache
+      - name: Setup Xcode build cache
         uses: actions/cache@v4
         with:
           path: |
@@ -100,72 +126,6 @@ jobs:
           key: ${{ runner.os }}-xcode-${{ hashFiles('**/*.xcodeproj/**', '**/*.xcworkspace/**') }}
           restore-keys: |
             ${{ runner.os }}-xcode-
-
-      - name: Install Devbox
-        uses: jetify-com/devbox-install-action@v0.14.0
-        with:
-          enable-cache: true
-
-      - name: Run orchestrated iOS plugin tests
-        run: devbox run test:ios
-
-      - name: Upload logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-plugin-test-logs
-          path: test-results/devbox-unit-tests-logs/test-ios-*
-          retention-days: 7
-
-  android-quick-smoke:
-    name: Android Quick Smoke Test
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    needs: android-plugin-tests
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Android CI
-        uses: ./.github/actions/setup-android-ci
-        with:
-          device: min
-          working-directory: examples/android
-
-      - name: Install Devbox
-        uses: jetify-com/devbox-install-action@v0.14.0
-        with:
-          enable-cache: true
-
-      - name: Run Android E2E test
-        working-directory: examples/android
-        env:
-          EMU_HEADLESS: 1
-          BOOT_TIMEOUT: 180
-          TEST_TIMEOUT: 300
-          ANDROID_DEFAULT_DEVICE: min
-          TEST_TUI: false
-        run: devbox run --pure test:e2e
-
-      - name: Upload logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-smoke-logs
-          path: |
-            examples/android/reports/android-e2e-logs/
-            examples/android/app/build/outputs/
-          retention-days: 7
-
-  ios-quick-smoke:
-    name: iOS Quick Smoke Test
-    runs-on: macos-15
-    timeout-minutes: 20
-    needs: ios-plugin-tests
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup iOS CI
-        uses: ./.github/actions/setup-ios-ci
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
@@ -178,28 +138,67 @@ jobs:
           SIM_HEADLESS: 1
           BOOT_TIMEOUT: 120
           TEST_TIMEOUT: 300
+          IOS_DEFAULT_DEVICE: ${{ matrix.device }}
           TEST_TUI: false
         run: devbox run --pure test:e2e
 
-      - name: Upload logs
-        if: failure()
+      - name: Upload reports and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ios-smoke-logs
+          name: ios-${{ matrix.device }}-reports
           path: |
-            /tmp/ios-e2e-logs/
+            examples/ios/reports/
             ~/Library/Logs/CoreSimulator/
           retention-days: 7
 
-  android-example-unit-tests:
-    name: Android Example Unit Tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    needs: lint-and-validate
+  # React Native E2E tests (Android min/max, iOS min/max, Web)
+  react-native-e2e:
+    name: React Native E2E - ${{ matrix.platform }}-${{ matrix.device }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    needs: fast-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Android tests
+          - platform: android
+            device: min
+            os: ubuntu-24.04
+          - platform: android
+            device: max
+            os: ubuntu-24.04
+          # iOS tests
+          - platform: ios
+            device: min
+            os: macos-14
+          - platform: ios
+            device: max
+            os: macos-15
+          # Web test (fast, no device needed)
+          - platform: web
+            device: none
+            os: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Gradle cache
+      - name: Setup Node.js with cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: examples/react-native/package-lock.json
+
+      - name: Enable KVM (Android only)
+        if: matrix.platform == 'android'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Setup Gradle cache (Android only)
+        if: matrix.platform == 'android'
         uses: actions/cache@v4
         with:
           path: |
@@ -209,24 +208,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Install Devbox
-        uses: jetify-com/devbox-install-action@v0.14.0
+      - name: Setup CocoaPods cache (iOS only)
+        if: matrix.platform == 'ios'
+        uses: actions/cache@v4
         with:
-          enable-cache: true
+          path: |
+            ~/.cocoapods/repos
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
 
-      - name: Run Android example unit tests
-        working-directory: examples/android
-        run: devbox run --pure test:android
-
-  ios-unit-tests:
-    name: iOS Unit Tests
-    runs-on: macos-15
-    timeout-minutes: 20
-    needs: lint-and-validate
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup iOS build cache
+      - name: Setup Xcode build cache (iOS only)
+        if: matrix.platform == 'ios'
         uses: actions/cache@v4
         with:
           path: |
@@ -240,55 +234,60 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Run iOS unit tests
-        working-directory: examples/ios
-        run: devbox run --pure test:ios
-
-  react-native-unit-tests:
-    name: React Native Unit Tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    needs: lint-and-validate
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js with cache
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: examples/react-native/package-lock.json
-
-      - name: Install Devbox
-        uses: jetify-com/devbox-install-action@v0.14.0
-        with:
-          enable-cache: true
-
-      - name: Install dependencies
+      - name: Run React Native E2E test
         working-directory: examples/react-native
-        run: devbox run --pure build:node
+        env:
+          EMU_HEADLESS: ${{ matrix.platform == 'android' && '1' || '0' }}
+          SIM_HEADLESS: ${{ matrix.platform == 'ios' && '1' || '0' }}
+          BOOT_TIMEOUT: 240
+          TEST_TIMEOUT: 600
+          ANDROID_DEFAULT_DEVICE: ${{ matrix.device }}
+          IOS_DEFAULT_DEVICE: ${{ matrix.device }}
+          TEST_TUI: false
+        run: |
+          if [ "${{ matrix.platform }}" = "android" ]; then
+            # Use wrapper script for platform-specific optimization
+            bash tests/run-android-tests.sh
+          elif [ "${{ matrix.platform }}" = "ios" ]; then
+            # Use wrapper script for platform-specific optimization
+            bash tests/run-ios-tests.sh
+          elif [ "${{ matrix.platform }}" = "web" ]; then
+            devbox run test:e2e:web
+          fi
 
-      - name: Run Jest tests
-        working-directory: examples/react-native
-        run: npm test -- --coverage
+      - name: Upload reports and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-native-${{ matrix.platform }}-${{ matrix.device }}-reports
+          path: |
+            examples/react-native/reports/
+            examples/react-native/android/app/build/outputs/
+            examples/react-native/ios/build/
+            ~/Library/Logs/CoreSimulator/
+          retention-days: 7
 
+  # Summary status check
   status-check:
     name: All PR Checks Passed
     runs-on: ubuntu-latest
-    needs: [lint-and-validate, android-plugin-tests, ios-plugin-tests, android-quick-smoke, ios-quick-smoke, android-example-unit-tests, ios-unit-tests, react-native-unit-tests]
+    needs: [fast-tests, android-e2e, ios-e2e, react-native-e2e]
     if: always()
     steps:
       - name: Check job results
         run: |
-          if [[ "${{ needs.lint-and-validate.result }}" != "success" ]] || \
-             [[ "${{ needs.android-plugin-tests.result }}" != "success" ]] || \
-             [[ "${{ needs.ios-plugin-tests.result }}" != "success" ]] || \
-             [[ "${{ needs.android-quick-smoke.result }}" != "success" ]] || \
-             [[ "${{ needs.ios-quick-smoke.result }}" != "success" ]] || \
-             [[ "${{ needs.android-example-unit-tests.result }}" != "success" ]] || \
-             [[ "${{ needs.ios-unit-tests.result }}" != "success" ]] || \
-             [[ "${{ needs.react-native-unit-tests.result }}" != "success" ]]; then
+          echo "📊 PR Check Results:"
+          echo "  Fast Tests: ${{ needs.fast-tests.result }}"
+          echo "  Android E2E: ${{ needs.android-e2e.result }}"
+          echo "  iOS E2E: ${{ needs.ios-e2e.result }}"
+          echo "  React Native E2E: ${{ needs.react-native-e2e.result }}"
+          echo ""
+
+          if [[ "${{ needs.fast-tests.result }}" != "success" ]] || \
+             [[ "${{ needs.android-e2e.result }}" != "success" ]] || \
+             [[ "${{ needs.ios-e2e.result }}" != "success" ]] || \
+             [[ "${{ needs.react-native-e2e.result }}" != "success" ]]; then
             echo "::error::One or more PR checks failed"
             exit 1
           fi
-          echo "::notice::All PR checks passed!"
+          echo "::notice::✅ All PR checks passed!"

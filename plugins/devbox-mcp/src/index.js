@@ -305,25 +305,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: "devbox_docs_search",
-        description: "Search the devbox documentation at github.com/jetify-com/docs for relevant information about devbox features, commands, and usage",
-        inputSchema: {
-          type: "object",
-          properties: {
-            query: {
-              type: "string",
-              description: "Search query (e.g., 'init hook', 'services', 'plugins')",
-            },
-            maxResults: {
-              type: "number",
-              description: "Maximum number of results to return (default: 10)",
-              default: 10,
-            },
-          },
-          required: ["query"],
-        },
-      },
-      {
         name: "devbox_docs_list",
         description: "List all available documentation files in the devbox documentation repository. Returns a list of file paths that can be read with devbox_docs_read.",
         inputSchema: {
@@ -333,7 +314,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "devbox_docs_read",
-        description: "Read the full content of a specific documentation file. Use the file path from devbox_docs_search results or devbox_docs_list to read complete documentation.",
+        description: "Read the full content of a specific documentation file. Use the file path from devbox_docs_list results to read complete documentation.",
         inputSchema: {
           type: "object",
           properties: {
@@ -492,48 +473,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
         ],
         isError: !result.success,
-      };
-    }
-
-    case "devbox_docs_search": {
-      const { query, maxResults = 10 } = args;
-      const result = await searchDocs(query, { maxResults });
-
-      if (!result.success) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `✗ Failed to search docs\n\nError: ${result.error}\n${result.stderr ? `\nDetails: ${result.stderr}` : ""}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-
-      if (result.results.length === 0) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `No results found for "${query}" in devbox documentation.`,
-            },
-          ],
-        };
-      }
-
-      // Format results
-      const formattedResults = result.results.map(
-        (r) => `${r.file}:${r.line}\n  ${r.content}`
-      ).join("\n\n");
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Found ${result.total} match(es) for "${query}" (showing ${result.results.length}):\n\n${formattedResults}\n\nView docs: https://github.com/jetify-com/docs\n\nTip: Use devbox_docs_read with a file path to read the complete documentation.`,
-          },
-        ],
       };
     }
 

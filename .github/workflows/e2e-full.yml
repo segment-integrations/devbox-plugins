@@ -24,6 +24,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Android example E2E tests (min/max devices)
   android-e2e:
     name: Android E2E - ${{ matrix.device }}
     if: ${{ github.event_name == 'schedule' || inputs.run_android }}
@@ -36,11 +37,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Android CI
-        uses: ./.github/actions/setup-android-ci
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Setup Gradle cache
+        uses: actions/cache@v4
         with:
-          device: ${{ matrix.device }}
-          working-directory: examples/android
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
@@ -57,17 +68,17 @@ jobs:
           TEST_TUI: false
         run: devbox run --pure test:e2e
 
-      - name: Upload logs
-        if: failure()
+      - name: Upload reports and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-${{ matrix.device }}-logs
+          name: android-${{ matrix.device }}-reports
           path: |
-            examples/android/reports/android-e2e-logs/
+            examples/android/reports/
             examples/android/app/build/outputs/
-            examples/android/build/
           retention-days: 7
 
+  # iOS example E2E tests (min/max devices)
   ios-e2e:
     name: iOS E2E - ${{ matrix.device }}
     if: ${{ github.event_name == 'schedule' || inputs.run_ios }}
@@ -84,8 +95,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup iOS CI
-        uses: ./.github/actions/setup-ios-ci
+      - name: Setup CocoaPods cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cocoapods/repos
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Setup Xcode build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-${{ hashFiles('**/*.xcodeproj/**', '**/*.xcworkspace/**') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
@@ -102,16 +129,17 @@ jobs:
           TEST_TUI: false
         run: devbox run --pure test:e2e
 
-      - name: Upload logs
-        if: failure()
+      - name: Upload reports and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ios-${{ matrix.device }}-logs
+          name: ios-${{ matrix.device }}-reports
           path: |
-            /tmp/ios-e2e-logs/
+            examples/ios/reports/
             ~/Library/Logs/CoreSimulator/
           retention-days: 7
 
+  # React Native E2E tests (Android min/max, iOS min/max, Web)
   react-native-e2e:
     name: React Native E2E - ${{ matrix.platform }}-${{ matrix.device }}
     if: ${{ github.event_name == 'schedule' || inputs.run_react_native }}
@@ -135,6 +163,10 @@ jobs:
           - platform: ios
             device: max
             os: macos-15
+          # Web test (fast, no device needed)
+          - platform: web
+            device: none
+            os: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -145,16 +177,44 @@ jobs:
           cache: 'npm'
           cache-dependency-path: examples/react-native/package-lock.json
 
-      - name: Setup Android CI
+      - name: Enable KVM (Android only)
         if: matrix.platform == 'android'
-        uses: ./.github/actions/setup-android-ci
-        with:
-          device: ${{ matrix.device }}
-          working-directory: examples/react-native
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-      - name: Setup iOS CI
+      - name: Setup Gradle cache (Android only)
+        if: matrix.platform == 'android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup CocoaPods cache (iOS only)
         if: matrix.platform == 'ios'
-        uses: ./.github/actions/setup-ios-ci
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cocoapods/repos
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Setup Xcode build cache (iOS only)
+        if: matrix.platform == 'ios'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-${{ hashFiles('**/*.xcodeproj/**', '**/*.xcworkspace/**') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-
 
       - name: Install Devbox
         uses: jetify-com/devbox-install-action@v0.14.0
@@ -166,18 +226,27 @@ jobs:
         env:
           EMU_HEADLESS: ${{ matrix.platform == 'android' && '1' || '0' }}
           SIM_HEADLESS: ${{ matrix.platform == 'ios' && '1' || '0' }}
-          BOOT_TIMEOUT: 240
+          BOOT_TIMEOUT: 300
           TEST_TIMEOUT: 900
           ANDROID_DEFAULT_DEVICE: ${{ matrix.device }}
           IOS_DEFAULT_DEVICE: ${{ matrix.device }}
           TEST_TUI: false
-        run: devbox run --pure test:e2e:${{ matrix.platform }}
+        run: |
+          if [ "${{ matrix.platform }}" = "android" ]; then
+            # Use wrapper script for platform-specific optimization
+            bash tests/run-android-tests.sh
+          elif [ "${{ matrix.platform }}" = "ios" ]; then
+            # Use wrapper script for platform-specific optimization
+            bash tests/run-ios-tests.sh
+          elif [ "${{ matrix.platform }}" = "web" ]; then
+            devbox run test:e2e:web
+          fi
 
-      - name: Upload logs
-        if: failure()
+      - name: Upload reports and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: react-native-${{ matrix.platform }}-${{ matrix.device }}-logs
+          name: react-native-${{ matrix.platform }}-${{ matrix.device }}-reports
           path: |
             examples/react-native/reports/
             examples/react-native/android/app/build/outputs/
@@ -185,6 +254,7 @@ jobs:
             ~/Library/Logs/CoreSimulator/
           retention-days: 7
 
+  # Summary status check
   e2e-summary:
     name: E2E Test Summary
     runs-on: ubuntu-latest
@@ -199,9 +269,9 @@ jobs:
           echo "  React Native E2E: ${{ needs.react-native-e2e.result }}"
           echo ""
 
-          if [[ "${{ needs.android-e2e.result }}" != "success" ]] || \
-             [[ "${{ needs.ios-e2e.result }}" != "success" ]] || \
-             [[ "${{ needs.react-native-e2e.result }}" != "success" ]]; then
+          if [[ "${{ needs.android-e2e.result }}" != "success" && "${{ needs.android-e2e.result }}" != "skipped" ]] || \
+             [[ "${{ needs.ios-e2e.result }}" != "success" && "${{ needs.ios-e2e.result }}" != "skipped" ]] || \
+             [[ "${{ needs.react-native-e2e.result }}" != "success" && "${{ needs.react-native-e2e.result }}" != "skipped" ]]; then
             echo "::error::One or more E2E test suites failed"
             echo "::error::Check the individual job logs for details"
             echo "::error::Logs available in artifacts"

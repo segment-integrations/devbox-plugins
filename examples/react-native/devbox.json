@@ -74,19 +74,19 @@
         "npm test"
       ],
       "test:e2e": [
-        "devbox run --pure test:e2e:all"
+        "bash tests/run-android-tests.sh && bash tests/run-ios-tests.sh"
       ],
       "test:e2e:android": [
-        "devbox run --pure bash -c \"process-compose -f tests/test-suite-android-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
+        "bash tests/run-android-tests.sh"
       ],
       "test:e2e:ios": [
-        "devbox run --pure bash -c \"process-compose -f tests/test-suite-ios-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
+        "bash tests/run-ios-tests.sh"
       ],
       "test:e2e:all": [
-        "devbox run --pure bash -c \"process-compose -f tests/test-suite-all-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
+        "bash tests/run-android-tests.sh && bash tests/run-ios-tests.sh"
       ],
       "test:e2e:web": [
-        "devbox run --pure bash -c \"process-compose -f tests/test-suite-web-e2e.yaml --no-server --tui=${TEST_TUI:-false}\""
+        "bash -c \"ANDROID_SKIP_DOWNLOADS=1 IOS_SKIP_SETUP=1 devbox run --pure bash -c 'process-compose -f tests/test-suite-web-e2e.yaml --no-server --tui=${TEST_TUI:-false}'\""
       ]
     }
   }
