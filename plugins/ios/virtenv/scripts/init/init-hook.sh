@@ -5,6 +5,12 @@
 
 set -e
 
+# Skip all iOS initialization if IOS_SKIP_SETUP=1
+# Useful for Android-only contexts in React Native plugin
+if [ "${IOS_SKIP_SETUP:-0}" = "1" ]; then
+  exit 0
+fi
+
 # Find virtenv directory
 VIRTENV_DIR="${IOS_SCRIPTS_DIR:-}/.."
 if [ -z "$VIRTENV_DIR" ] || [ "$VIRTENV_DIR" = "/.." ]; then

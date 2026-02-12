@@ -19,8 +19,8 @@ echo "All tests completed!"
 echo "===================================="
 
 # If TUI is enabled, sleep to keep results visible
-if [ "${TEST_TUI:-false}" = "true" ]; then
+if [ "${TEST_TUI:-false}" = "true" ] || [ "${TEST_TUI:-false}" = "1" ]; then
   echo ""
-  echo "Press Ctrl+C to exit..."
-  sleep infinity
+  echo "TUI mode: Waiting 30 seconds before exit (Ctrl+C to exit now)..."
+  sleep 30
 fi

@@ -3,6 +3,12 @@
 # Sets up environment when user runs 'devbox shell'
 # This is NOT meant to make all functions available - use ios.sh for that
 
+# Skip all iOS setup if IOS_SKIP_SETUP=1
+# Useful for Android-only contexts in React Native plugin
+if [ "${IOS_SKIP_SETUP:-0}" = "1" ]; then
+  return 0 2>/dev/null || exit 0
+fi
+
 if ! (return 0 2>/dev/null); then
   echo "templates/devbox/plugins/ios/scripts/env.sh must be sourced." >&2
   exit 1

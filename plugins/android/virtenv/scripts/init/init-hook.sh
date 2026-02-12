@@ -5,6 +5,12 @@
 
 set -e
 
+# Skip all Android initialization if ANDROID_SKIP_DOWNLOADS=1
+# Useful for iOS-only contexts in React Native plugin to avoid SDK downloads
+if [ "${ANDROID_SKIP_DOWNLOADS:-0}" = "1" ]; then
+  exit 0
+fi
+
 # Show progress if not in CI
 if [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && [ -z "${ANDROID_INIT_SHOWN:-}" ]; then
   echo "📋 Initializing Android plugin configuration..." >&2

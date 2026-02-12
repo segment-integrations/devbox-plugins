@@ -49,6 +49,11 @@ Configure the plugin by setting environment variables in `devbox.json` or `plugi
 - `IOS_APP_ARTIFACT` — App bundle path/glob after build (default: "DerivedData/Build/Products/Debug-iphonesimulator/*.app")
 - `IOS_APP_DERIVED_DATA` — Xcode derived data directory (default: ".devbox/virtenv/ios/DerivedData")
 
+### Performance Settings
+- `IOS_SKIP_SETUP` — Skip iOS environment setup during shell initialization (1=skip, 0=setup; default: 0)
+  - Useful for Android-only contexts in React Native projects to speed up initialization
+  - When set to 1, skips Xcode path detection, device lock generation, and environment configuration
+
 ## Commands
 
 ### Simulator Management

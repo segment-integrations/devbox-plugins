@@ -28,9 +28,26 @@ processes:
     availability:
       restart: "no"
 
-  # Summary process - stays open to keep TUI visible in interactive mode
+  # Summary process - displays test results
   summary:
-    command: "bash tests/test-summary.sh 'Devbox MCP Test Suite' 'test-results/devbox-mcp-logs'"
+    command: |
+      echo ""
+      echo "===================================="
+      echo "Devbox MCP Test Suite Summary"
+      echo "===================================="
+      echo ""
+      echo "Test Logs:"
+      echo "  test-results/devbox-mcp-logs"
+      echo ""
+      echo "All tests completed!"
+      echo "===================================="
+
+      # In TUI mode, delay 30 seconds so user can view summary before exit
+      if [ "${TEST_TUI:-false}" = "true" ] || [ "${TEST_TUI:-false}" = "1" ]; then
+        echo ""
+        echo "TUI mode: Waiting 30 seconds before exit (Ctrl+C to exit now)..."
+        sleep 30
+      fi
     depends_on:
       test-server:
         condition: process_completed

@@ -35,6 +35,12 @@ Configure the plugin by setting environment variables in `plugin.json`. These ar
 - `ANDROID_CMAKE_VERSION` — CMake version when enabled (e.g., "3.22.1")
 - `ANDROID_CMDLINE_TOOLS_VERSION` — Command-line tools version (e.g., "19.0")
 
+### Performance Settings
+- `ANDROID_SKIP_DOWNLOADS` — Skip Android SDK downloads/evaluation during shell initialization (1=skip, 0=evaluate; default: 0)
+  - Useful for iOS-only contexts in React Native projects to speed up initialization
+  - When set to 1, skips Nix flake evaluation, SDK resolution, and environment configuration
+  - Android commands will fail if SDK is actually needed, but iOS workflows run without delay
+
 ## Commands
 
 ### Emulator

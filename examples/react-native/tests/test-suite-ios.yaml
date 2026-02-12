@@ -9,10 +9,11 @@ environment:
   - "LANG=en_US.UTF-8"
   - "LC_ALL=en_US.UTF-8"
   - "REACT_NATIVE_VIRTENV=${REACT_NATIVE_VIRTENV}"
+  - "IOS_BUILD_CONFIG=${IOS_BUILD_CONFIG:-Release}"
 
 log_location: "reports/react-native-ios-e2e-logs"
 log_level: info
-is_strict: false
+is_strict: true
 
 processes:
   # Phase 0: Allocate Metro port (runs first, no dependencies)
@@ -138,14 +139,27 @@ processes:
   # Phase 6: Build and deploy app with xcodebuild
   deploy-ios:
     command: |
+      set -e
+
+      # Set build configuration (default to Release for E2E tests)
+      BUILD_CONFIG="Release"
+      test -n "${IOS_BUILD_CONFIG:-}" && BUILD_CONFIG="$IOS_BUILD_CONFIG"
+
+      # Get absolute project root path
+      PROJECT_ROOT="${DEVBOX_PROJECT_ROOT:-}"
+      test -z "$PROJECT_ROOT" && PROJECT_ROOT="$(pwd)"
+
+      echo "📲 Building React Native app"
+      echo "Build configuration: $BUILD_CONFIG"
+      echo "Project root: $PROJECT_ROOT"
+
+      # Validate critical variables early
+      test -z "$BUILD_CONFIG" && { echo "ERROR: BUILD_CONFIG is empty!" >&2; exit 1; }
+      test -z "$PROJECT_ROOT" && { echo "ERROR: PROJECT_ROOT is empty!" >&2; exit 1; }
+
       # Source Metro environment so React Native uses correct port
       . ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh
-
-      echo "📲 Building React Native app (Metro port: $METRO_PORT)..."
-
-      # Configure Xcode environment to find node binary
-      echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env
-      echo "✓ Configured node path for Xcode build"
+      echo "Metro port: $METRO_PORT"
 
       # Get simulator UDID (retry for up to 30 seconds)
       max_attempts=15
@@ -177,25 +191,44 @@ processes:
 
       # Build with xcodebuild
       # Remove Nix-specific flags that interfere with Apple toolchain
-      cd ios
-      env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK \
-        RCT_METRO_PORT="$METRO_PORT" \
-        xcodebuild \
-        -workspace ReactNativeExample.xcworkspace \
-        -scheme ${IOS_APP_SCHEME} \
-        -configuration Debug \
-        -destination "id=$DEVICE_UDID" \
-        -derivedDataPath "${PWD}/../.devbox/virtenv/ios/DerivedData" \
-        build
+      # NODE_BINARY is set by React Native plugin init hook
+      # Pass RCT_METRO_PORT so the app connects to the correct Metro instance
 
-      cd ..
+      DERIVED_DATA_PATH="$PROJECT_ROOT/.devbox/virtenv/ios/DerivedData"
+      echo "Derived data path: $DERIVED_DATA_PATH"
+
+      # Ensure the derived data directory exists
+      mkdir -p "$DERIVED_DATA_PATH"
+
+      # Build with xcodebuild in a subshell to preserve variables
+      (
+        cd ios
+        env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK \
+          NODE_BINARY="$NODE_BINARY" \
+          RCT_METRO_PORT="$METRO_PORT" \
+          xcodebuild \
+          -workspace ReactNativeExample.xcworkspace \
+          -scheme ${IOS_APP_SCHEME} \
+          -configuration "$BUILD_CONFIG" \
+          -destination "id=$DEVICE_UDID" \
+          -derivedDataPath "$DERIVED_DATA_PATH" \
+          -quiet \
+          build
+      )
 
       # Install the built app
       echo "Installing app to simulator..."
-      APP_PATH=".devbox/virtenv/ios/DerivedData/Build/Products/Debug-iphonesimulator/ReactNativeExample.app"
+      echo "DEBUG: BUILD_CONFIG='${BUILD_CONFIG}'"
+      echo "DEBUG: PROJECT_ROOT='${PROJECT_ROOT}'"
+
+      APP_PATH="$PROJECT_ROOT/.devbox/virtenv/ios/DerivedData/Build/Products/${BUILD_CONFIG}-iphonesimulator/ReactNativeExample.app"
+      echo "DEBUG: APP_PATH='${APP_PATH}'"
 
       if [ ! -d "$APP_PATH" ]; then
         echo "ERROR: App bundle not found at $APP_PATH" >&2
+        echo "ERROR: BUILD_CONFIG was: '${BUILD_CONFIG}'" >&2
+        echo "ERROR: Contents of Products directory:" >&2
+        ls -la "$PROJECT_ROOT/.devbox/virtenv/ios/DerivedData/Build/Products/" >&2 || true
         exit 1
       fi
 
@@ -258,9 +291,8 @@ processes:
         waited=$((waited + 1))
       done
 
-      echo "🧹 Cleaning Metro state files..."
-      rm -f ${REACT_NATIVE_VIRTENV}/metro/port-ios.txt 2>/dev/null || true
-      rm -f ${REACT_NATIVE_VIRTENV}/metro/env-ios.sh 2>/dev/null || true
+      # Note: Process-compose will automatically kill Metro when tests complete
+      # Don't delete Metro state files here - Metro may restart and need them
 
       if [ "${DEVBOX_PURE_SHELL:-}" = "1" ]; then
         echo "🧹 Cleaning up (pure mode)..."
@@ -276,12 +308,12 @@ processes:
           xcrun simctl shutdown "$test_sim_udid" 2>/dev/null || true
           xcrun simctl delete "$test_sim_udid" 2>/dev/null || true
           rm -f .devbox/virtenv/ios/runtime/simulator-udid.txt 2>/dev/null || true
-          echo "✓ App stopped, test simulator deleted, Metro state cleaned"
+          echo "✓ App stopped, test simulator deleted"
         else
-          echo "✓ No test simulator to clean up, Metro state cleaned"
+          echo "✓ No test simulator to clean up"
         fi
       else
-        echo "✓ Test complete - app and simulator still running, Metro state cleaned"
+        echo "✓ Test complete - app and simulator still running"
       fi
     depends_on:
       allocate-metro-port:
@@ -290,3 +322,15 @@ processes:
         condition: process_completed_successfully
     availability:
       restart: "no"
+
+  # Summary - displays results and optionally stays open
+  summary:
+    command: "bash tests/test-summary.sh 'React Native iOS E2E Test Suite' 'reports/react-native-ios-e2e-logs'"
+    depends_on:
+      cleanup:
+        condition: process_completed
+    availability:
+      restart: "no"
+    shutdown:
+      signal: 15
+      timeout_seconds: 1

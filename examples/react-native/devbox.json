@@ -32,7 +32,7 @@
       "build:ios": [
         "devbox run install",
         "cd ios && pod install --repo-update",
-        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -workspace ReactNativeExample.xcworkspace -scheme ${IOS_APP_SCHEME} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData build"
+        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -workspace ReactNativeExample.xcworkspace -scheme ${IOS_APP_SCHEME} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ${DEVBOX_PROJECT_ROOT}/.devbox/virtenv/ios/DerivedData -quiet build"
       ],
       "build:web": [
         "devbox run install",

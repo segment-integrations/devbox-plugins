@@ -36,6 +36,7 @@
   },
   "shell": {
     "init_hook": [
+      "export NODE_BINARY=\"$(command -v node)\""
     ],
     "scripts": {
       "rn:metro:port": [
