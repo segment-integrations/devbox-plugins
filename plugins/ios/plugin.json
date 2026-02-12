@@ -11,7 +11,8 @@
     "IOS_DEFAULT_RUNTIME": "",
     "IOS_DEVELOPER_DIR": "",
     "IOS_DOWNLOAD_RUNTIME": "1",
-    "IOS_XCODE_ENV_PATH": ""
+    "IOS_XCODE_ENV_PATH": "",
+    "REPORTS_DIR": "reports"
   },
   "packages": {
     "bash": "latest",

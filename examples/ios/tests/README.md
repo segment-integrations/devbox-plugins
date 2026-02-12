@@ -139,16 +139,16 @@ Configure via environment variables in `devbox.json`:
 
 ### Check Test Logs
 
-Test logs are written to `/tmp/ios-e2e-logs/`:
+Test logs are written to `reports/ios-e2e-logs/`:
 
 ```bash
 # View all logs
-ls -la /tmp/ios-e2e-logs/
+ls -la reports/ios-e2e-logs/
 
 # View specific process log
-cat /tmp/ios-e2e-logs/build-app.log
-cat /tmp/ios-e2e-logs/ios-simulator.log
-cat /tmp/ios-e2e-logs/deploy-app.log
+cat reports/ios-e2e-logs/build-app.log
+cat reports/ios-e2e-logs/ios-simulator.log
+cat reports/ios-e2e-logs/deploy-app.log
 ```
 
 ### Check Simulator Status
@@ -170,13 +170,13 @@ tail -f ~/Library/Logs/CoreSimulator/*/system.log
 - Check Xcode is properly installed: `xcode-select -p`
 - Verify project path: `ls -la $IOS_APP_PROJECT`
 - Check scheme exists: `xcodebuild -list -project $IOS_APP_PROJECT`
-- View build log: `cat /tmp/ios-e2e-logs/build-app.log`
+- View build log: `cat reports/ios-e2e-logs/build-app.log`
 
 **Simulator Won't Start:**
 - Check CoreSimulatorService: `launchctl list | grep CoreSimulator`
 - Restart service: `killall -9 CoreSimulatorService`
 - Check disk space: `df -h`
-- View simulator log: `cat /tmp/ios-e2e-logs/ios-simulator.log`
+- View simulator log: `cat reports/ios-e2e-logs/ios-simulator.log`
 
 **App Won't Install:**
 - Verify app bundle exists: `ls -la $IOS_APP_ARTIFACT`

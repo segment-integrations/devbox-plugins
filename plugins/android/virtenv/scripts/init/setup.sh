@@ -15,6 +15,13 @@ if ! (return 0 2>/dev/null); then
   exit 1
 fi
 
+# Skip all Android setup if ANDROID_SKIP_DOWNLOADS=1
+# Useful for iOS-only contexts in React Native plugin to avoid SDK downloads
+if [ "${ANDROID_SKIP_DOWNLOADS:-0}" = "1" ]; then
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Skipping Android setup (ANDROID_SKIP_DOWNLOADS=1)" >&2
+  return 0
+fi
+
 # Prevent double-loading
 if [ "${ANDROID_ENV_LOADED:-}" = "1" ] && [ "${ANDROID_ENV_LOADED_PID:-}" = "$$" ]; then
   [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[SETUP-$$] Already loaded in this PID, returning" >&2

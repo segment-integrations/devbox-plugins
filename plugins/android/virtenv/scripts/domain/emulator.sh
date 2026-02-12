@@ -273,14 +273,17 @@ android_start_emulator() {
 
   # Start emulator in background, fully detached from parent shell/session
   # Using setsid creates a new session, preventing termination signals from parent
-  # Log output to reports/logs if available, otherwise use temp
-  if [ -n "${TEST_LOGS_DIR:-}" ] && [ -d "${TEST_LOGS_DIR}" ]; then
+  # Log output to project-local reports directory
+  if [ -n "${TEST_LOGS_DIR:-}" ]; then
+    mkdir -p "${TEST_LOGS_DIR}"
     emulator_log="${TEST_LOGS_DIR}/emulator-${avd_to_start}.log"
   elif [ -n "${REPORTS_DIR:-}" ]; then
     mkdir -p "${REPORTS_DIR}/logs"
     emulator_log="${REPORTS_DIR}/logs/emulator-${avd_to_start}.log"
   else
-    emulator_log="/tmp/emulator-${avd_to_start}.log"
+    # Fallback to project-local reports directory
+    mkdir -p "reports/logs"
+    emulator_log="reports/logs/emulator-${avd_to_start}.log"
   fi
 
   # Check if we should run in foreground (for process-compose monitoring)
@@ -385,8 +388,12 @@ android_start_emulator() {
   echo ""
   echo "✓ Emulator ready: $emulator_serial"
 
-  # Write serial to temp file for scripts to read
-  echo "$emulator_serial" > /tmp/android-emulator-serial.txt
+  # Write serial to runtime directory for scripts to read
+  runtime_dir="${ANDROID_RUNTIME_DIR:-${ANDROID_USER_HOME:-}}"
+  if [ -n "$runtime_dir" ]; then
+    mkdir -p "$runtime_dir"
+    echo "$emulator_serial" > "$runtime_dir/emulator-serial.txt"
+  fi
 
   # Track this emulator as started by this project
   android_track_emulator "$emulator_serial"

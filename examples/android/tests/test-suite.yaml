@@ -14,7 +14,7 @@ processes:
     command: |
       echo '[BUILD-APP] Starting build process (PID=$$)...'
       # Source Android environment to set ANDROID_SDK_ROOT
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
       echo '📦 Building Android app...'
       gradle assembleDebug --info
       echo '✓ Build complete'
@@ -23,7 +23,7 @@ processes:
 
   # Phase 2a: Sync AVDs - ensure all AVDs match device definitions
   sync-avds:
-    command: "echo '[SYNC-AVDS] Starting (PID=$$)...' && echo '[SYNC-AVDS] About to source setup.sh...' && . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh && echo '[SYNC-AVDS] setup.sh sourced' && echo '🔄 Syncing AVDs with device definitions...' && android.sh devices sync && echo '✓ Sync complete'"
+    command: "echo '[SYNC-AVDS] Starting (PID=$$)...' && echo '[SYNC-AVDS] About to source setup.sh...' && . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh && echo '[SYNC-AVDS] setup.sh sourced' && echo '🔄 Syncing AVDs with device definitions...' && android.sh devices sync && echo '✓ Sync complete'"
     availability:
       restart: "no"
 
@@ -39,7 +39,7 @@ processes:
     command: |
       echo "[ANDROID-EMULATOR] Starting emulator in foreground mode..."
       # Source Android environment
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
 
       # Determine which device to start
       device="${ANDROID_DEFAULT_DEVICE:-max}"
@@ -50,7 +50,7 @@ processes:
         export ANDROID_EMULATOR_PURE=1
 
         # Write expected serial for readiness probe (emulator always starts on 5554 first)
-        echo "emulator-5554" > /tmp/android-emu-serial.txt
+        echo "emulator-5554" > ${ANDROID_RUNTIME_DIR}/emulator-serial.txt
 
         # Start emulator in foreground - this blocks and runs the emulator
         # Process-compose will monitor it and use readiness probe to check when ready
@@ -60,7 +60,7 @@ processes:
 
         # Write expected serial for readiness probe
         serial="emulator-5554"
-        echo "$serial" > /tmp/android-emu-serial.txt
+        echo "$serial" > ${ANDROID_RUNTIME_DIR}/emulator-serial.txt
 
         # Check if emulator is already running
         if adb devices | grep -q "$serial"; then
@@ -100,7 +100,7 @@ processes:
     readiness_probe:
       exec:
         command: |
-          serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo "")
+          serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo "")
           [ -n "$serial" ] && adb -s $serial shell getprop sys.boot_completed 2>/dev/null | grep -q "1"
       initial_delay_seconds: 10
       period_seconds: 10
@@ -112,13 +112,14 @@ processes:
   run-app:
     command: |
       # Source Android environment
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
 
-      serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo emulator-5554)
+      serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
       export ANDROID_EMULATOR_SERIAL="$serial"
 
       echo "📲 Running app on emulator: $serial"
-      android.sh run
+      # Use already-built APK from build-app phase
+      android.sh run ${ANDROID_APP_APK:-app/build/outputs/apk/debug/app-debug.apk}
 
       echo ""
       echo "Waiting for app to start..."
@@ -152,9 +153,9 @@ processes:
   cleanup-app:
     command: |
       # Source Android environment
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
 
-      serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo emulator-5554)
+      serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 
       # In pure mode (CI), stop app and emulator for reproducibility
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then

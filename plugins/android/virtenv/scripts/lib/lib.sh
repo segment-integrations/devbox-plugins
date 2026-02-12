@@ -15,6 +15,60 @@ fi
 ANDROID_LIB_LOADED=1
 ANDROID_LIB_LOADED_PID="$$"
 
+# ============================================================================
+# Logging Utilities
+# ============================================================================
+
+# Detect script name from caller (works for sourced and executed scripts)
+_android_get_script_name() {
+  # Try to get script name from $0 first
+  if [ -n "${0:-}" ] && [ "$0" != "sh" ] && [ "$0" != "bash" ] && [ "$0" != "-sh" ] && [ "$0" != "-bash" ]; then
+    basename "$0" 2>/dev/null || echo "android"
+  else
+    echo "android"
+  fi
+}
+
+# Log with level and optional script name
+# Usage: _android_log "LEVEL" "script-name" "message" or _android_log "LEVEL" "message"
+_android_log() {
+  level="$1"
+  shift
+
+  # Check if first arg looks like a script name (ends in .sh or is short)
+  if [ $# -eq 2 ]; then
+    script_name="$1"
+    message="$2"
+  else
+    script_name="$(_android_get_script_name)"
+    message="$1"
+  fi
+
+  printf '[%s] [%s] %s\n' "$level" "$script_name" "$message" >&2
+}
+
+# Debug logging (only shown when DEBUG=1 or ANDROID_DEBUG=1)
+android_log_debug() {
+  if [ "${ANDROID_DEBUG:-}" = "1" ] || [ "${DEBUG:-}" = "1" ]; then
+    _android_log "DEBUG" "$@"
+  fi
+}
+
+# Info logging (always shown)
+android_log_info() {
+  _android_log "INFO" "$@"
+}
+
+# Warning logging (always shown)
+android_log_warn() {
+  _android_log "WARN" "$@"
+}
+
+# Error logging (always shown)
+android_log_error() {
+  _android_log "ERROR" "$@"
+}
+
 # String normalization for fuzzy matching
 android_normalize_name() {
   input_string="$1"

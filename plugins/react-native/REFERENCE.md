@@ -4,6 +4,21 @@
 
 This plugin composes the Android and iOS plugins.
 
+## Performance Optimization
+
+When running iOS-only workflows, you can skip Android SDK evaluation and downloads by setting `ANDROID_SKIP_DOWNLOADS=1`:
+
+```bash
+# iOS-only commands
+devbox run -e ANDROID_SKIP_DOWNLOADS=1 build:ios
+devbox run --pure -e ANDROID_SKIP_DOWNLOADS=1 start:sim
+
+# The flag is automatically set in test-suite-ios.yaml
+devbox run test:e2e:ios
+```
+
+This significantly speeds up iOS workflows and prevents unnecessary Android SDK downloads.
+
 ## Commands
 
 - Android: `devbox run --pure start-emu`, `devbox run --pure start-android`, `devbox run --pure stop-emu`

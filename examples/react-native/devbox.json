@@ -7,12 +7,13 @@
     "gradle@latest"
   ],
   "env": {
-    "IOS_APP_PROJECT": "ios/ReactNativeExample.xcodeproj",
+    "IOS_APP_PROJECT": "ReactNativeExample.xcodeproj",
     "IOS_APP_SCHEME": "ReactNativeExample",
-    "IOS_APP_BUNDLE_ID": "com.reactnativeexample",
+    "IOS_APP_BUNDLE_ID": "org.reactjs.native.example.ReactNativeExample",
     "IOS_APP_ARTIFACT": ".devbox/virtenv/ios/DerivedData/Build/Products/Debug-iphonesimulator/ReactNativeExample.app",
     "ANDROID_APP_ID": "com.reactnativeexample",
     "ANDROID_APP_APK": "android/app/build/outputs/apk/debug/app-debug.apk",
+    "ANDROID_MAX_API": "35",
     "DEVBOX_COREPACK_ENABLED": "",
     "ANDROID_SDK_REQUIRED": "0"
   },
@@ -21,13 +22,17 @@
       "install": [
         "npm install"
       ],
+      "build:node": [
+        "npm install"
+      ],
       "build:android": [
         "devbox run install",
         "cd android && gradle assembleDebug"
       ],
       "build:ios": [
         "devbox run install",
-        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT} -scheme ${IOS_APP_SCHEME} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData build"
+        "cd ios && pod install --repo-update",
+        "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -workspace ReactNativeExample.xcworkspace -scheme ${IOS_APP_SCHEME} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData build"
       ],
       "build:web": [
         "devbox run install",
@@ -46,8 +51,23 @@
         "devbox services start ios-simulator || devbox services up -b ios-simulator",
         "npx react-native run-ios --no-packager"
       ],
+      "start:sim": [
+        "ios.sh simulator start ${1:-${IOS_DEFAULT_DEVICE:-max}}"
+      ],
+      "stop:sim": [
+        "ios.sh simulator stop"
+      ],
+      "start:emu": [
+        "android.sh emulator start ${1:-${ANDROID_DEFAULT_DEVICE:-max}}"
+      ],
+      "stop:emu": [
+        "android.sh emulator stop"
+      ],
       "test": [
         "npm test"
+      ],
+      "test:e2e": [
+        "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-true}"
       ],
       "test:e2e:android": [
         "process-compose -f tests/test-suite-android.yaml --no-server --tui=${TEST_TUI:-true}"

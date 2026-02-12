@@ -4,124 +4,184 @@ environment:
   - "IOS_DEVICE=${IOS_DEFAULT_DEVICE:-max}"
   - "TEST_TIMEOUT=300"
   - "BOOT_TIMEOUT=120"
+  - "ANDROID_SKIP_DOWNLOADS=1"
 
-log_location: "/tmp/react-native-ios-e2e-logs"
+log_location: "reports/react-native-ios-e2e-logs"
 log_level: info
 
 processes:
-  # Phase 1: Build Node dependencies and iOS app
+  # Phase 1: Build Node dependencies
   build-node:
     command: "devbox run --pure build:node"
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -d node_modules"
-      initial_delay_seconds: 2
-      period_seconds: 5
-      timeout_seconds: 180
-      success_threshold: 1
 
-  build-ios:
-    command: "cd ios && env -u LD -u LDFLAGS -u NIX_LDFLAGS -u NIX_CFLAGS_COMPILE -u NIX_CFLAGS_LINK xcodebuild -project ${IOS_APP_PROJECT:-*.xcodeproj} -scheme ${IOS_APP_SCHEME:-$(basename ${IOS_APP_PROJECT:-*.xcodeproj} .xcodeproj)} -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ../.devbox/virtenv/ios/DerivedData build"
+  # Phase 2: Install CocoaPods dependencies
+  install-pods:
+    command: |
+      cd ios
+      echo "Installing CocoaPods dependencies..."
+      pod install --repo-update
+      echo '✓ Pod install complete'
     depends_on:
       build-node:
         condition: process_completed_successfully
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "test -d ${IOS_APP_ARTIFACT:-../.devbox/virtenv/ios/DerivedData/Build/Products/Debug-iphonesimulator/*.app}"
-      initial_delay_seconds: 5
-      period_seconds: 5
-      timeout_seconds: 300
-      success_threshold: 1
 
-  # Phase 2: Sync simulators - ensure all simulators match device definitions
+  # Phase 3: Sync simulators
   sync-simulators:
     command: "devbox run ios.sh devices sync"
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: "echo 'Sync complete'"
-      initial_delay_seconds: 1
-      period_seconds: 2
-      timeout_seconds: 120
-      success_threshold: 1
 
-  # Phase 3: Start simulator - depends on sync completing
+  # Phase 4: Start simulator
   ios-simulator:
-    command: "devbox run --pure start:sim ${IOS_DEVICE}"
+    command: |
+      mkdir -p .devbox/virtenv/ios/runtime
+
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
+        echo "🚀 Starting fresh iOS simulator with clean state (${IOS_DEVICE})..."
+        output=$(ios.sh simulator start --pure ${IOS_DEVICE} 2>&1)
+        echo "$output"
+
+        test_udid=$(echo "$output" | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' | tail -1)
+        if [ -n "$test_udid" ]; then
+          echo "$test_udid" > .devbox/virtenv/ios/runtime/simulator-udid.txt
+          echo "✓ Test simulator UDID saved: $test_udid"
+        fi
+      else
+        echo "🚀 Starting iOS simulator (${IOS_DEVICE})..."
+        ios.sh simulator start ${IOS_DEVICE}
+
+        echo "Waiting for simulator to boot..."
+        DEVICE_UDID=$(xcrun simctl list devices | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1 || echo "")
+        if [ -z "$DEVICE_UDID" ]; then
+          echo "ERROR: No booted simulator found"
+          exit 1
+        fi
+        xcrun simctl bootstatus "$DEVICE_UDID" >/dev/null 2>&1 || true
+
+        echo "✓ Simulator ready for testing"
+        echo "✓ Simulator will remain running after tests complete"
+        exit 0
+      fi
+
+      tail -f /dev/null
     depends_on:
       sync-simulators:
+        condition: process_completed_successfully
+    availability:
+      restart: "no"
+    readiness_probe:
+      exec:
+        command: |
+          if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
+            DEVICE_UDID=$(xcrun simctl list devices | grep "Test" | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1 || echo "")
+          else
+            DEVICE_UDID=$(xcrun simctl list devices | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1 || echo "")
+          fi
+          [ -n "$DEVICE_UDID" ] && xcrun simctl bootstatus "$DEVICE_UDID" >/dev/null 2>&1
+      initial_delay_seconds: 10
+      period_seconds: 5
+      timeout_seconds: 120
+      success_threshold: 1
+      failure_threshold: 3
+
+  # Phase 5: Start Metro bundler
+  metro-bundler:
+    command: "npx react-native start --reset-cache"
+    depends_on:
+      build-node:
         condition: process_completed_successfully
     availability:
       restart: "on_failure"
       max_restarts: 2
     readiness_probe:
       exec:
-        command: "xcrun simctl list devices | grep ${IOS_DEVICE} | grep -q '(Booted)'"
-      initial_delay_seconds: 5
-      period_seconds: 3
-      timeout_seconds: 120
-      success_threshold: 1
-      failure_threshold: 3
-    liveness_probe:
-      exec:
-        command: "xcrun simctl list devices | grep ${IOS_DEVICE} | grep -q '(Booted)'"
-      initial_delay_seconds: 10
-      period_seconds: 10
-      timeout_seconds: 5
-      success_threshold: 1
-      failure_threshold: 3
-    shutdown:
-      command: "devbox run --pure stop:sim"
-      timeout_seconds: 30
-
-  # Phase 4: Deploy React Native app
-  deploy-ios:
-    command: "npx react-native run-ios --no-packager --simulator='${IOS_DEVICE}'"
-    depends_on:
-      build-ios:
-        condition: process_completed_successfully
-      ios-simulator:
-        condition: process_healthy
-    availability:
-      restart: "no"
-    readiness_probe:
-      exec:
         command: |
-          DEVICE_UDID=$(xcrun simctl list devices | grep ${IOS_DEVICE} | grep -oE '[0-9A-F-]{36}' | head -1)
-          xcrun simctl get_app_container "$DEVICE_UDID" "${IOS_APP_BUNDLE_ID:-com.example.devbox}" >/dev/null 2>&1
+          # Check if Metro server is up
+          curl -sf http://localhost:8081/status >/dev/null || exit 1
+
+          # Verify Metro can actually serve the bundle (without downloading it)
+          # This ensures Metro has finished initialization and can compile
+          curl -sf -I "http://localhost:8081/index.bundle?platform=ios&dev=true" | grep -q "HTTP.*200" || exit 1
       initial_delay_seconds: 5
-      period_seconds: 3
+      period_seconds: 5
       timeout_seconds: 60
       success_threshold: 1
 
-  # Phase 5: Verify app is running
+  # Phase 6: Build and deploy app (React Native CLI handles both, like Android)
+  deploy-ios:
+    command: "npx react-native run-ios --no-packager"
+    depends_on:
+      install-pods:
+        condition: process_completed_successfully
+      ios-simulator:
+        condition: process_completed_successfully
+      metro-bundler:
+        condition: process_healthy
+    availability:
+      restart: "no"
+
+  # Phase 7: Verify app is running
   verify-app-running:
     command: |
-      DEVICE_UDID=$(xcrun simctl list devices | grep ${IOS_DEVICE} | grep -oE '[0-9A-F-]{36}' | head -1)
-      xcrun simctl spawn "$DEVICE_UDID" launchctl list | grep -q "${IOS_APP_BUNDLE_ID:-com.example.devbox}"
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
+        DEVICE_UDID=$(xcrun simctl list devices | grep "Test" | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1)
+      else
+        DEVICE_UDID=$(xcrun simctl list devices | grep "Booted" | grep -oE '[0-9A-F-]{36}' | head -1)
+      fi
+
+      echo "Waiting for app to start..."
+      max_attempts=10
+      attempt=0
+      while [ $attempt -lt $max_attempts ]; do
+        if xcrun simctl spawn "$DEVICE_UDID" launchctl list | grep -q "${IOS_APP_BUNDLE_ID}"; then
+          echo "✓ App is running: ${IOS_APP_BUNDLE_ID}"
+          exit 0
+        fi
+        attempt=$((attempt + 1))
+        echo "  Attempt $attempt/$max_attempts..."
+        sleep 2
+      done
+
+      echo "ERROR: App did not start within timeout" >&2
+      exit 1
     depends_on:
       deploy-ios:
         condition: process_completed_successfully
     availability:
       restart: "no"
-    readiness_probe:
-      exec:
-        command: |
-          DEVICE_UDID=$(xcrun simctl list devices | grep ${IOS_DEVICE} | grep -oE '[0-9A-F-]{36}' | head -1)
-          xcrun simctl spawn "$DEVICE_UDID" launchctl list | grep -q "${IOS_APP_BUNDLE_ID:-com.example.devbox}"
-      initial_delay_seconds: 2
-      period_seconds: 3
-      timeout_seconds: 30
-      success_threshold: 1
 
   # Cleanup
   cleanup:
-    command: "echo 'Cleanup complete' && devbox run --pure stop:sim || true"
+    command: |
+      # Kill Metro bundler
+      echo "Stopping Metro bundler..."
+      lsof -ti:8081 2>/dev/null | xargs kill -9 2>/dev/null || echo "No Metro process found"
+
+      if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
+        echo "🧹 Cleaning up (pure mode)..."
+
+        test_sim_udid=$(cat .devbox/virtenv/ios/runtime/simulator-udid.txt 2>/dev/null || echo "")
+
+        if [ -z "$test_sim_udid" ]; then
+          test_sim_udid=$(xcrun simctl list devices | grep "Test" | grep -oE '[0-9A-F-]{36}' | head -1 || true)
+        fi
+
+        if [ -n "$test_sim_udid" ]; then
+          xcrun simctl terminate "$test_sim_udid" "${IOS_APP_BUNDLE_ID}" 2>/dev/null || true
+          xcrun simctl shutdown "$test_sim_udid" >/dev/null 2>&1 || true
+          xcrun simctl delete "$test_sim_udid" >/dev/null 2>&1 || true
+          rm -f .devbox/virtenv/ios/runtime/simulator-udid.txt
+          echo "✓ App stopped, test simulator deleted"
+        else
+          echo "✓ No test simulator to clean up"
+        fi
+      else
+        echo "✓ Test complete - app and simulator still running"
+      fi
     depends_on:
       verify-app-running:
         condition: process_completed

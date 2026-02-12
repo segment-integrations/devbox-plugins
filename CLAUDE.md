@@ -30,7 +30,40 @@ This is a mobile development templates repository providing Devbox plugins and e
 
 **IMPORTANT:** All logs must go to `${TEST_LOGS_DIR}` (defaults to `reports/logs/`), never to `/tmp/`.
 
-**Correct:**
+**Standardized Logging Functions:**
+
+Use the built-in logging functions from `lib.sh` for consistent, identifiable output:
+
+```bash
+# Auto-detects script name from $0
+android_log_info "Creating AVD: pixel_api30"
+android_log_warn "Emulator already running"
+android_log_error "APK not found"
+android_log_debug "SDK path: /nix/store/..."
+
+# Or explicitly provide script name
+android_log_info "avd.sh" "Creating AVD: pixel_api30"
+ios_log_warn "simulator.sh" "Simulator boot timeout"
+```
+
+**Output format:**
+```
+[INFO] [avd.sh] Creating AVD: pixel_api30
+[WARN] [emulator.sh] Emulator already running
+[ERROR] [deploy.sh] APK not found
+[DEBUG] [core.sh] SDK path: /nix/store/...
+```
+
+**Log levels:**
+- `android_log_debug` / `ios_log_debug` - Only shown when `DEBUG=1` or `ANDROID_DEBUG=1` / `IOS_DEBUG=1`
+- `android_log_info` / `ios_log_info` - Always shown
+- `android_log_warn` / `ios_log_warn` - Always shown
+- `android_log_error` / `ios_log_error` - Always shown
+
+**File Logging Paths:**
+
+For writing log files, use project-local paths:
+
 ```bash
 # Use environment variables (preferred)
 echo "$data" > "${TEST_LOGS_DIR}/test-output.txt"
@@ -58,6 +91,7 @@ log_file="/tmp/test.log"              # WRONG - may be cleaned up by system
 - `reports/logs/` is gitignored and project-local
 - CI/CD systems expect logs in `reports/`
 - Consistent location makes debugging easier
+- Standardized logging makes scripts identifiable in process-compose output
 - Environment variables allow for configuration flexibility
 
 ## Core Architecture

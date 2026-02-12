@@ -9,12 +9,12 @@ processes:
       - "ANDROID_EMULATOR_FOREGROUND=1"
     command: |
       echo "[EMULATOR-ONLY] Starting emulator..."
-      . ${ANDROID_FLAKE_DIR}/scripts/init/setup.sh
+      . ${ANDROID_RUNTIME_DIR}/scripts/init/setup.sh
 
       device="${ANDROID_DEFAULT_DEVICE:-max}"
       export ANDROID_EMULATOR_PURE=1
 
-      echo "emulator-5554" > /tmp/android-emu-serial.txt
+      echo "emulator-5554" > ${ANDROID_RUNTIME_DIR}/emulator-serial.txt
 
       android.sh emulator start "$device"
     availability:
@@ -22,7 +22,7 @@ processes:
     readiness_probe:
       exec:
         command: |
-          serial=$(cat /tmp/android-emu-serial.txt 2>/dev/null || echo "")
+          serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo "")
           [ -n "$serial" ] && adb -s $serial shell getprop sys.boot_completed 2>/dev/null | grep -q "1"
       initial_delay_seconds: 10
       period_seconds: 10

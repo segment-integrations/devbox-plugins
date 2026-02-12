@@ -69,8 +69,8 @@ resolve_flake_sdk_root() {
 
   root="${ANDROID_SDK_FLAKE_PATH:-}"
   if [ -z "$root" ]; then
-    if [ -n "${ANDROID_FLAKE_DIR:-}" ] && [ -d "${ANDROID_FLAKE_DIR}" ]; then
-      root="${ANDROID_FLAKE_DIR}"
+    if [ -n "${ANDROID_RUNTIME_DIR:-}" ] && [ -d "${ANDROID_RUNTIME_DIR}" ]; then
+      root="${ANDROID_RUNTIME_DIR}"
     elif [ -n "${ANDROID_SCRIPTS_DIR:-}" ] && [ -d "${ANDROID_SCRIPTS_DIR}" ]; then
       # Flake is in same directory as scripts (virtenv)
       root="$(dirname "${ANDROID_SCRIPTS_DIR}")"
@@ -100,16 +100,16 @@ resolve_flake_sdk_root() {
     export ANDROID_NIX_EVAL_SHOWN=1
   fi
 
-  # Nix handles caching internally - no need for our own cache file
-  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] Starting nix eval for path:${root}#${output}.outPath" >&2
+  # Build the SDK to ensure it's in the Nix store
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] Building SDK: path:${root}#${output}" >&2
   sdk_out=$(
     nix --extra-experimental-features 'nix-command flakes' \
-      eval --raw "path:${root}#${output}.outPath" 2>&1 || true
+      build "path:${root}#${output}" --no-link --print-out-paths 2>&1 || true
   )
-  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] nix eval returned: ${sdk_out:-(empty)}" >&2
+  [ -n "${ANDROID_DEBUG_SETUP:-}" ] && echo "[CORE-$$] nix build returned: ${sdk_out:-(empty)}" >&2
 
   if android_debug_enabled; then
-    android_debug_log "Flake eval returned: ${sdk_out:-empty}"
+    android_debug_log "Flake build returned: ${sdk_out:-empty}"
     if [ -n "$sdk_out" ]; then
       android_debug_log "Checking path: $sdk_out/libexec/android-sdk"
       if [ -d "$sdk_out/libexec/android-sdk" ]; then

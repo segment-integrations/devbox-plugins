@@ -10,7 +10,7 @@
     "ANDROID_DEVICES_DIR": "{{ .DevboxDir }}/devices",
     "ANDROID_DEVICES": "",
     "ANDROID_SCRIPTS_DIR": "{{ .Virtenv }}/scripts",
-    "ANDROID_FLAKE_DIR": "{{ .Virtenv }}",
+    "ANDROID_RUNTIME_DIR": "{{ .Virtenv }}",
     "ANDROID_LOCAL_SDK": "0",
     "ANDROID_COMPILE_SDK": "36",
     "ANDROID_TARGET_SDK": "36",
@@ -22,7 +22,9 @@
     "ANDROID_INCLUDE_CMAKE": "false",
     "ANDROID_CMAKE_VERSION": "3.22.1",
     "ANDROID_CMDLINE_TOOLS_VERSION": "19.0",
-    "ANDROID_DISABLE_SNAPSHOTS": "0"
+    "ANDROID_DISABLE_SNAPSHOTS": "0",
+    "ANDROID_SKIP_DOWNLOADS": "0",
+    "REPORTS_DIR": "reports"
   },
   "packages": {
     "bash": "latest",
