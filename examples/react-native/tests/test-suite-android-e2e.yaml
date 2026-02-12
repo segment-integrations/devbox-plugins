@@ -143,15 +143,7 @@ processes:
       timeout_seconds: 5
     readiness_probe:
       exec:
-        command: |
-          # Source Metro environment to get correct port
-          . ${REACT_NATIVE_VIRTENV}/metro/env-android.sh
-
-          # Check if Metro server is up on allocated port
-          curl -sf http://localhost:$METRO_PORT/status >/dev/null || exit 1
-
-          # Verify Metro can actually serve the bundle (without downloading it)
-          curl -sf -I "http://localhost:$METRO_PORT/index.bundle?platform=android&dev=true" | grep -q "HTTP.*200" || exit 1
+        command: "metro.sh health android android"
       initial_delay_seconds: 5
       period_seconds: 5
       timeout_seconds: 60

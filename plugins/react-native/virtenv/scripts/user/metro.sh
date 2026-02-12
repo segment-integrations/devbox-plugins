@@ -84,6 +84,38 @@ metro_clean() {
   echo "✓ Metro state cleaned"
 }
 
+metro_health() {
+  suite_name="${1:-default}"
+  platform="${2:-ios}"  # Default to ios, can be android, ios, or all
+  metro_dir="${REACT_NATIVE_VIRTENV}/metro"
+  env_file="$metro_dir/env-${suite_name}.sh"
+
+  # Check if Metro environment exists
+  if [ ! -f "$env_file" ] && [ ! -L "$env_file" ]; then
+    return 1
+  fi
+
+  # shellcheck disable=SC1090
+  . "$env_file"
+
+  # Check if port is set
+  if [ -z "${METRO_PORT:-}" ]; then
+    return 1
+  fi
+
+  # Check if Metro server is up
+  if ! curl -sf "http://localhost:$METRO_PORT/status" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  # Verify Metro can serve bundles for the platform
+  if ! curl -sf -I "http://localhost:$METRO_PORT/index.bundle?platform=$platform&dev=true" 2>/dev/null | grep -q "HTTP.*200"; then
+    return 1
+  fi
+
+  return 0
+}
+
 # ============================================================================
 # CLI
 # ============================================================================
@@ -92,20 +124,24 @@ show_usage() {
   cat <<EOF
 Metro Bundler CLI for React Native
 
-Usage: metro.sh <command> [suite_name]
+Usage: metro.sh <command> [suite_name] [platform]
 
 Commands:
-  start [suite]     Start Metro bundler for test suite (default: default)
-                    Allocates port, saves environment, starts Metro
+  start [suite]         Start Metro bundler for test suite (default: default)
+                        Allocates port, saves environment, starts Metro
 
-  stop [suite]      Stop Metro bundler for test suite
-                    Finds Metro by port and stops it gracefully
+  stop [suite]          Stop Metro bundler for test suite
+                        Finds Metro by port and stops it gracefully
 
-  status [suite]    Show Metro status for test suite
-                    Displays port, PID, and running status
+  status [suite]        Show Metro status for test suite
+                        Displays port, PID, and running status
 
-  clean [suite]     Clean Metro state files for test suite
-                    Removes port allocation and environment files
+  health [suite] [plat] Health check for Metro (silent, exit code only)
+                        Checks if Metro can serve bundles
+                        Platform: ios, android, all (default: ios)
+
+  clean [suite]         Clean Metro state files for test suite
+                        Removes port allocation and environment files
 
 Examples:
   metro.sh start android        # Start Metro for android test suite
@@ -146,6 +182,9 @@ main() {
       ;;
     status)
       metro_status "$@"
+      ;;
+    health)
+      metro_health "$@"
       ;;
     clean)
       metro_clean "$@"

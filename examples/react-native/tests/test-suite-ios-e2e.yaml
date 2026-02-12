@@ -127,6 +127,13 @@ processes:
       command: "metro.sh stop ios || true"
       signal: 15
       timeout_seconds: 5
+    readiness_probe:
+      exec:
+        command: "metro.sh health ios ios"
+      initial_delay_seconds: 5
+      period_seconds: 5
+      timeout_seconds: 60
+      success_threshold: 1
 
   # Phase 6: Build and deploy app with xcodebuild
   deploy-ios:

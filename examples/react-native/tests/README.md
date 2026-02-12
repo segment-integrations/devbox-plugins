@@ -11,8 +11,27 @@ This directory contains E2E test suites for React Native development.
 # Run Android tests only (fast - skips iOS setup)
 ./tests/run-android-tests.sh
 
+# Run web tests only (fastest - Metro + browser)
+devbox run test:e2e:web
+
 # Run all tests (both platforms)
 devbox run test:e2e:all
+```
+
+## Development Commands
+
+```bash
+# Start React Native with Metro for each platform
+devbox run start:android     # Start Metro + deploy to Android
+devbox run start:ios         # Start Metro + deploy to iOS
+devbox run start:web         # Start Metro + open browser
+
+# Manual Metro control
+devbox run start:metro android   # Start Metro for android suite
+devbox run stop:metro android    # Stop Metro for android suite
+metro.sh status android          # Check Metro status
+metro.sh health android android  # Health check (exit code only)
+metro.sh clean android           # Clean up Metro state files
 ```
 
 ## Test Modes: --pure vs Development
@@ -59,7 +78,8 @@ devbox run test:e2e:android
 
 - **test-suite-ios.yaml** - iOS simulator build and deployment
 - **test-suite-android.yaml** - Android emulator build and deployment
-- **test-suite-all.yaml** - Both platforms in parallel
+- **test-suite-web.yaml** - Web browser Metro bundle (fastest)
+- **test-suite-all.yaml** - Both mobile platforms in parallel
 
 ## Parallel Testing Multiple Versions
 

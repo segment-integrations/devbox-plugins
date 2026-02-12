@@ -44,12 +44,19 @@
         "devbox run build:web"
       ],
       "start:android": [
-        "devbox services start android-emulator || devbox services up -b android-emulator",
-        "npx react-native run-android --no-packager"
+        "bash scripts/start-with-metro.sh android ${1:-${ANDROID_DEFAULT_DEVICE:-max}}"
       ],
       "start:ios": [
-        "devbox services start ios-simulator || devbox services up -b ios-simulator",
-        "npx react-native run-ios --no-packager"
+        "bash scripts/start-with-metro.sh ios ${1:-${IOS_DEFAULT_DEVICE:-max}}"
+      ],
+      "start:web": [
+        "bash scripts/start-with-metro.sh web"
+      ],
+      "start:metro": [
+        "metro.sh start ${1:-default}"
+      ],
+      "stop:metro": [
+        "metro.sh stop ${1:-default}"
       ],
       "start:sim": [
         "ios.sh simulator start ${1:-${IOS_DEFAULT_DEVICE:-max}}"
@@ -77,6 +84,9 @@
       ],
       "test:e2e:all": [
         "process-compose -f tests/test-suite-all.yaml --no-server --tui=${TEST_TUI:-false}"
+      ],
+      "test:e2e:web": [
+        "process-compose -f tests/test-suite-web.yaml --no-server --tui=${TEST_TUI:-false}"
       ]
     }
   }
