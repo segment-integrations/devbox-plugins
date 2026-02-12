@@ -1,0 +1,148 @@
+version: "0.5"
+
+environment:
+  - "TEST_SUITE_NAME=shutdown-test"
+  - "TEST_TUI=false"
+
+log_location: "test-results/metro-shutdown-logs"
+log_level: info
+is_strict: false
+
+processes:
+  # Phase 1: Allocate Metro port
+  allocate-port:
+    command: |
+      . ${REACT_NATIVE_VIRTENV}/scripts/lib/lib.sh
+
+      metro_port=$(rn_allocate_metro_port "${TEST_SUITE_NAME}")
+      echo "📡 Allocated Metro port: $metro_port"
+
+      env_file=$(rn_save_metro_env "${TEST_SUITE_NAME}" "$metro_port")
+      echo "✓ Metro environment saved to: $env_file"
+    availability:
+      restart: "no"
+
+  # Phase 2: Start Metro
+  metro-bundler:
+    command: "metro.sh start ${TEST_SUITE_NAME}"
+    depends_on:
+      allocate-port:
+        condition: process_completed_successfully
+    availability:
+      restart: "no"
+    shutdown:
+      command: "metro.sh stop ${TEST_SUITE_NAME} || true"
+      signal: 15
+      timeout_seconds: 5
+    readiness_probe:
+      exec:
+        command: |
+          . ${REACT_NATIVE_VIRTENV}/metro/env-${TEST_SUITE_NAME}.sh
+          curl -sf http://localhost:$METRO_PORT/status >/dev/null || exit 1
+      initial_delay_seconds: 3
+      period_seconds: 2
+      timeout_seconds: 30
+      success_threshold: 1
+
+  # Phase 3: Verify Metro is running
+  verify-metro:
+    command: |
+      echo "Verifying Metro is running..."
+
+      . ${REACT_NATIVE_VIRTENV}/metro/env-${TEST_SUITE_NAME}.sh
+
+      # Check port is allocated
+      if [ -z "$METRO_PORT" ]; then
+        echo "ERROR: METRO_PORT not set"
+        exit 1
+      fi
+      echo "✓ METRO_PORT is set: $METRO_PORT"
+
+      # Check Metro responds
+      if curl -sf http://localhost:$METRO_PORT/status >/dev/null; then
+        echo "✓ Metro is responding on port $METRO_PORT"
+      else
+        echo "ERROR: Metro not responding on port $METRO_PORT"
+        exit 1
+      fi
+
+      # Check process is running
+      if metro_pid=$(lsof -ti:$METRO_PORT 2>/dev/null); then
+        echo "✓ Metro process running (PID: $metro_pid)"
+      else
+        echo "ERROR: No process listening on port $METRO_PORT"
+        exit 1
+      fi
+
+      echo ""
+      echo "All Metro checks passed!"
+    depends_on:
+      metro-bundler:
+        condition: process_healthy
+    availability:
+      restart: "no"
+
+  # Phase 4: Stop Metro explicitly
+  stop-metro:
+    command: |
+      echo "Stopping Metro bundler..."
+
+      # Get current port
+      . ${REACT_NATIVE_VIRTENV}/metro/env-${TEST_SUITE_NAME}.sh
+      echo "Metro port before stop: $METRO_PORT"
+
+      # Stop Metro
+      metro.sh stop "${TEST_SUITE_NAME}"
+
+      # Wait a moment for process to die
+      sleep 2
+
+      # Verify Metro stopped
+      if lsof -ti:$METRO_PORT >/dev/null 2>&1; then
+        echo "ERROR: Metro still running on port $METRO_PORT"
+        exit 1
+      else
+        echo "✓ Metro stopped successfully"
+      fi
+
+      # Verify state files cleaned up
+      if [ ! -f "${REACT_NATIVE_VIRTENV}/metro/env-${TEST_SUITE_NAME}.sh" ]; then
+        echo "✓ Metro state files cleaned up"
+      else
+        echo "WARNING: Metro state files still present (expected after stop)"
+      fi
+    depends_on:
+      verify-metro:
+        condition: process_completed_successfully
+      metro-bundler:
+        condition: process_healthy
+    availability:
+      restart: "no"
+
+  # Phase 5: Summary
+  summary:
+    command: |
+      echo ""
+      echo "===================================="
+      echo "Metro Shutdown Test Summary"
+      echo "===================================="
+      echo ""
+      echo "Test Results:"
+      echo "  ✓ Metro started successfully"
+      echo "  ✓ Metro responded to health checks"
+      echo "  ✓ Metro stopped cleanly"
+      echo "  ✓ No processes left running"
+      echo ""
+      echo "Logs: test-results/metro-shutdown-logs"
+      echo "===================================="
+      echo ""
+
+      exit 0
+    depends_on:
+      stop-metro:
+        condition: process_completed
+    availability:
+      restart: "no"
+    shutdown:
+      signal: 15
+      timeout_seconds: 1

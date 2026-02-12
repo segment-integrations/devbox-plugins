@@ -270,7 +270,13 @@ processes:
   # Cleanup - runs after verify completes
   cleanup:
     command: |
-      # Metro will be stopped by its shutdown handler
+      # Stop Metro bundler explicitly
+      echo "Stopping Metro bundler..."
+      metro.sh stop ios || true
+
+      # Also kill the metro.sh wrapper process
+      pkill -f "metro.sh start ios" || true
+
       if [ "${DEVBOX_PURE_SHELL:-}" = "1" ]; then
         echo "🧹 Cleaning up (pure mode)..."
 
@@ -295,6 +301,8 @@ processes:
     depends_on:
       verify-app-running:
         condition: process_completed
+      metro-bundler:
+        condition: process_healthy
     availability:
       restart: "no"
 

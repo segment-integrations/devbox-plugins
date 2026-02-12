@@ -329,7 +329,13 @@ processes:
   # Cleanup - runs when both platforms complete
   cleanup:
     command: |
-      # Metro will be stopped by its shutdown handler
+      # Stop Metro bundler explicitly
+      echo "Stopping Metro bundler..."
+      metro.sh stop all || true
+
+      # Also kill the metro.sh wrapper process
+      pkill -f "metro.sh start all" || true
+
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
 
@@ -360,6 +366,8 @@ processes:
         condition: process_completed
       verify-ios-running:
         condition: process_completed
+      metro-bundler:
+        condition: process_healthy
     availability:
       restart: "no"
 

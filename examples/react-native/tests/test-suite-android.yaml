@@ -209,7 +209,13 @@ processes:
 
       serial=$(cat ${ANDROID_RUNTIME_DIR}/emulator-serial.txt 2>/dev/null || echo emulator-5554)
 
-      # Metro will be stopped by its shutdown handler
+      # Stop Metro bundler explicitly
+      echo "Stopping Metro bundler..."
+      metro.sh stop android || true
+
+      # Also kill the metro.sh wrapper process
+      pkill -f "metro.sh start android" || true
+
       if [ "${IN_NIX_SHELL:-}" = "pure" ]; then
         echo "🧹 Cleaning up (pure mode)..."
         adb -s $serial shell am force-stop ${ANDROID_APP_ID:-com.reactnativeexample} 2>/dev/null || true
@@ -221,6 +227,8 @@ processes:
     depends_on:
       verify-app-running:
         condition: process_completed
+      metro-bundler:
+        condition: process_healthy
     availability:
       restart: "no"
 

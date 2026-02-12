@@ -300,30 +300,32 @@ rn_stop_metro_by_port() {
     return 0
   fi
 
-  # Find process listening on Metro port
-  metro_pid=$(lsof -ti:"${METRO_PORT}" 2>/dev/null || true)
+  # Find all processes listening on Metro port
+  metro_pids=$(lsof -ti:"${METRO_PORT}" 2>/dev/null || true)
 
-  if [ -z "$metro_pid" ]; then
+  if [ -z "$metro_pids" ]; then
     echo "No Metro process found on port ${METRO_PORT}"
     # Clean up files even if Metro not running
     rn_clean_metro "$suite_name"
     return 0
   fi
 
-  # Verify it's actually Metro before killing
-  process_cmd=$(ps -p "$metro_pid" -o command= 2>/dev/null || true)
-  if echo "$process_cmd" | grep -q "react-native start"; then
-    echo "Stopping Metro on port ${METRO_PORT} (PID: $metro_pid)..."
-    kill "$metro_pid" 2>/dev/null || true
-    sleep 1
-    # Force kill if still running
-    if ps -p "$metro_pid" >/dev/null 2>&1; then
-      kill -9 "$metro_pid" 2>/dev/null || true
+  # Kill all processes on the Metro port
+  echo "Stopping Metro on port ${METRO_PORT} (PIDs: $metro_pids)..."
+  for pid in $metro_pids; do
+    kill "$pid" 2>/dev/null || true
+  done
+
+  sleep 1
+
+  # Force kill any that are still running
+  for pid in $metro_pids; do
+    if ps -p "$pid" >/dev/null 2>&1; then
+      kill -9 "$pid" 2>/dev/null || true
     fi
-    echo "✓ Metro stopped (port ${METRO_PORT})"
-  else
-    echo "Process on port ${METRO_PORT} (PID: $metro_pid) is not Metro, skipping"
-  fi
+  done
+
+  echo "✓ Metro stopped (port ${METRO_PORT})"
 
   # Clean up files after stopping
   rn_clean_metro "$suite_name"
