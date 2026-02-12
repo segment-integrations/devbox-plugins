@@ -1,0 +1,187 @@
+# iOS Cheatsheet
+
+Quick reference for common iOS plugin operations.
+
+## Setup
+
+```bash
+# Add plugin to devbox.json
+{
+  "include": ["github:segment-integrations/devbox-plugins?dir=plugins/ios"],
+  "env": {
+    "IOS_DEFAULT_DEVICE": "max",
+    "IOS_DEVICES": "min,max"
+  }
+}
+
+# Enter shell
+devbox shell
+```
+
+## Device Management
+
+```bash
+# List devices
+devbox run ios.sh devices list
+
+# Create device
+devbox run ios.sh devices create iphone15 --runtime 17.5
+
+# Update device
+devbox run ios.sh devices update iphone15 --runtime 18.0
+
+# Delete device
+devbox run ios.sh devices delete iphone15
+
+# Regenerate lock file
+devbox run ios.sh devices eval
+
+# Sync simulators to match definitions
+devbox run ios.sh devices sync
+```
+
+## Simulator Operations
+
+```bash
+# Start simulator (default device)
+devbox run start-sim
+
+# Start specific device
+devbox run start-sim min
+
+# Stop simulator
+devbox run stop-sim
+```
+
+## Build and Deploy
+
+```bash
+# Build app
+devbox run build-ios
+
+# Build, install, and launch app
+devbox run start-ios
+
+# Build and run on specific device
+devbox run start-ios iphone15
+```
+
+## Configuration
+
+```bash
+# Show current configuration
+devbox run ios.sh config show
+
+# View SDK info
+devbox run ios.sh info
+```
+
+## Diagnostics
+
+```bash
+# Run health check
+devbox run doctor
+
+# Quick verification
+devbox run verify:setup
+```
+
+## Common Environment Variables
+
+```bash
+IOS_DEFAULT_DEVICE="max"              # Default device
+IOS_DEVICES="min,max"                 # Devices to evaluate (comma-separated)
+IOS_DEFAULT_RUNTIME=""                # Default runtime (empty = latest)
+IOS_DEVELOPER_DIR=""                  # Xcode path (empty = auto-detect)
+IOS_DOWNLOAD_RUNTIME="1"              # Auto-download runtimes (1=yes, 0=no)
+IOS_SKIP_SETUP="0"                    # Skip setup during init (1=yes, 0=no)
+IOS_APP_PROJECT="ios.xcodeproj"       # Xcode project path
+IOS_APP_SCHEME="ios"                  # Build scheme
+IOS_APP_BUNDLE_ID="com.example.ios"   # App bundle ID
+```
+
+## Device Definition Format
+
+```json
+{
+  "name": "iPhone 15 Pro",
+  "runtime": "17.5"
+}
+```
+
+## Troubleshooting
+
+```bash
+# Enable debug logging
+IOS_DEBUG=1 devbox shell
+
+# List available runtimes
+xcrun simctl list runtimes
+
+# List all simulators
+xcrun simctl list devices
+
+# Check Xcode path
+xcode-select -p
+
+# Switch Xcode version
+sudo xcode-select --switch /Applications/Xcode-15.4.app/Contents/Developer
+
+# Restart CoreSimulator
+killall -9 com.apple.CoreSimulatorService
+launchctl kickstart -k gui/$UID/com.apple.CoreSimulatorService
+```
+
+## Testing
+
+```bash
+# Run fast tests
+devbox run test:fast
+
+# Run E2E tests
+devbox run test:e2e
+```
+
+## Files and Directories
+
+```
+devbox.d/ios/
+└── devices/           # Device definitions
+    ├── min.json
+    ├── max.json
+    └── devices.lock   # Generated lock file
+
+.devbox/virtenv/ios/   # Runtime directory (auto-regenerated)
+├── scripts/           # Plugin scripts
+└── DerivedData/       # Build output
+
+reports/
+├── logs/             # Test logs
+└── results/          # Test results
+```
+
+## Common Xcode Commands
+
+```bash
+# Build project
+xcodebuild -project ios.xcodeproj -scheme ios -configuration Debug \
+  -destination 'generic/platform=iOS Simulator' build
+
+# Install app to simulator
+xcrun simctl install booted path/to/app.app
+
+# Launch app on simulator
+xcrun simctl launch booted com.example.ios
+
+# Download iOS runtime
+xcodebuild -downloadPlatform iOS
+
+# Clean build
+xcodebuild clean -project ios.xcodeproj -scheme ios
+```
+
+## See Also
+
+- [iOS Guide](../ios-guide.md) - Complete iOS workflow
+- [iOS Reference](../../reference/ios.md) - Full API documentation
+- [Device Management](../device-management.md) - Multi-device workflows
